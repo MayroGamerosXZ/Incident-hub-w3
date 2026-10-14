@@ -92,17 +92,18 @@ Este documento detalla todas las capturas de pantalla requeridas para el informe
 
 ## 🏷️ Módulo 6: Versionado Semántico y Release (Semana 3)
 
-- [ ] **Captura 6.1: Etiquetas de Versionado Semántico en Git (SemVer)**  
+- [x] **Captura 6.1: Etiquetas de Versionado Semántico en Git (SemVer)**  
   * **Ubicación:** `https://github.com/MayroGamerosXZ/Incident-hub-w3/tags`
   * **Qué muestra:** Las 3 etiquetas SemVer anotadas: `v0.1.0` (Semana 1), `v0.2.0` (Semana 2) y `v1.0.0` (Semana 3).
   * **Criterio de Rúbrica:** Aplicación estricta de Versionado Semántico (SemVer) que refleje la evolución incremental del proyecto.
 
-- [ ] **Captura 6.2: Release Oficial de Producción en GitHub**  
+- [x] **Captura 6.2: Release Oficial de Producción en GitHub**  
   * **Ubicación:** `https://github.com/MayroGamerosXZ/Incident-hub-w3/releases`
   * **Qué muestra:** La publicación de la versión **`v1.0.0 - Production Ready`** con sus Release Notes detalladas, resumen de características y artefactos asociados.
   * **Criterio de Rúbrica:** Estrategia formal de empaquetado y liberación de software.
 
-- [ ] **Captura 6.3: Cierre al 100% en Azure Boards**  
+- [x] **Captura 6.3: Cierre al 100% en Azure Boards**  
   * **Ubicación:** `https://dev.azure.com/DevOps-UMG-Mayro/incident-hub/_workitems`
   * **Qué muestra:** Todos los Epics (`AB#4`, `AB#20`), Features y User Stories en estado **`Closed`**, con trazabilidad completa de fechas y commits.
   * **Criterio de Rúbrica:** Gestión del ciclo de vida del software culminada exitosamente con el 100% de requerimientos entregados.
+
