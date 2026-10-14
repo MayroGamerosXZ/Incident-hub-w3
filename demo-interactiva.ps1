@@ -14,7 +14,8 @@ function Show-Menu {
     Write-Host " [3] Ejecutar Auditoria de Seguridad (npm audit - 0 vulnerabilidades)" -ForegroundColor White
     Write-Host " [4] Probar API REST y Metricas del Dashboard en Vivo" -ForegroundColor White
     Write-Host " [5] Verificar Estado de Repositorios Git y Remotos (w1, w2, w3, azdo)" -ForegroundColor White
-    Write-Host " [6] Salir" -ForegroundColor White
+    Write-Host " [6] Abrir Centro de Control y Guia HTML en Navegador" -ForegroundColor White
+    Write-Host " [7] Salir" -ForegroundColor White
     Write-Host ""
     Write-Host "======================================================================" -ForegroundColor Cyan
 }
@@ -22,7 +23,7 @@ function Show-Menu {
 $running = $true
 while ($running) {
     Show-Menu
-    $choice = Read-Host "Seleccione una opcion [1-6]"
+    $choice = Read-Host "Seleccione una opcion [1-7]"
     switch ($choice) {
         "1" {
             Clear-Host
@@ -85,6 +86,13 @@ while ($running) {
             Read-Host "Presione Enter para volver al menu..."
         }
         "6" {
+            Clear-Host
+            Write-Host "--- ABRIENDO CENTRO DE CONTROL HTML EN NAVEGADOR ---" -ForegroundColor Green
+            Start-Process "$PSScriptRoot/docs/centro_de_control.html"
+            Write-Host ""
+            Read-Host "Presione Enter para volver al menu..."
+        }
+        "7" {
             $running = $false
         }
         default {

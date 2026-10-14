@@ -13,17 +13,19 @@ echo  [2] Iniciar Sistema Completo (Backend + Frontend) y Abrir Navegador
 echo  [3] Ejecutar Auditoria de Seguridad (npm audit)
 echo  [4] Simular Creacion y Flujo de Incidente via API (REST Check)
 echo  [5] Verificar Estado de Repositorios Git y Remotos (w1, w2, w3, azdo)
-echo  [6] Salir
+echo  [6] Abrir Centro de Control y Guia HTML en Navegador
+echo  [7] Salir
 echo.
 echo ======================================================================
-set /p opt="Seleccione una opcion [1-6]: "
+set /p opt="Seleccione una opcion [1-7]: "
 
 if "%opt%"=="1" goto test
 if "%opt%"=="2" goto start_app
 if "%opt%"=="3" goto audit
 if "%opt%"=="4" goto api_check
 if "%opt%"=="5" goto git_status
-if "%opt%"=="6" goto fin
+if "%opt%"=="6" goto open_guide
+if "%opt%"=="7" goto fin
 goto menu
 
 :test
@@ -71,6 +73,12 @@ echo Remotos configurados:
 git remote -v
 echo.
 pause
+goto menu
+
+:open_guide
+cls
+echo --- ABRIENDO CENTRO DE CONTROL HTML EN NAVEGADOR ---
+start "" "%~dp0docs\centro_de_control.html"
 goto menu
 
 :fin

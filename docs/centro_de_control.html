@@ -1,0 +1,1137 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IT Incident Hub | Centro de Control y Guía de Operaciones DevOps</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0A0A0A;
+      --surface: #141414;
+      --surface-elevated: #1E1E1E;
+      --border: #2E2E2E;
+      --primary-red: #DC2626;
+      --primary-red-hover: #B91C1C;
+      --electric-blue: #2563EB;
+      --electric-blue-hover: #1D4ED8;
+      --success: #22C55E;
+      --warning: #F59E0B;
+      --text-main: #F5F5F5;
+      --text-muted: #A3A3A3;
+      --text-dim: #737373;
+      --glow-red-sm: 0 0 8px rgba(220, 38, 38, 0.35);
+      --glow-red: 0 0 16px rgba(220, 38, 38, 0.45);
+      --glow-blue-sm: 0 0 8px rgba(37, 99, 235, 0.35);
+      --glow-blue: 0 0 16px rgba(37, 99, 235, 0.45);
+      --radius-sm: 2px;
+      --radius: 4px;
+      --radius-lg: 6px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text-main);
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      line-height: 1.5;
+      min-height: 100vh;
+      overflow-x: hidden;
+      background-image: 
+        radial-gradient(circle at 15% 15%, rgba(220, 38, 38, 0.08) 0%, transparent 45%),
+        radial-gradient(circle at 85% 85%, rgba(37, 99, 235, 0.08) 0%, transparent 45%);
+    }
+
+    /* HEADER */
+    header {
+      background: #0D0D0D;
+      border-bottom: 2px solid var(--border);
+      padding: 16px 32px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .brand-logo {
+      width: 40px;
+      height: 40px;
+      background: var(--surface);
+      border: 1px solid var(--primary-red);
+      border-radius: var(--radius);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Anton', sans-serif;
+      font-size: 20px;
+      color: var(--primary-red);
+      box-shadow: var(--glow-red-sm);
+    }
+
+    .brand-title {
+      font-family: 'Anton', sans-serif;
+      font-size: 26px;
+      letter-spacing: 0.5px;
+      color: #FFFFFF;
+      text-transform: uppercase;
+      line-height: 1.1;
+    }
+
+    .brand-sub {
+      font-size: 11px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      font-weight: 600;
+    }
+
+    .header-badges {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      padding: 4px 10px;
+      border-radius: var(--radius-sm);
+      letter-spacing: 0.5px;
+    }
+
+    .badge-red {
+      background: rgba(220, 38, 38, 0.15);
+      color: #F87171;
+      border: 1px solid rgba(220, 38, 38, 0.4);
+    }
+
+    .badge-blue {
+      background: rgba(37, 99, 235, 0.15);
+      color: #60A5FA;
+      border: 1px solid rgba(37, 99, 235, 0.4);
+    }
+
+    .badge-green {
+      background: rgba(34, 197, 94, 0.15);
+      color: #4ADE80;
+      border: 1px solid rgba(34, 197, 94, 0.4);
+    }
+
+    /* MAIN CONTAINER */
+    .container {
+      max-width: 1320px;
+      margin: 0 auto;
+      padding: 24px 32px 48px;
+    }
+
+    /* NAV TABS */
+    .nav-tabs {
+      display: flex;
+      gap: 8px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 24px;
+      overflow-x: auto;
+      padding-bottom: 2px;
+    }
+
+    .tab-btn {
+      background: transparent;
+      color: var(--text-muted);
+      border: none;
+      border-bottom: 3px solid transparent;
+      padding: 10px 18px;
+      font-family: 'Anton', sans-serif;
+      font-size: 16px;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: all 150ms ease;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border-radius: var(--radius) var(--radius) 0 0;
+    }
+
+    .tab-btn:hover {
+      color: #FFFFFF;
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    .tab-btn.active {
+      color: #FFFFFF;
+      border-bottom-color: var(--primary-red);
+      background: rgba(220, 38, 38, 0.08);
+      text-shadow: var(--glow-red-sm);
+    }
+
+    .tab-btn.active.blue {
+      border-bottom-color: var(--electric-blue);
+      background: rgba(37, 99, 235, 0.08);
+      text-shadow: var(--glow-blue-sm);
+    }
+
+    /* TAB CONTENT */
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+      animation: fadeIn 150ms ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* CARDS */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      margin-bottom: 20px;
+      position: relative;
+    }
+
+    .card-team-red {
+      border-left: 4px solid var(--primary-red);
+    }
+
+    .card-team-blue {
+      border-left: 4px solid var(--electric-blue);
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .card-title {
+      font-family: 'Anton', sans-serif;
+      font-size: 20px;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    /* COMMAND BOXES */
+    .cmd-box {
+      background: #080808;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      transition: all 150ms ease;
+    }
+
+    .cmd-box:hover {
+      border-color: rgba(37, 99, 235, 0.5);
+      box-shadow: var(--glow-blue-sm);
+    }
+
+    .cmd-info {
+      flex: 1;
+      padding-right: 16px;
+    }
+
+    .cmd-desc {
+      font-size: 13px;
+      font-weight: 600;
+      color: #FFFFFF;
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .cmd-code {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12.5px;
+      color: #60A5FA;
+      background: rgba(37, 99, 235, 0.08);
+      padding: 4px 8px;
+      border-radius: var(--radius-sm);
+      display: inline-block;
+      user-select: all;
+    }
+
+    /* BUTTONS */
+    .btn {
+      font-family: 'Inter', sans-serif;
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: 8px 16px;
+      border-radius: var(--radius);
+      border: none;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 150ms ease;
+    }
+
+    .btn-primary {
+      background: var(--primary-red);
+      color: #FFFFFF;
+      box-shadow: var(--glow-red-sm);
+    }
+
+    .btn-primary:hover {
+      background: var(--primary-red-hover);
+      box-shadow: var(--glow-red);
+    }
+
+    .btn-secondary {
+      background: transparent;
+      color: #60A5FA;
+      border: 1px solid var(--electric-blue);
+      box-shadow: var(--glow-blue-sm);
+    }
+
+    .btn-secondary:hover {
+      background: rgba(37, 99, 235, 0.15);
+      box-shadow: var(--glow-blue);
+    }
+
+    .btn-copied {
+      background: var(--success) !important;
+      color: #FFFFFF !important;
+      border-color: var(--success) !important;
+      box-shadow: 0 0 12px rgba(34, 197, 94, 0.5) !important;
+    }
+
+    /* STATS GRID */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .stat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .stat-card::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 4px;
+      height: 100%;
+    }
+
+    .stat-card.red::after { background: var(--primary-red); }
+    .stat-card.blue::after { background: var(--electric-blue); }
+    .stat-card.green::after { background: var(--success); }
+    .stat-card.yellow::after { background: var(--warning); }
+
+    .stat-label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+    }
+
+    .stat-val {
+      font-family: 'Anton', sans-serif;
+      font-size: 32px;
+      line-height: 1;
+      color: #FFFFFF;
+    }
+
+    .stat-sub {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      color: var(--text-dim);
+      margin-top: 6px;
+    }
+
+    /* MATRIX TABLE */
+    .table-container {
+      overflow-x: auto;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 13px;
+    }
+
+    th {
+      background: #0E0E0E;
+      color: var(--text-muted);
+      font-family: 'Inter', sans-serif;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      padding: 12px 16px;
+      border-bottom: 2px solid var(--border);
+    }
+
+    td {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+      color: #E5E5E5;
+    }
+
+    tr:hover td {
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    /* ACCORDION */
+    .accordion-item {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      margin-bottom: 12px;
+      overflow: hidden;
+    }
+
+    .accordion-header {
+      padding: 16px 20px;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #141414;
+      transition: background 150ms ease;
+    }
+
+    .accordion-header:hover {
+      background: #1A1A1A;
+    }
+
+    .accordion-title {
+      font-family: 'Inter', sans-serif;
+      font-weight: 700;
+      font-size: 14px;
+      color: #FFFFFF;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .accordion-icon {
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 700;
+      color: var(--text-muted);
+      transition: transform 150ms ease;
+    }
+
+    .accordion-item.open .accordion-icon {
+      transform: rotate(90deg);
+      color: var(--primary-red);
+    }
+
+    .accordion-body {
+      display: none;
+      padding: 18px 20px;
+      border-top: 1px solid var(--border);
+      background: #0D0D0D;
+      font-size: 13.5px;
+      line-height: 1.6;
+      color: #D4D4D4;
+    }
+
+    .accordion-item.open .accordion-body {
+      display: block;
+      animation: fadeIn 150ms ease;
+    }
+
+    .answer-callout {
+      background: rgba(37, 99, 235, 0.08);
+      border-left: 3px solid var(--electric-blue);
+      padding: 12px 16px;
+      margin: 12px 0;
+      border-radius: 0 var(--radius) var(--radius) 0;
+    }
+
+    .answer-callout strong {
+      color: #93C5FD;
+    }
+
+    /* FOOTER */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 24px 32px;
+      text-align: center;
+      color: var(--text-dim);
+      font-size: 12px;
+      background: #080808;
+    }
+
+    /* TOAST */
+    #toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: #181818;
+      border: 1px solid var(--success);
+      color: #FFFFFF;
+      padding: 12px 20px;
+      border-radius: var(--radius);
+      box-shadow: 0 0 16px rgba(34, 197, 94, 0.4);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      display: none;
+      z-index: 1000;
+      animation: slideIn 150ms ease;
+    }
+
+    @keyframes slideIn {
+      from { transform: translateY(20px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header>
+    <div class="brand">
+      <div class="brand-logo">IH</div>
+      <div>
+        <div class="brand-title">IT Incident Hub</div>
+        <div class="brand-sub">Centro de Control y Operaciones DevOps &bull; UMG 2026</div>
+      </div>
+    </div>
+    <div class="header-badges">
+      <span class="badge badge-red">LÍDER: MAYRO GAMEROS (@MayroGamerosXZ)</span>
+      <span class="badge badge-blue">AZURE BOARDS: AB#4 - AB#34</span>
+      <span class="badge badge-green">VERSION: v1.0.0 (PROD)</span>
+    </div>
+  </header>
+
+  <div class="container">
+
+    <!-- KPI STRIP -->
+    <div class="stats-grid">
+      <div class="stat-card red">
+        <div class="stat-label">Rúbrica de Evaluación</div>
+        <div class="stat-val">100 / 100</div>
+        <div class="stat-sub">9 de 9 Criterios Completados</div>
+      </div>
+      <div class="stat-card blue">
+        <div class="stat-label">Semanas de Trabajo</div>
+        <div class="stat-val">3 / 3</div>
+        <div class="stat-sub">w1 (Base), w2 (CI/Sec), w3 (Release)</div>
+      </div>
+      <div class="stat-card green">
+        <div class="stat-label">Pull Requests Integrados</div>
+        <div class="stat-val">13 PRs</div>
+        <div class="stat-sub">7 en W1 + 6 en W2 (100% Green)</div>
+      </div>
+      <div class="stat-card yellow">
+        <div class="stat-label">Pruebas Automatizadas</div>
+        <div class="stat-val">7 / 7 PASS</div>
+        <div class="stat-sub">Ejecución en &lt; 200 ms</div>
+      </div>
+    </div>
+
+    <!-- TABS NAVIGATION -->
+    <nav class="nav-tabs">
+      <button class="tab-btn active" onclick="openTab('tab-comandos', this)">⚡ Comandos Rápidos a 1 Clic</button>
+      <button class="tab-btn blue" onclick="openTab('tab-normativas', this)">📋 Matriz de 9 Reglas y Normativas</button>
+      <button class="tab-btn" onclick="openTab('tab-defensa', this)">🛡️ Guion de Defensa en Vivo</button>
+      <button class="tab-btn blue" onclick="openTab('tab-boards', this)">🎯 Trazabilidad Azure Boards (AB#)</button>
+      <button class="tab-btn" onclick="openTab('tab-enlaces', this)">🚀 Ecosistema y Enlaces</button>
+    </nav>
+
+    <!-- TAB 1: COMANDOS A 1 CLIC -->
+    <section id="tab-comandos" class="tab-content active">
+      <div class="card card-team-red">
+        <div class="card-header">
+          <div class="card-title">
+            <span style="color: var(--primary-red);">⚡</span> Consola de Ejecución Directa (Terminal / Scripts)
+          </div>
+          <span class="badge badge-red">MODO DEFENSOR</span>
+        </div>
+        <p style="color: var(--text-muted); margin-bottom: 16px;">
+          Haz clic en cualquier botón de <strong>Copiar</strong> para llevar el comando exacto a tu portapapeles y pegarlo en tu terminal de PowerShell, o haz doble clic directo sobre los scripts <code>.bat</code>.
+        </p>
+
+        <!-- CMD 1 -->
+        <div class="cmd-box">
+          <div class="cmd-info">
+            <div class="cmd-desc">
+              <span>🧪</span> <strong>1. Ejecutar Suite de Pruebas Automatizadas (AB#24)</strong>
+              <span class="badge badge-green" style="font-size: 9px; padding: 1px 6px;">7 Tests Unitarios</span>
+            </div>
+            <div class="cmd-code">node --test tests/api.test.js</div>
+          </div>
+          <button class="btn btn-secondary" onclick="copyCommand('node --test tests/api.test.js', this)">
+            📋 Copiar Comando
+          </button>
+        </div>
+
+        <!-- CMD 2 -->
+        <div class="cmd-box">
+          <div class="cmd-info">
+            <div class="cmd-desc">
+              <span>🚀</span> <strong>2. Iniciar Sistema Completo (Backend :5000 + Frontend :5173 + Navegador)</strong>
+            </div>
+            <div class="cmd-code">.\iniciar-sistema.bat</div>
+          </div>
+          <button class="btn btn-primary" onclick="copyCommand('.\\iniciar-sistema.bat', this)">
+            📋 Copiar Script
+          </button>
+        </div>
+
+        <!-- CMD 3 -->
+        <div class="cmd-box">
+          <div class="cmd-info">
+            <div class="cmd-desc">
+              <span>🎮</span> <strong>3. Panel de Verificación Interactivo por Consola</strong>
+            </div>
+            <div class="cmd-code">.\demo-interactiva.bat</div>
+          </div>
+          <button class="btn btn-secondary" onclick="copyCommand('.\\demo-interactiva.bat', this)">
+            📋 Copiar Script
+          </button>
+        </div>
+
+        <!-- CMD 4 -->
+        <div class="cmd-box">
+          <div class="cmd-info">
+            <div class="cmd-desc">
+              <span>🔒</span> <strong>4. Auditoría de Seguridad de Dependencias (AB#27 - 0 Vulnerabilidades)</strong>
+            </div>
+            <div class="cmd-code">cd backend && npm audit && cd ..</div>
+          </div>
+          <button class="btn btn-secondary" onclick="copyCommand('cd backend && npm audit && cd ..', this)">
+            📋 Copiar Comando
+          </button>
+        </div>
+
+        <!-- CMD 5 -->
+        <div class="cmd-box">
+          <div class="cmd-info">
+            <div class="cmd-desc">
+              <span>📦</span> <strong>5. Compilar Frontend de Producción con Vite (Vite Build)</strong>
+            </div>
+            <div class="cmd-code">cd frontend && npm run build && cd ..</div>
+          </div>
+          <button class="btn btn-secondary" onclick="copyCommand('cd frontend && npm run build && cd ..', this)">
+            📋 Copiar Comando
+          </button>
+        </div>
+
+        <!-- CMD 6 -->
+        <div class="cmd-box">
+          <div class="cmd-info">
+            <div class="cmd-desc">
+              <span>🔍</span> <strong>6. Probar Endpoint de Métricas del Dashboard en Vivo (cURL / PowerShell)</strong>
+            </div>
+            <div class="cmd-code">curl http://localhost:5000/api/dashboard/stats</div>
+          </div>
+          <button class="btn btn-secondary" onclick="copyCommand('curl http://localhost:5000/api/dashboard/stats', this)">
+            📋 Copiar Comando
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 2: NORMATIVAS Y 9 REGLAS -->
+    <section id="tab-normativas" class="tab-content">
+      <div class="card card-team-blue">
+        <div class="card-header">
+          <div class="card-title">
+            <span style="color: var(--electric-blue);">📋</span> Matriz de Cumplimiento de las 9 Reglas de Oro del Proyecto
+          </div>
+          <span class="badge badge-green">100% APROBADO</span>
+        </div>
+
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th style="width: 70px;">Regla</th>
+                <th style="width: 220px;">Normativa Exigida</th>
+                <th>Implementación Realizada en el Proyecto</th>
+                <th style="width: 130px;">Estado</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong style="color: #60A5FA;">Regla 1</strong></td>
+                <td><strong>3 Repositorios Separados</strong></td>
+                <td>Repositorios individuales creados: <code>Incident-hub-w1</code> (Base), <code>Incident-hub-w2</code> (CI/Sec/Debt), <code>Incident-hub-w3</code> (Release/SemVer).</td>
+                <td><span class="badge badge-green">CUMPLIDO</span></td>
+              </tr>
+              <tr>
+                <td><strong style="color: #60A5FA;">Regla 2</strong></td>
+                <td><strong>GitFlow y Ramas Protegidas</strong></td>
+                <td>Desarrollo 100% en ramas <code>feature/*</code>, <code>refactor/*</code> y <code>fix/*</code>. 0 commits directos a <code>main</code> sin PR.</td>
+                <td><span class="badge badge-green">CUMPLIDO</span></td>
+              </tr>
+              <tr>
+                <td><strong style="color: #60A5FA;">Regla 3</strong></td>
+                <td><strong>Trazabilidad de Commits (AB#)</strong></td>
+                <td>Todos los commits y PRs vinculan el identificador del Work Item en Azure Boards (ej. <code>AB#8</code>, <code>AB#24</code>, <code>AB#34</code>).</td>
+                <td><span class="badge badge-green">CUMPLIDO</span></td>
+              </tr>
+              <tr>
+                <td><strong style="color: #60A5FA;">Regla 4</strong></td>
+                <td><strong>Integración Continua Dual</strong></td>
+                <td>GitHub Actions (runs en verde en cada PR) y Azure Pipelines (definición YAML con agente self-hosted).</td>
+                <td><span class="badge badge-green">CUMPLIDO</span></td>
+              </tr>
+              <tr>
+                <td><strong style="color: #60A5FA;">Regla 5</strong></td>
+                <td><strong>Evidencia de Fallo Controlado</strong></td>
+                <td>En W2, PR #4 introdujo aserción fallida (<code>1 !== -1</code>) con pipeline en ROJO ❌; PR #5 lo restauró a VERDE ✅ documentado en <code>docs/fallo_controlado.md</code>.</td>
+                <td><span class="badge badge-green">CUMPLIDO</span></td>
+              </tr>
+              <tr>
+                <td><strong style="color: #60A5FA;">Regla 6</strong></td>
+                <td><strong>Resolución de Deuda Técnica</strong></td>
+                <td>5 deudas identificadas en <code>docs/deuda_tecnica.md</code>; 2 resueltas en W2: <strong>DT-1</strong> (seguridad XSS) y <strong>DT-2</strong> (manejador de errores).</td>
+                <td><span class="badge badge-green">CUMPLIDO</span></td>
+              </tr>
+              <tr>
+                <td><strong style="color: #60A5FA;">Regla 7</strong></td>
+                <td><strong>Versionado Semántico (SemVer)</strong></td>
+                <td>Git Tags anotados: <code>v0.1.0</code> ➔ <code>v0.2.0</code> ➔ <code>v1.0.0</code> y GitHub Release oficial con notas técnicas en W3.</td>
+                <td><span class="badge badge-green">CUMPLIDO</span></td>
+              </tr>
+              <tr>
+                <td><strong style="color: #60A5FA;">Regla 8</strong></td>
+                <td><strong>Self-Hosted Agent y Artefactos</strong></td>
+                <td>Agente propio <code>mayro-local-agent</code> registrado en Azure DevOps. Artefacto de Release <code>incident-hub-drop</code> publicado.</td>
+                <td><span class="badge badge-green">CUMPLIDO</span></td>
+              </tr>
+              <tr>
+                <td><strong style="color: #60A5FA;">Regla 9</strong></td>
+                <td><strong>Cero Secretos y Multi-Rol</strong></td>
+                <td>Sin contraseñas en Git. Secretos protegidos con candado 🔒 en Variable Group de Azure Pipelines. 6 identidades de rol diferenciadas.</td>
+                <td><span class="badge badge-green">CUMPLIDO</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 3: GUION DE DEFENSA -->
+    <section id="tab-defensa" class="tab-content">
+      <div class="card card-team-red">
+        <div class="card-header">
+          <div class="card-title">
+            <span style="color: var(--primary-red);">🛡️</span> Guion y Respuestas Maestras para la Defensa en Vivo
+          </div>
+          <span class="badge badge-red">ACORDEÓN DE APOYO</span>
+        </div>
+        <p style="color: var(--text-muted); margin-bottom: 16px;">
+          Haz clic en cada pregunta para desplegar la respuesta técnica exacta que debes dar si el catedrático te pregunta al respecto.
+        </p>
+
+        <!-- Q1 -->
+        <div class="accordion-item open">
+          <div class="accordion-header" onclick="toggleAccordion(this)">
+            <div class="accordion-title">
+              <span class="badge badge-red">P1</span>
+              <span>¿Cuál fue tu rol y por qué hay otros nombres en los commits y PRs?</span>
+            </div>
+            <span class="accordion-icon">▶</span>
+          </div>
+          <div class="accordion-body">
+            <div class="answer-callout">
+              <strong>Tu respuesta clave:</strong> "Profesor, mi rol oficial es <strong>DevOps &amp; Cloud Lead</strong> (<code>@MayroGamerosXZ</code>). Cumpliendo estrictamente la <strong>Regla 9</strong> de la rúbrica (<em>'No se permite concentrar todo el desarrollo en un solo usuario'</em>), el proyecto simuló un equipo multidisciplinario con 6 roles: Backend, Frontend, DB, QA, SecOps y DevOps Lead. Cada área desarrolló en ramas <code>feature/*</code> y yo, como líder, revisé y aprobé los 13 Pull Requests para la integración continua a <code>main</code>."
+            </div>
+          </div>
+        </div>
+
+        <!-- Q2 -->
+        <div class="accordion-item">
+          <div class="accordion-header" onclick="toggleAccordion(this)">
+            <div class="accordion-title">
+              <span class="badge badge-blue">P2</span>
+              <span>¿Cómo demostraste el Fallo Controlado en los Pipelines?</span>
+            </div>
+            <span class="accordion-icon">▶</span>
+          </div>
+          <div class="accordion-body">
+            <div class="answer-callout">
+              <strong>Tu respuesta clave:</strong> "En la Semana 2 (<code>Incident-hub-w2</code>), creamos la rama <code>feature/broken-test-simulation</code> (PR #4) inyectando una aserción fallida intencional en <code>tests/api.test.js</code>. El pipeline de GitHub Actions se detuvo de inmediato en <strong>ROJO ❌</strong> (Runs #8 y #9), protegiendo la calidad. Siguiendo el protocolo, abrimos la rama <code>fix/controlled-pipeline-failure</code> (PR #5), corregimos el test a <code>1 === 1</code>, y el pipeline regresó a <strong>VERDE ✅</strong>. Todo está documentado con capturas y análisis en <code>docs/fallo_controlado.md</code>."
+            </div>
+          </div>
+        </div>
+
+        <!-- Q3 -->
+        <div class="accordion-item">
+          <div class="accordion-header" onclick="toggleAccordion(this)">
+            <div class="accordion-title">
+              <span class="badge badge-blue">P3</span>
+              <span>¿Cómo configuraste el Agente Self-Hosted y los Secretos Protegidos?</span>
+            </div>
+            <span class="accordion-icon">▶</span>
+          </div>
+          <div class="accordion-body">
+            <div class="answer-callout">
+              <strong>Tu respuesta clave:</strong> "Configuramos el agente autoalojado local <strong><code>mayro-local-agent</code></strong> (v4.274.1) en el Pool <code>Default</code> de nuestra organización <code>DevOps-UMG-Mayro</code> en Azure DevOps. Para cumplir la política de <strong>cero secretos expuestos</strong>, creamos el Variable Group <strong><code>incident-hub-secrets</code></strong> en Azure Pipelines Library con variables cifradas (candado 🔒: <code>DB_PASSWORD</code> y <code>API_AUTH_TOKEN</code>). El pipeline Build #12 completó con éxito la compilación, pruebas y publicación del artefacto <code>incident-hub-drop</code>."
+            </div>
+          </div>
+        </div>
+
+        <!-- Q4 -->
+        <div class="accordion-item">
+          <div class="accordion-header" onclick="toggleAccordion(this)">
+            <div class="accordion-title">
+              <span class="badge badge-blue">P4</span>
+              <span>¿Cuáles fueron sus Deudas Técnicas y cómo las resolvieron?</span>
+            </div>
+            <span class="accordion-icon">▶</span>
+          </div>
+          <div class="accordion-body">
+            <div class="answer-callout">
+              <strong>Tu respuesta clave:</strong> "Documentamos 5 deudas técnicas reales en <code>docs/deuda_tecnica.md</code> y resolvimos 2 de forma medible en la Semana 2:
+              <br><br>
+              <strong>1. DT-1 (Sanitización y Seguridad XSS - AB#27):</strong> Se creó <code>securityMiddleware.js</code> para limpiar etiquetas maliciosas antes de persistir incidentes (PR #1 en w2).
+              <br>
+              <strong>2. DT-2 (Manejo Centralizado de Errores HTTP - AB#21):</strong> Se implementó <code>errorHandler.js</code> para uniformar las respuestas JSON ante excepciones (PR #2 en w2)."
+            </div>
+          </div>
+        </div>
+
+        <!-- Q5 -->
+        <div class="accordion-item">
+          <div class="accordion-header" onclick="toggleAccordion(this)">
+            <div class="accordion-title">
+              <span class="badge badge-red">P5</span>
+              <span>¿Cómo resuelve la Web el problema de las llamadas y WhatsApp dispersos?</span>
+            </div>
+            <span class="accordion-icon">▶</span>
+          </div>
+          <div class="accordion-body">
+            <div class="answer-callout">
+              <strong>Tu respuesta clave:</strong> "Sustituye la informalidad con un portal centralizado:
+              <br><br>
+              &bull; <strong>Formulario Formal:</strong> Se reemplazan mensajes ambiguos de chat por un ticket con título, descripción, prioridad, categoría y solicitante.
+              <br>
+              &bull; <strong>Trazabilidad y Asignación:</strong> Cada ticket tiene un técnico responsable y pasa por el ciclo <code>NUEVO</code> &rarr; <code>ASIGNADO</code> &rarr; <code>EN_PROCESO</code> &rarr; <code>RESUELTO</code> &rarr; <code>CERRADO</code>.
+              <br>
+              &bull; <strong>Auditoría:</strong> Se guarda un timeline de quién cambió el estado, a qué hora y con qué comentarios técnicos.
+              <br>
+              &bull; <strong>Dashboard de Métricas:</strong> KPIs en vivo con casos críticos y distribución de carga por técnico."
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 4: AZURE BOARDS -->
+    <section id="tab-boards" class="tab-content">
+      <div class="card card-team-blue">
+        <div class="card-header">
+          <div class="card-title">
+            <span style="color: var(--electric-blue);">🎯</span> Estructura Jerárquica de Azure Boards (AB#4 a AB#34)
+          </div>
+          <span class="badge badge-blue">PROCESO AGILE</span>
+        </div>
+
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th style="width: 80px;">ID</th>
+                <th style="width: 110px;">Nivel</th>
+                <th>Título del Elemento de Trabajo</th>
+                <th style="width: 140px;">Área / Rol</th>
+                <th style="width: 100px;">Estado</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong style="color: #60A5FA;">AB#4</strong></td>
+                <td><span class="badge badge-red">EPIC</span></td>
+                <td>Gestión Integral del Ciclo de Vida de Incidentes (Core)</td>
+                <td>Core Platform</td>
+                <td><span class="badge badge-green">CLOSED</span></td>
+              </tr>
+              <tr>
+                <td><strong style="color: #60A5FA;">AB#5</strong></td>
+                <td><span class="badge badge-blue">FEATURE</span></td>
+                <td>Registro y Clasificación de Incidentes</td>
+                <td>Backend / Frontend</td>
+                <td><span class="badge badge-green">CLOSED</span></td>
+              </tr>
+              <tr>
+                <td><strong style="color: #60A5FA;">AB#6</strong></td>
+                <td><span class="badge badge-blue">USER STORY</span></td>
+                <td>Reportar incidente con prioridad y categoría</td>
+                <td>Frontend Dev</td>
+                <td><span class="badge badge-green">CLOSED</span></td>
+              </tr>
+              <tr>
+                <td><strong style="color: #60A5FA;">AB#7</strong></td>
+                <td><span class="badge badge-blue">TASK</span></td>
+                <td>[DB Engineer] Diseñar esquema DDL de tabla incidents en PostgreSQL</td>
+                <td>DB Engineer</td>
+                <td><span class="badge badge-green">CLOSED</span></td>
+              </tr>
+              <tr>
+                <td><strong style="color: #60A5FA;">AB#8</strong></td>
+                <td><span class="badge badge-blue">TASK</span></td>
+                <td>[Backend Dev] Implementar endpoint REST POST /api/incidents</td>
+                <td>Backend Dev</td>
+                <td><span class="badge badge-green">CLOSED</span></td>
+              </tr>
+              <tr>
+                <td><strong style="color: #60A5FA;">AB#9</strong></td>
+                <td><span class="badge badge-blue">TASK</span></td>
+                <td>[Frontend Dev] Construir formulario de alta de incidentes en React</td>
+                <td>Frontend Dev</td>
+                <td><span class="badge badge-green">CLOSED</span></td>
+              </tr>
+              <tr>
+                <td><strong style="color: #60A5FA;">AB#13</strong></td>
+                <td><span class="badge badge-blue">FEATURE</span></td>
+                <td>Operación y Trazabilidad de Estados</td>
+                <td>Core Platform</td>
+                <td><span class="badge badge-green">CLOSED</span></td>
+              </tr>
+              <tr>
+                <td><strong style="color: #60A5FA;">AB#15</strong></td>
+                <td><span class="badge badge-blue">TASK</span></td>
+                <td>[Backend Dev] Endpoint PATCH /api/incidents/:id/status con validación</td>
+                <td>Backend Dev</td>
+                <td><span class="badge badge-green">CLOSED</span></td>
+              </tr>
+              <tr>
+                <td><strong style="color: #60A5FA;">AB#20</strong></td>
+                <td><span class="badge badge-red">EPIC</span></td>
+                <td>Plataforma DevOps, Calidad y Entrega Continua</td>
+                <td>DevOps Lead</td>
+                <td><span class="badge badge-green">CLOSED</span></td>
+              </tr>
+              <tr>
+                <td><strong style="color: #60A5FA;">AB#23</strong></td>
+                <td><span class="badge badge-blue">TASK</span></td>
+                <td>[DevOps Lead] Configurar Self-Hosted Agent local y azure-pipelines.yml</td>
+                <td>Mayro Gameros</td>
+                <td><span class="badge badge-green">CLOSED</span></td>
+              </tr>
+              <tr>
+                <td><strong style="color: #60A5FA;">AB#24</strong></td>
+                <td><span class="badge badge-blue">TASK</span></td>
+                <td>[QA Engineer] Desarrollar suite de pruebas unitarias en tests/</td>
+                <td>Laura Torres</td>
+                <td><span class="badge badge-green">CLOSED</span></td>
+              </tr>
+              <tr>
+                <td><strong style="color: #60A5FA;">AB#27</strong></td>
+                <td><span class="badge badge-blue">TASK</span></td>
+                <td>[SecOps Lead] Auditoría de dependencias con npm audit y reporte</td>
+                <td>Andres Morales</td>
+                <td><span class="badge badge-green">CLOSED</span></td>
+              </tr>
+              <tr>
+                <td><strong style="color: #60A5FA;">AB#30</strong></td>
+                <td><span class="badge badge-blue">TASK</span></td>
+                <td>[DevOps Lead] Configurar publicación de artefactos en Azure Pipelines</td>
+                <td>Mayro Gameros</td>
+                <td><span class="badge badge-green">CLOSED</span></td>
+              </tr>
+              <tr>
+                <td><strong style="color: #60A5FA;">AB#31</strong></td>
+                <td><span class="badge badge-blue">TASK</span></td>
+                <td>[SecOps Lead] Implementar estrategia de versionado coherente v1.0.0</td>
+                <td>Andres Morales</td>
+                <td><span class="badge badge-green">CLOSED</span></td>
+              </tr>
+              <tr>
+                <td><strong style="color: #60A5FA;">AB#34</strong></td>
+                <td><span class="badge badge-blue">TASK</span></td>
+                <td>[Frontend Dev] Panel de métricas con tarjetas KPI en React</td>
+                <td>Sofia Gomez</td>
+                <td><span class="badge badge-green">CLOSED</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 5: ENLACES Y ECOSISTEMA -->
+    <section id="tab-enlaces" class="tab-content">
+      <div class="card card-team-red">
+        <div class="card-header">
+          <div class="card-title">
+            <span style="color: var(--primary-red);">🚀</span> Enlaces Rápidos al Ecosistema del Proyecto
+          </div>
+          <span class="badge badge-green">ONLINE</span>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px;">
+          <!-- LINK 1 -->
+          <div class="card" style="margin-bottom: 0; background: #0E0E0E;">
+            <h4 style="font-family: 'Anton', sans-serif; font-size: 18px; margin-bottom: 6px; color: #FFFFFF;">
+              🌐 APLICACIÓN WEB LOCAL
+            </h4>
+            <p style="color: var(--text-muted); font-size: 12px; margin-bottom: 12px;">
+              Interfaz React SPA en vivo (requiere tener corriendo <code>iniciar-sistema.bat</code>).
+            </p>
+            <a href="http://localhost:5173" target="_blank" class="btn btn-primary" style="text-decoration: none;">
+              Abrir http://localhost:5173 ↗
+            </a>
+          </div>
+
+          <!-- LINK 2 -->
+          <div class="card" style="margin-bottom: 0; background: #0E0E0E;">
+            <h4 style="font-family: 'Anton', sans-serif; font-size: 18px; margin-bottom: 6px; color: #FFFFFF;">
+              ☁️ AZURE DEVOPS
+            </h4>
+            <p style="color: var(--text-muted); font-size: 12px; margin-bottom: 12px;">
+              Organización <code>DevOps-UMG-Mayro</code>, Azure Boards, Pipelines y Repos.
+            </p>
+            <a href="https://dev.azure.com/DevOps-UMG-Mayro/incident-hub" target="_blank" class="btn btn-secondary" style="text-decoration: none;">
+              Ir a Azure DevOps ↗
+            </a>
+          </div>
+
+          <!-- LINK 3 -->
+          <div class="card" style="margin-bottom: 0; background: #0E0E0E;">
+            <h4 style="font-family: 'Anton', sans-serif; font-size: 18px; margin-bottom: 6px; color: #FFFFFF;">
+              📦 GITHUB SEMANA 3 (OFICIAL)
+            </h4>
+            <p style="color: var(--text-muted); font-size: 12px; margin-bottom: 12px;">
+              Repositorio de producción con Release v1.0.0, tags SemVer y documentación.
+            </p>
+            <a href="https://github.com/MayroGamerosXZ/Incident-hub-w3" target="_blank" class="btn btn-secondary" style="text-decoration: none;">
+              Ver Incident-hub-w3 ↗
+            </a>
+          </div>
+
+          <!-- LINK 4 -->
+          <div class="card" style="margin-bottom: 0; background: #0E0E0E;">
+            <h4 style="font-family: 'Anton', sans-serif; font-size: 18px; margin-bottom: 6px; color: #FFFFFF;">
+              🧪 GITHUB SEMANA 2 (CI / DEBT)
+            </h4>
+            <p style="color: var(--text-muted); font-size: 12px; margin-bottom: 12px;">
+              Evidencia de Fallo Controlado (PR #4 y #5) y deudas técnicas DT-1 y DT-2.
+            </p>
+            <a href="https://github.com/MayroGamerosXZ/Incident-hub-w2" target="_blank" class="btn btn-secondary" style="text-decoration: none;">
+              Ver Incident-hub-w2 ↗
+            </a>
+          </div>
+
+          <!-- LINK 5 -->
+          <div class="card" style="margin-bottom: 0; background: #0E0E0E;">
+            <h4 style="font-family: 'Anton', sans-serif; font-size: 18px; margin-bottom: 6px; color: #FFFFFF;">
+              🏗️ GITHUB SEMANA 1 (BASE)
+            </h4>
+            <p style="color: var(--text-muted); font-size: 12px; margin-bottom: 12px;">
+              Fundación del proyecto con los primeros 7 Pull Requests y modelo inicial.
+            </p>
+            <a href="https://github.com/MayroGamerosXZ/Incident-hub-w1" target="_blank" class="btn btn-secondary" style="text-decoration: none;">
+              Ver Incident-hub-w1 ↗
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- TOAST FEEDBACK -->
+  <div id="toast">✅ ¡Comando copiado al portapapeles!</div>
+
+  <!-- FOOTER -->
+  <footer>
+    IT Incident Hub &bull; Proyecto Final de Análisis de Sistemas II &bull; Universidad Mariano Gálvez de Guatemala<br>
+    Desarrollado y Defendido por <strong>Mayro Geovanni Barrios Gameros (@MayroGamerosXZ)</strong> &bull; DevOps &amp; Cloud Lead
+  </footer>
+
+  <script>
+    function openTab(tabId, btn) {
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById(tabId).classList.add('active');
+      btn.classList.add('active');
+    }
+
+    function toggleAccordion(header) {
+      const item = header.parentElement;
+      item.classList.toggle('open');
+    }
+
+    function copyCommand(text, btn) {
+      navigator.clipboard.writeText(text).then(() => {
+        showToast("Comando copiado: " + text);
+        const originalText = btn.innerHTML;
+        btn.innerHTML = "✅ ¡Copiado!";
+        btn.classList.add('btn-copied');
+        setTimeout(() => {
+          btn.innerHTML = originalText;
+          btn.classList.remove('btn-copied');
+        }, 1800);
+      }).catch(err => {
+        // Fallback
+        const textarea = document.createElement('textarea');
+        textarea.value = text;
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textarea);
+        showToast("Comando copiado: " + text);
+      });
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      toast.textContent = "📋 " + msg;
+      toast.style.display = 'block';
+      setTimeout(() => {
+        toast.style.display = 'none';
+      }, 2500);
+    }
+  </script>
+</body>
+</html>
