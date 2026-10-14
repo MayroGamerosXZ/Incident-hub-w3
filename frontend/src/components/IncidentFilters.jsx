@@ -1,4 +1,4 @@
-﻿import React from 'react';
+import React from 'react';
 
 export default function IncidentFilters({
   searchTerm, setSearchTerm,
@@ -12,7 +12,7 @@ export default function IncidentFilters({
     <section style={{ backgroundColor: '#1e293b', padding: '1rem', borderRadius: '8px', marginBottom: '1.5rem', display: 'flex', flexWrap: 'wrap', gap: '0.75rem', alignItems: 'center' }}>
       <input
         type="text"
-        placeholder="ðŸ” Buscar por tÃ­tulo, descripciÃ³n o usuario..."
+        placeholder="🔍 Buscar por título, descripción o solicitante..."
         value={searchTerm}
         onChange={(e) => setSearchTerm(e.target.value)}
         style={{ flex: '1', minWidth: '220px', backgroundColor: '#0f172a', border: '1px solid #334155', borderRadius: '6px', padding: '0.55rem 0.75rem', color: '#fff' }}
@@ -40,7 +40,7 @@ export default function IncidentFilters({
         <option value="BAJA">BAJA</option>
         <option value="MEDIA">MEDIA</option>
         <option value="ALTA">ALTA</option>
-        <option value="CRITICA">CRÃTICA</option>
+        <option value="CRITICA">CRÍTICA</option>
       </select>
 
       <select
@@ -48,7 +48,7 @@ export default function IncidentFilters({
         onChange={(e) => setCategoryFilter(e.target.value)}
         style={{ backgroundColor: '#0f172a', border: '1px solid #334155', borderRadius: '6px', padding: '0.55rem 0.75rem', color: '#fff' }}
       >
-        <option value="">Todas las CategorÃ­as</option>
+        <option value="">Todas las Categorías</option>
         <option value="HARDWARE">HARDWARE</option>
         <option value="SOFTWARE">SOFTWARE</option>
         <option value="NETWORK">NETWORK</option>
@@ -61,7 +61,7 @@ export default function IncidentFilters({
         onChange={(e) => setTechFilter(e.target.value)}
         style={{ backgroundColor: '#0f172a', border: '1px solid #334155', borderRadius: '6px', padding: '0.55rem 0.75rem', color: '#fff' }}
       >
-        <option value="">Todos los TÃ©cnicos</option>
+        <option value="">Todos los Técnicos</option>
         {users && users.map(u => (
           <option key={u.id} value={u.id}>{u.name}</option>
         ))}

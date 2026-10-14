@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import IncidentFilters from './components/IncidentFilters.jsx';
 import DistributionPanel from './components/DistributionPanel.jsx';
 
@@ -111,7 +111,7 @@ export default function App() {
           status: targetStatus,
           assigned_to_id: targetTech || null,
           changed_by: 'Operador en Turno',
-          change_reason: 'TransiciÃ³n manual en tablero web'
+          change_reason: 'Transición manual en tablero web'
         })
       });
       if (res.ok) {
@@ -150,29 +150,32 @@ export default function App() {
   };
 
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: '#0f172a', color: '#f8fafc', padding: '1.5rem 2rem' }}>
+    <div style={{ minHeight: '100vh', backgroundColor: '#0f172a', color: '#f8fafc', padding: '1.5rem 2rem', fontFamily: 'system-ui, -apple-system, sans-serif' }}>
       <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #1e293b', paddingBottom: '1.25rem', marginBottom: '2rem' }}>
         <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-            <span style={{ fontSize: '1.75rem' }}>ðŸ›¡ï¸</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
+            <span style={{ fontSize: '1.75rem' }}>🛡️</span>
             <h1 style={{ fontSize: '1.5rem', fontWeight: '700', letterSpacing: '-0.025em' }}>IT Incident Hub</h1>
             <span style={{ backgroundColor: '#1e293b', color: '#38bdf8', padding: '0.2rem 0.6rem', borderRadius: '4px', fontSize: '0.75rem', fontWeight: '600' }}>
-              v0.1.0-w1
+              v1.0.0 (Producción)
             </span>
             <span style={{ backgroundColor: '#047857', color: '#ecfdf5', padding: '0.2rem 0.6rem', borderRadius: '4px', fontSize: '0.75rem', fontWeight: '600' }}>
               Azure Boards: AB#4 - AB#34
             </span>
+            <span style={{ backgroundColor: '#312e81', color: '#c7d2fe', padding: '0.2rem 0.6rem', borderRadius: '4px', fontSize: '0.75rem', fontWeight: '600' }}>
+              CI/CD: Dual Green ✅
+            </span>
           </div>
-          <p style={{ color: '#94a3b8', fontSize: '0.875rem', marginTop: '0.25rem' }}>
-            Plataforma Corporativa de Trazabilidad y GestiÃ³n Continua de Incidentes de TI
+          <p style={{ color: '#94a3b8', fontSize: '0.875rem', marginTop: '0.35rem' }}>
+            Plataforma Web Centralizada y Trazable para Sustituir Reportes Dispersos (Llamadas, WhatsApp y Correos)
           </p>
         </div>
 
         <button
           onClick={() => setShowNewModal(true)}
-          style={{ backgroundColor: '#2563eb', color: 'white', border: 'none', padding: '0.65rem 1.25rem', borderRadius: '6px', fontWeight: '600', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+          style={{ backgroundColor: '#2563eb', color: 'white', border: 'none', padding: '0.65rem 1.25rem', borderRadius: '6px', fontWeight: '600', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)' }}
         >
-          <span>âž•</span> Nuevo Incidente
+          <span>➕</span> Nuevo Incidente
         </button>
       </header>
 
@@ -189,7 +192,7 @@ export default function App() {
               <div style={{ fontSize: '2rem', fontWeight: '700', marginTop: '0.25rem', color: '#f59e0b' }}>{stats.abiertos}</div>
             </div>
             <div style={{ backgroundColor: '#1e293b', padding: '1.25rem', borderRadius: '8px', borderLeft: '4px solid #ef4444' }}>
-              <div style={{ color: '#94a3b8', fontSize: '0.8rem', fontWeight: '600', textTransform: 'uppercase' }}>Casos CrÃ­ticos</div>
+              <div style={{ color: '#94a3b8', fontSize: '0.8rem', fontWeight: '600', textTransform: 'uppercase' }}>Casos Críticos</div>
               <div style={{ fontSize: '2rem', fontWeight: '700', marginTop: '0.25rem', color: '#ef4444' }}>{stats.criticos}</div>
             </div>
             <div style={{ backgroundColor: '#1e293b', padding: '1.25rem', borderRadius: '8px', borderLeft: '4px solid #10b981' }}>
@@ -213,17 +216,17 @@ export default function App() {
       />
 
       {/* TABLA DE INCIDENTES */}
-      <section style={{ backgroundColor: '#1e293b', borderRadius: '8px', overflow: 'hidden' }}>
+      <section style={{ backgroundColor: '#1e293b', borderRadius: '8px', overflow: 'hidden', border: '1px solid #334155' }}>
         <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.875rem' }}>
           <thead>
             <tr style={{ backgroundColor: '#334155', color: '#cbd5e1' }}>
               <th style={{ padding: '0.75rem 1rem' }}>ID</th>
-              <th style={{ padding: '0.75rem 1rem' }}>TÃ­tulo</th>
-              <th style={{ padding: '0.75rem 1rem' }}>CategorÃ­a</th>
+              <th style={{ padding: '0.75rem 1rem' }}>Título</th>
+              <th style={{ padding: '0.75rem 1rem' }}>Categoría</th>
               <th style={{ padding: '0.75rem 1rem' }}>Prioridad</th>
               <th style={{ padding: '0.75rem 1rem' }}>Estado</th>
-              <th style={{ padding: '0.75rem 1rem' }}>TÃ©cnico Asignado</th>
-              <th style={{ padding: '0.75rem 1rem', textAlign: 'right' }}>AcciÃ³n</th>
+              <th style={{ padding: '0.75rem 1rem' }}>Técnico Asignado</th>
+              <th style={{ padding: '0.75rem 1rem', textAlign: 'right' }}>Acción</th>
             </tr>
           </thead>
           <tbody>
@@ -259,38 +262,41 @@ export default function App() {
         </table>
       </section>
 
+      {/* MODAL REGISTRAR NUEVO INCIDENTE */}
       {showNewModal && (
         <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem', zIndex: 50 }}>
           <div style={{ backgroundColor: '#1e293b', borderRadius: '8px', maxWidth: '500px', width: '100%', padding: '1.5rem', border: '1px solid #334155' }}>
-            <h2 style={{ fontSize: '1.25rem', fontWeight: '700', marginBottom: '1rem' }}>Registrar Nuevo Incidente</h2>
+            <h2 style={{ fontSize: '1.25rem', fontWeight: '700', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <span>📝</span> Registrar Nuevo Incidente
+            </h2>
             <form onSubmit={handleCreateIncident} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
               <div>
-                <label style={{ display: 'block', fontSize: '0.8rem', color: '#94a3b8', marginBottom: '0.3rem' }}>TÃ­tulo del Incidente *</label>
+                <label style={{ display: 'block', fontSize: '0.8rem', color: '#94a3b8', marginBottom: '0.3rem' }}>Título del Incidente *</label>
                 <input
                   type="text"
                   required
                   value={newTitle}
                   onChange={(e) => setNewTitle(e.target.value)}
-                  placeholder="Ej. Falla de conexiÃ³n en impresora de RRHH"
+                  placeholder="Ej. Falla de conexión en impresora de RRHH"
                   style={{ width: '100%', backgroundColor: '#0f172a', border: '1px solid #334155', borderRadius: '6px', padding: '0.5rem', color: '#fff' }}
                 />
               </div>
 
               <div>
-                <label style={{ display: 'block', fontSize: '0.8rem', color: '#94a3b8', marginBottom: '0.3rem' }}>DescripciÃ³n Detallada *</label>
+                <label style={{ display: 'block', fontSize: '0.8rem', color: '#94a3b8', marginBottom: '0.3rem' }}>Descripción Detallada *</label>
                 <textarea
                   required
                   rows="3"
                   value={newDesc}
                   onChange={(e) => setNewDesc(e.target.value)}
-                  placeholder="Explica quÃ© ocurriÃ³ y el impacto observado..."
+                  placeholder="Explica qué ocurrió, sistemas afectados e impacto observado..."
                   style={{ width: '100%', backgroundColor: '#0f172a', border: '1px solid #334155', borderRadius: '6px', padding: '0.5rem', color: '#fff' }}
                 />
               </div>
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.8rem', color: '#94a3b8', marginBottom: '0.3rem' }}>CategorÃ­a *</label>
+                  <label style={{ display: 'block', fontSize: '0.8rem', color: '#94a3b8', marginBottom: '0.3rem' }}>Categoría *</label>
                   <select
                     value={newCategory}
                     onChange={(e) => setNewCategory(e.target.value)}
@@ -314,15 +320,15 @@ export default function App() {
                     <option value="BAJA">BAJA</option>
                     <option value="MEDIA">MEDIA</option>
                     <option value="ALTA">ALTA</option>
-                    <option value="CRITICA">CRÃTICA</option>
+                    <option value="CRITICA">CRÍTICA</option>
                   </select>
                 </div>
               </div>
 
               <div>
-                <label style={{ display: 'block', fontSize: '0.8rem', color: '#94a3b8', marginBottom: '0.3rem' }}>Reportado Por (Correo / Usuario) *</label>
+                <label style={{ display: 'block', fontSize: '0.8rem', color: '#94a3b8', marginBottom: '0.3rem' }}>Reportado Por (Correo del Solicitante) *</label>
                 <input
-                  type="text"
+                  type="email"
                   required
                   value={newReportedBy}
                   onChange={(e) => setNewReportedBy(e.target.value)}
@@ -351,6 +357,7 @@ export default function App() {
         </div>
       )}
 
+      {/* MODAL DETALLE DEL INCIDENTE Y AUDITORÍA */}
       {selectedIncident && (
         <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem', zIndex: 50 }}>
           <div style={{ backgroundColor: '#1e293b', borderRadius: '8px', maxWidth: '650px', width: '100%', maxHeight: '90vh', overflowY: 'auto', padding: '1.75rem', border: '1px solid #334155' }}>
@@ -363,7 +370,7 @@ export default function App() {
                 onClick={() => setSelectedIncident(null)}
                 style={{ background: 'none', border: 'none', color: '#94a3b8', fontSize: '1.5rem', cursor: 'pointer' }}
               >
-                âœ•
+                ✕
               </button>
             </div>
 
@@ -372,7 +379,9 @@ export default function App() {
             </p>
 
             <div style={{ backgroundColor: '#0f172a', border: '1px solid #334155', borderRadius: '6px', padding: '1rem', marginBottom: '1.25rem' }}>
-              <div style={{ fontSize: '0.85rem', fontWeight: '700', color: '#38bdf8', marginBottom: '0.75rem' }}>âš™ï¸ TransiciÃ³n de OperaciÃ³n</div>
+              <div style={{ fontSize: '0.85rem', fontWeight: '700', color: '#38bdf8', marginBottom: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                <span>⚙️</span> Transición de Operación
+              </div>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr auto', gap: '0.75rem', alignItems: 'center' }}>
                 <div>
                   <label style={{ display: 'block', fontSize: '0.75rem', color: '#94a3b8', marginBottom: '0.25rem' }}>Estado Actual: {selectedIncident.status}</label>
@@ -390,7 +399,7 @@ export default function App() {
                 </div>
 
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.75rem', color: '#94a3b8', marginBottom: '0.25rem' }}>TÃ©cnico Asignado</label>
+                  <label style={{ display: 'block', fontSize: '0.75rem', color: '#94a3b8', marginBottom: '0.25rem' }}>Técnico Asignado</label>
                   <select
                     value={targetTech}
                     onChange={(e) => setTargetTech(e.target.value)}
@@ -412,18 +421,22 @@ export default function App() {
             </div>
 
             <div style={{ marginBottom: '1.25rem' }}>
-              <h3 style={{ fontSize: '0.9rem', fontWeight: '700', color: '#94a3b8', marginBottom: '0.5rem' }}>ðŸ“œ Historial de Estados (AuditorÃ­a)</h3>
+              <h3 style={{ fontSize: '0.9rem', fontWeight: '700', color: '#94a3b8', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                <span>📜</span> Historial de Estados (Auditoría)
+              </h3>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', maxHeight: '150px', overflowY: 'auto' }}>
                 {selectedIncident.logs && selectedIncident.logs.map(log => (
                   <div key={log.id} style={{ fontSize: '0.8rem', backgroundColor: '#0f172a', padding: '0.5rem 0.75rem', borderRadius: '4px', borderLeft: '3px solid #38bdf8' }}>
-                    <span style={{ color: '#94a3b8' }}>{new Date(log.created_at).toLocaleTimeString()}:</span> TransiciÃ³n a <strong>{log.new_status}</strong> por <em>{log.changed_by}</em> ({log.change_reason})
+                    <span style={{ color: '#94a3b8' }}>{new Date(log.created_at).toLocaleTimeString()}:</span> Transición a <strong>{log.new_status}</strong> por <em>{log.changed_by}</em> ({log.change_reason})
                   </div>
                 ))}
               </div>
             </div>
 
             <div>
-              <h3 style={{ fontSize: '0.9rem', fontWeight: '700', color: '#94a3b8', marginBottom: '0.5rem' }}>ðŸ’¬ Comentarios de Seguimiento</h3>
+              <h3 style={{ fontSize: '0.9rem', fontWeight: '700', color: '#94a3b8', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                <span>💬</span> Comentarios de Seguimiento
+              </h3>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', maxHeight: '120px', overflowY: 'auto', marginBottom: '0.75rem' }}>
                 {selectedIncident.comments && selectedIncident.comments.map(c => (
                   <div key={c.id} style={{ fontSize: '0.8rem', backgroundColor: '#0f172a', padding: '0.5rem', borderRadius: '4px' }}>
@@ -434,7 +447,7 @@ export default function App() {
               <form onSubmit={handleAddComment} style={{ display: 'flex', gap: '0.5rem' }}>
                 <input
                   type="text"
-                  placeholder="Agregar una nota tÃ©cnica..."
+                  placeholder="Agregar una nota técnica..."
                   value={newComment}
                   onChange={(e) => setNewComment(e.target.value)}
                   style={{ flex: 1, backgroundColor: '#0f172a', border: '1px solid #334155', borderRadius: '4px', padding: '0.4rem 0.6rem', color: '#fff', fontSize: '0.85rem' }}
