@@ -4,11 +4,13 @@
  * Cumple Regla 9: Cero credenciales expuestas en código fuente (uso de variables de entorno)
  */
 const tls = require('node:tls');
+const path = require('node:path');
+require('dotenv').config({ path: path.resolve(__dirname, '..', '..', '.env') });
 
 const DEFAULT_RECIPIENT = process.env.ALERT_RECIPIENT || 'mbarriosg8@miumg.edu.gt';
 const DEFAULT_SENDER = process.env.GMAIL_USER || 'mbarriosg8@miumg.edu.gt';
 
-// Configuración dinámica en tiempo de ejecución (leída desde .env)
+// Configuración dinámica en tiempo de ejecución (leída desde backend/.env)
 let smtpConfig = {
   host: process.env.SMTP_HOST || 'smtp.gmail.com',
   port: parseInt(process.env.SMTP_PORT || '465', 10),
@@ -56,7 +58,7 @@ let notificationHistory = [
       buildNumber: 'Build #12',
       status: 'Succeeded',
       branch: 'main',
-      commit: '8a9040b',
+      commit: 'a0dcb6f',
       agent: 'mayro-local-agent (Pool: Default)',
       artifact: 'incident-hub-drop (v1.0.0)'
     })
@@ -71,14 +73,12 @@ function buildEmailHtml(incident, actionTitle = 'NOTIFICACIÓN DE INCIDENTE') {
 
   return `
     <div style="background-color:#0A0A0A;color:#F5F5F5;font-family:'Inter',Arial,sans-serif;padding:24px;border:1px solid #2E2E2E;border-radius:4px;max-width:620px;margin:0 auto;">
-      <div style="border-bottom:2px solid #DC2626;padding-bottom:12px;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center;">
-        <div>
-          <span style="background:#DC2626;color:#FFF;padding:3px 8px;font-weight:bold;font-size:11px;border-radius:2px;">IT INCIDENT HUB v1.0.0</span>
-          <h2 style="margin:8px 0 0 0;color:#FFFFFF;font-size:18px;text-transform:uppercase;">${actionTitle}</h2>
-        </div>
+      <div style="border-bottom:2px solid #DC2626;padding-bottom:12px;margin-bottom:16px;">
+        <span style="background:#DC2626;color:#FFF;padding:3px 8px;font-weight:bold;font-size:11px;border-radius:2px;">IT INCIDENT HUB v1.0.0</span>
+        <h2 style="margin:8px 0 0 0;color:#FFFFFF;font-size:18px;text-transform:uppercase;">${actionTitle}</h2>
       </div>
       <p style="color:#A3A3A3;font-size:13px;margin-bottom:16px;">
-        Notificación automática enviada a <strong>${smtpConfig.recipient}</strong> (DevOps &amp; Cloud Lead).
+        Notificación oficial despachada a <strong>${smtpConfig ? smtpConfig.recipient : DEFAULT_RECIPIENT}</strong> (DevOps &amp; Cloud Lead - UMG).
       </p>
       <table style="width:100%;border-collapse:collapse;background:#141414;border:1px solid #2E2E2E;font-size:13px;margin-bottom:16px;">
         <tr>
@@ -125,7 +125,7 @@ function buildPipelineEmailHtml(buildInfo) {
       <table style="width:100%;border-collapse:collapse;background:#141414;border:1px solid #2E2E2E;font-size:13px;margin-bottom:16px;">
         <tr>
           <td style="padding:8px 12px;border-bottom:1px solid #2E2E2E;color:#A3A3A3;width:35%;">Resultado:</td>
-          <td style="padding:8px 12px;border-bottom:1px solid #2E2E2E;color:#4ADE80;font-weight:bold;">✅ ${buildInfo.status}</td>
+          <td style="padding:8px 12px;border-bottom:1px solid #2E2E2E;color:#4ADE80;font-weight:bold;">✅ ${buildInfo.status || buildInfo.result}</td>
         </tr>
         <tr>
           <td style="padding:8px 12px;border-bottom:1px solid #2E2E2E;color:#A3A3A3;">Rama / Commit:</td>
@@ -141,65 +141,94 @@ function buildPipelineEmailHtml(buildInfo) {
         </tr>
       </table>
       <div style="font-size:11px;color:#737373;">
-        Notificación enviada a: <strong>${smtpConfig.recipient}</strong>
+        Notificación enviada a: <strong>${smtpConfig ? smtpConfig.recipient : DEFAULT_RECIPIENT}</strong>
       </div>
     </div>
   `.trim();
 }
 
 /**
- * Envío nativo por TLS a smtp.gmail.com:465 cuando existe GMAIL_APP_PASSWORD configurada
+ * Envío nativo por TLS a smtp.gmail.com:465 con soporte completo de respuestas multilínea SMTP
  */
 function sendRawSmtpTls({ host, port, user, pass, to, subject, html }) {
   return new Promise((resolve, reject) => {
-    const socket = tls.connect({ host, port, rejectUnauthorized: false }, () => {
-      let step = 0;
-      const commands = [
-        `EHLO incident-hub.local\r\n`,
-        `AUTH LOGIN\r\n`,
-        `${Buffer.from(user).toString('base64')}\r\n`,
-        `${Buffer.from(pass.replace(/\s+/g, '')).toString('base64')}\r\n`,
-        `MAIL FROM:<${user}>\r\n`,
-        `RCPT TO:<${to}>\r\n`,
-        `DATA\r\n`,
-        [
-          `From: "IT Incident Hub DevOps" <${user}>`,
-          `To: <${to}>`,
-          `Subject: =?UTF-8?B?${Buffer.from(subject).toString('base64')}?=`,
-          `MIME-Version: 1.0`,
-          `Content-Type: text/html; charset=UTF-8`,
-          ``,
-          html,
-          `.`,
-          ``
-        ].join('\r\n') + `\r\n`,
-        `QUIT\r\n`
-      ];
+    const cleanPass = String(pass).replace(/\s+/g, '');
+    const commands = [
+      `EHLO incident-hub.local\r\n`,
+      `AUTH LOGIN\r\n`,
+      `${Buffer.from(user).toString('base64')}\r\n`,
+      `${Buffer.from(cleanPass).toString('base64')}\r\n`,
+      `MAIL FROM:<${user}>\r\n`,
+      `RCPT TO:<${to}>\r\n`,
+      `DATA\r\n`,
+      [
+        `From: "IT Incident Hub DevOps" <${user}>`,
+        `To: <${to}>`,
+        `Date: ${new Date().toUTCString()}`,
+        `Subject: =?UTF-8?B?${Buffer.from(subject).toString('base64')}?=`,
+        `MIME-Version: 1.0`,
+        `Content-Type: text/html; charset=UTF-8`,
+        ``,
+        html,
+        `.`,
+        ``
+      ].join('\r\n')
+    ];
 
-      socket.on('data', (data) => {
-        const resp = data.toString();
-        const code = parseInt(resp.substring(0, 3), 10);
-        if (code >= 400) {
-          socket.destroy();
-          return reject(new Error(`SMTP Error ${code}: ${resp.trim()}`));
-        }
-        if (step < commands.length) {
-          socket.write(commands[step]);
-          step++;
-        } else {
-          socket.end();
-          resolve({ sent: true, transport: 'SMTP_TLS_GMAIL' });
-        }
-      });
+    let step = 0;
+    let buffer = '';
+    let resolved = false;
+
+    const socket = tls.connect({ host, port, servername: host }, () => {
+      // Conectado, esperando banner 220 del servidor SMTP
     });
 
-    socket.setTimeout(6000, () => {
+    socket.on('data', (chunk) => {
+      buffer += chunk.toString();
+      const lines = buffer.split(/\r?\n/);
+      buffer = lines.pop();
+
+      for (const line of lines) {
+        if (!line.trim()) continue;
+        // En SMTP, las líneas intermedias tienen guión (ej. "250-SIZE") y la línea final tiene espacio (ej. "250 SMTPUTF8")
+        if (/^\d{3} /.test(line)) {
+          const code = parseInt(line.substring(0, 3), 10);
+          if (code >= 400) {
+            socket.destroy();
+            if (!resolved) {
+              resolved = true;
+              reject(new Error(`SMTP Error ${code}: ${line}`));
+            }
+            return;
+          }
+
+          if (step < commands.length) {
+            const cmd = commands[step];
+            step++;
+            socket.write(cmd);
+          } else if (!resolved) {
+            resolved = true;
+            socket.write(`QUIT\r\n`);
+            socket.end();
+            resolve({ sent: true, transport: 'SMTP_TLS_GMAIL_REAL' });
+          }
+        }
+      }
+    });
+
+    socket.setTimeout(10000, () => {
       socket.destroy();
-      reject(new Error('SMTP Connection Timeout'));
+      if (!resolved) {
+        resolved = true;
+        reject(new Error('SMTP Connection Timeout'));
+      }
     });
 
     socket.on('error', (err) => {
-      reject(err);
+      if (!resolved) {
+        resolved = true;
+        reject(err);
+      }
     });
   });
 }
@@ -231,9 +260,10 @@ async function sendIncidentNotification(incident, eventType = 'INCIDENT_CREATED'
         subject,
         html
       });
-      transportUsed = 'SMTP_GMAIL_TLS';
-      deliveryStatus = 'SENT_SMTP_OK';
+      transportUsed = 'SMTP_GMAIL_REAL_TLS';
+      deliveryStatus = 'SENT_TO_GMAIL_INBOX';
     } catch (err) {
+      console.error('[SMTP Warning]:', err.message);
       transportUsed = 'OUTBOX_FALLBACK_RESILIENT';
       deliveryStatus = 'DELIVERED_LOCAL_OUTBOX';
     }
@@ -258,7 +288,7 @@ async function sendIncidentNotification(incident, eventType = 'INCIDENT_CREATED'
 }
 
 async function sendPipelineNotification(buildInfo) {
-  const subject = `[AZURE PIPELINES] ${buildInfo.buildNumber} (${buildInfo.status}) - ${buildInfo.branch}`;
+  const subject = `[AZURE PIPELINES] ${buildInfo.buildNumber} (${buildInfo.result || buildInfo.status}) - ${buildInfo.branch}`;
   const html = buildPipelineEmailHtml(buildInfo);
 
   let transportUsed = 'AZURE_DEVOPS_HOOK';
@@ -275,9 +305,10 @@ async function sendPipelineNotification(buildInfo) {
         subject,
         html
       });
-      transportUsed = 'SMTP_GMAIL_TLS';
-      deliveryStatus = 'SENT_SMTP_OK';
+      transportUsed = 'SMTP_GMAIL_REAL_TLS';
+      deliveryStatus = 'SENT_TO_GMAIL_INBOX';
     } catch (err) {
+      console.error('[SMTP Warning]:', err.message);
       transportUsed = 'AZURE_OUTBOX_RESILIENT';
     }
   }
