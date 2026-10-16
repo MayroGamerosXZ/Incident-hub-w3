@@ -17,7 +17,7 @@ let pipelineBuilds = [
     status: 'completed',
     result: 'succeeded',
     branch: 'main',
-    commit: '8a9040b',
+    commit: 'fdbe890',
     author: 'Mayro Gameros (@MayroGamerosXZ)',
     agent: 'mayro-local-agent (v4.274.1)',
     pool: 'Default (Self-Hosted)',
@@ -70,8 +70,8 @@ function getLocalGitMetadata() {
   } catch {
     return {
       branch: 'main',
-      commit: '8a9040b',
-      subject: 'feat(ui): implementar Centro de Control HTML y sistema de diseno'
+      commit: 'fdbe890',
+      subject: 'fix(smtp): optimizar protocolo TLS multiline en emailService'
     };
   }
 }
@@ -80,7 +80,6 @@ async function getAzureStatus() {
   const gitMeta = getLocalGitMetadata();
   const pat = process.env.AZURE_DEVOPS_PAT || '';
 
-  // Si existe PAT en .env y hay red, intenta enriquecer con Azure DevOps REST API
   if (pat && process.env.NODE_ENV !== 'test' && typeof fetch === 'function') {
     try {
       const auth = Buffer.from(`:${pat}`).toString('base64');
@@ -110,7 +109,7 @@ async function getAzureStatus() {
         }
       }
     } catch {
-      // Fallback resiliente a estado cacheado
+      // Fallback resiliente a estado local
     }
   }
 
@@ -156,18 +155,44 @@ async function getAzureStatus() {
   };
 }
 
-function triggerPipelineVerification(reason = 'Verificación desde Interfaz Web') {
-  const gitMeta = getLocalGitMetadata();
+function simulatePipelineFailure(reason = 'Fallo Controlado en Suite Unitaria (ERR_ASSERTION: 1 !== -1)') {
   const nextId = pipelineBuilds.length > 0 ? Math.max(...pipelineBuilds.map(b => b.id)) + 1 : 13;
+
+  const failedBuild = {
+    id: nextId,
+    buildNumber: `Build #${nextId} (Fallo Controlado)`,
+    pipelineName: 'IT-Incident-Hub-CI-CD',
+    status: 'completed',
+    result: 'failed',
+    branch: 'feature/broken-test-simulation',
+    commit: '8cd3c8d',
+    author: 'Laura Torres (QA) / Mayro Gameros',
+    agent: 'mayro-local-agent (v4.274.1)',
+    pool: 'Default (Self-Hosted)',
+    artifact: '❌ Bloqueado por Quality Gate (Test #5 Failed)',
+    duration: '29s',
+    reason,
+    errorDetail: 'ERR_ASSERTION [AB#22, AB#24]: stats.criticos esperado -1 pero recibió 1 en tests/api.test.js',
+    workItems: ['AB#22', 'AB#24'],
+    finishedAt: new Date().toISOString()
+  };
+
+  pipelineBuilds.unshift(failedBuild);
+  return failedBuild;
+}
+
+function triggerPipelineVerification(reason = 'Solución Aplicada y Verificada desde Interfaz Web') {
+  const gitMeta = getLocalGitMetadata();
+  const nextId = pipelineBuilds.length > 0 ? Math.max(...pipelineBuilds.map(b => b.id)) + 1 : 14;
 
   const newBuild = {
     id: nextId,
-    buildNumber: `Build #${nextId}`,
+    buildNumber: `Build #${nextId} (Restaurado)`,
     pipelineName: 'IT-Incident-Hub-CI-CD',
     status: 'completed',
     result: 'succeeded',
-    branch: gitMeta.branch,
-    commit: gitMeta.commit,
+    branch: gitMeta.branch || 'fix/controlled-pipeline-failure',
+    commit: gitMeta.commit || 'd61d3f8',
     author: 'Mayro Gameros (@MayroGamerosXZ)',
     agent: 'mayro-local-agent (v4.274.1)',
     pool: 'Default (Self-Hosted)',
@@ -184,5 +209,6 @@ function triggerPipelineVerification(reason = 'Verificación desde Interfaz Web'
 
 module.exports = {
   getAzureStatus,
+  simulatePipelineFailure,
   triggerPipelineVerification
 };

@@ -17,6 +17,12 @@ coverage/
 .env.test.local
 .env.production.local
 
+# Guias privadas de defensa local (NUNCA SUBIR A GITHUB)
+guia_pruebas_sincronizacion.html
+centro_de_control.html
+docs/centro_de_control.html
+guia_*.html
+
 # Logs y SO
 logs/
 *.log

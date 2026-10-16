@@ -2,10 +2,19 @@ import React, { useState, useEffect } from 'react';
 import IncidentFilters from './components/IncidentFilters.jsx';
 import DistributionPanel from './components/DistributionPanel.jsx';
 import DevOpsMonitor from './components/DevOpsMonitor.jsx';
+import LoginPanel from './components/LoginPanel.jsx';
 
 const API_BASE = 'http://localhost:5000/api';
 
 export default function App() {
+  const [currentUser, setCurrentUser] = useState(() => {
+    try {
+      const saved = sessionStorage.getItem('ih_active_user');
+      return saved ? JSON.parse(saved) : null;
+    } catch {
+      return null;
+    }
+  });
   const [incidents, setIncidents] = useState([]);
   const [users, setUsers] = useState([]);
   const [stats, setStats] = useState(null);
@@ -13,6 +22,7 @@ export default function App() {
   const [notificationsData, setNotificationsData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [syncingAzure, setSyncingAzure] = useState(false);
+  const [simulatingFailure, setSimulatingFailure] = useState(false);
   const [sendingEmail, setSendingEmail] = useState(false);
   const [toastMsg, setToastMsg] = useState(null);
 
@@ -44,6 +54,44 @@ export default function App() {
     setTimeout(() => {
       setToastMsg(null);
     }, 4500);
+  };
+
+  const applyUserRoleContext = (user) => {
+    if (!user) return;
+    setNewReportedBy(user.email || 'mbarriosg8@miumg.edu.gt');
+    if (user.role === 'ADMIN') {
+      setTechFilter('');
+      setCategoryFilter('');
+    } else {
+      // Orientar vista automáticamente al trabajo del técnico
+      setTechFilter(String(user.id));
+      setCategoryFilter('');
+    }
+  };
+
+  const handleLogin = async ({ userId, email, accessCode }) => {
+    const res = await fetch(`${API_BASE}/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userId, email, accessCode })
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      throw new Error(data.error || 'Error de autenticación');
+    }
+    setCurrentUser(data.user);
+    sessionStorage.setItem('ih_active_user', JSON.stringify(data.user));
+    applyUserRoleContext(data.user);
+    showToast(`🔐 Sesión iniciada: ${data.user.name} [${data.user.role}]`);
+  };
+
+  const handleLogout = () => {
+    setCurrentUser(null);
+    sessionStorage.removeItem('ih_active_user');
+    setTechFilter('');
+    setCategoryFilter('');
+    setStatusFilter('');
+    setPriorityFilter('');
   };
 
   const fetchData = async () => {
@@ -128,8 +176,8 @@ export default function App() {
         body: JSON.stringify({
           status: targetStatus,
           assigned_to_id: targetTech || null,
-          changed_by: 'Mayro Gameros (DevOps Lead)',
-          change_reason: 'Transición operativa en tablero web'
+          changed_by: currentUser ? currentUser.name : 'Mayro Gameros (DevOps Lead)',
+          change_reason: `Transición operativa por ${currentUser ? currentUser.role : 'ADMIN'}`
         })
       });
       if (res.ok) {
@@ -151,7 +199,7 @@ export default function App() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          author_name: 'Mayro Gameros (DevOps Lead)',
+          author_name: currentUser ? currentUser.name : 'Mayro Gameros (DevOps Lead)',
           comment: newComment
         })
       });
@@ -171,16 +219,36 @@ export default function App() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          reason: 'Sincronización de verificación desde interfaz web'
+          reason: 'Solución Aplicada y Restauración de Pipeline CI/CD a Verde'
         })
       });
       if (res.ok) {
         const data = await res.json();
         await fetchData();
-        showToast(`☁️ Azure DevOps ${data.build?.buildNumber} Succeeded y correo enviado a ${data.notification_sent?.to || 'mbarriosg8@miumg.edu.gt'}`);
+        showToast(`✅ Solución Aplicada: ${data.build?.buildNumber} Succeeded y correo enviado a ${data.notification_sent?.to || 'mbarriosg8@miumg.edu.gt'}`);
       }
     } finally {
       setSyncingAzure(false);
+    }
+  };
+
+  const handleSimulateFailure = async () => {
+    try {
+      setSimulatingFailure(true);
+      const res = await fetch(`${API_BASE}/azure/simulate-failure`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          reason: 'Simulación de Fallo Controlado en Pipeline CI (ERR_ASSERTION: 1 !== -1)'
+        })
+      });
+      if (res.ok) {
+        const data = await res.json();
+        await fetchData();
+        showToast(`🚨 Fallo en Pipeline Detectado (${data.build?.buildNumber}) y alerta enviada a ${data.notification_sent?.to || 'mbarriosg8@miumg.edu.gt'}`);
+      }
+    } finally {
+      setSimulatingFailure(false);
     }
   };
 
@@ -263,6 +331,12 @@ export default function App() {
     marginBottom: '4px'
   };
 
+  if (!currentUser) {
+    return <LoginPanel users={users} onLoginSuccess={handleLogin} />;
+  }
+
+  const isAdmin = currentUser.role === 'ADMIN';
+
   return (
     <div style={{ minHeight: '100vh', backgroundColor: '#0A0A0A', color: '#F5F5F5', padding: '24px 32px' }}>
 
@@ -294,7 +368,7 @@ export default function App() {
         alignItems: 'center',
         borderBottom: '2px solid #2E2E2E',
         paddingBottom: '16px',
-        marginBottom: '24px',
+        marginBottom: '16px',
         flexWrap: 'wrap',
         gap: '16px'
       }}>
@@ -361,14 +435,152 @@ export default function App() {
           </p>
         </div>
 
-        <button
-          onClick={() => setShowNewModal(true)}
-          className="btn-red"
-          style={{ padding: '10px 20px', display: 'flex', alignItems: 'center', gap: '8px' }}
-        >
-          <span>➕</span> Nuevo Incidente
-        </button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+          {/* TARJETA DE SESIÓN ACTIVA (SIN IMÁGENES) */}
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '10px',
+            backgroundColor: '#141414',
+            border: isAdmin ? '1px solid #DC2626' : '1px solid #2563EB',
+            padding: '6px 12px',
+            borderRadius: '4px'
+          }}>
+            <span style={{
+              fontFamily: 'JetBrains Mono, monospace',
+              fontSize: '12px',
+              fontWeight: '700',
+              backgroundColor: isAdmin ? 'rgba(220, 38, 38, 0.2)' : 'rgba(37, 99, 235, 0.2)',
+              color: isAdmin ? '#F87171' : '#60A5FA',
+              padding: '4px 7px',
+              borderRadius: '3px'
+            }}>
+              {currentUser.initials || 'IT'}
+            </span>
+            <div style={{ lineHeight: 1.2 }}>
+              <div style={{ fontSize: '12px', fontWeight: '700', color: '#FFFFFF' }}>
+                {currentUser.name}
+              </div>
+              <div style={{ fontSize: '10px', fontFamily: 'JetBrains Mono, monospace', color: isAdmin ? '#F87171' : '#60A5FA' }}>
+                {currentUser.role} &bull; {currentUser.email}
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={handleLogout}
+              style={{
+                backgroundColor: '#0A0A0A',
+                border: '1px solid #2E2E2E',
+                color: '#A3A3A3',
+                fontSize: '11px',
+                padding: '5px 9px',
+                borderRadius: '3px',
+                cursor: 'pointer',
+                marginLeft: '4px',
+                fontFamily: 'Inter, sans-serif',
+                fontWeight: '600'
+              }}
+              title="Volver al Panel de Inicio de Sesión / Cambiar de Rol"
+            >
+              🚪 Cambiar Rol
+            </button>
+          </div>
+
+          <button
+            onClick={() => setShowNewModal(true)}
+            className="btn-red"
+            style={{ padding: '10px 18px', display: 'flex', alignItems: 'center', gap: '8px' }}
+          >
+            <span>➕</span> Nuevo Incidente
+          </button>
+        </div>
       </header>
+
+      {/* BARRA DE CONTEXTO DE ROL Y FILTRO RÁPIDO DE TRABAJO */}
+      <div style={{
+        backgroundColor: '#141414',
+        border: '1px solid #2E2E2E',
+        borderLeft: isAdmin ? '4px solid #DC2626' : '4px solid #2563EB',
+        borderRadius: '4px',
+        padding: '10px 16px',
+        marginBottom: '20px',
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        flexWrap: 'wrap',
+        gap: '10px'
+      }}>
+        <div style={{ fontSize: '12.5px', color: '#D4D4D4' }}>
+          {isAdmin ? (
+            <>
+              <strong style={{ color: '#F87171', fontFamily: 'JetBrains Mono, monospace' }}>[MODO ADMINISTRADOR GLOBAL]</strong>{' '}
+              Tienes acceso completo a todos los tickets, al control de fallos/soluciones en Azure Pipelines y a la configuración SMTP.
+            </>
+          ) : (
+            <>
+              <strong style={{ color: '#60A5FA', fontFamily: 'JetBrains Mono, monospace' }}>[VISTA ORIENTADA A TÉCNICO: {currentUser.specialty}]</strong>{' '}
+              El tablero filtra prioritariamente los incidentes asignados a tu usuario o especialidad.
+            </>
+          )}
+        </div>
+
+        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+          {!isAdmin && (
+            <>
+              <button
+                type="button"
+                onClick={() => { setTechFilter(String(currentUser.id)); setCategoryFilter(''); }}
+                style={{
+                  backgroundColor: techFilter === String(currentUser.id) ? '#2563EB' : '#0A0A0A',
+                  color: '#FFFFFF',
+                  border: '1px solid #2563EB',
+                  borderRadius: '3px',
+                  padding: '4px 10px',
+                  fontSize: '11px',
+                  cursor: 'pointer',
+                  fontFamily: 'JetBrains Mono, monospace'
+                }}
+              >
+                🎯 Mis Asignados
+              </button>
+              {currentUser.defaultCategory && (
+                <button
+                  type="button"
+                  onClick={() => { setTechFilter(''); setCategoryFilter(currentUser.defaultCategory); }}
+                  style={{
+                    backgroundColor: categoryFilter === currentUser.defaultCategory ? '#2563EB' : '#0A0A0A',
+                    color: '#FFFFFF',
+                    border: '1px solid #2563EB',
+                    borderRadius: '3px',
+                    padding: '4px 10px',
+                    fontSize: '11px',
+                    cursor: 'pointer',
+                    fontFamily: 'JetBrains Mono, monospace'
+                  }}
+                >
+                  🏷️ Área {currentUser.defaultCategory}
+                </button>
+              )}
+            </>
+          )}
+          <button
+            type="button"
+            onClick={() => { setTechFilter(''); setCategoryFilter(''); setStatusFilter(''); setPriorityFilter(''); }}
+            style={{
+              backgroundColor: (!techFilter && !categoryFilter) ? 'rgba(34, 197, 94, 0.2)' : '#0A0A0A',
+              color: (!techFilter && !categoryFilter) ? '#4ADE80' : '#A3A3A3',
+              border: '1px solid #2E2E2E',
+              borderRadius: '3px',
+              padding: '4px 10px',
+              fontSize: '11px',
+              cursor: 'pointer',
+              fontFamily: 'JetBrains Mono, monospace'
+            }}
+          >
+            🌐 Ver Todos los Incidentes
+          </button>
+        </div>
+      </div>
 
       {/* KPI DASHBOARD (AB#34) */}
       {stats && (
@@ -461,13 +673,16 @@ export default function App() {
             azureStatus={azureStatus}
             notificationsData={notificationsData}
             onTriggerAzureSync={handleTriggerAzureSync}
+            onSimulateFailure={handleSimulateFailure}
             onSendTestEmail={handleSendTestEmail}
             onSaveSmtpConfig={handleSaveSmtpConfig}
             syncingAzure={syncingAzure}
+            simulatingFailure={simulatingFailure}
             sendingEmail={sendingEmail}
+            isAdmin={isAdmin}
           />
 
-          <DistributionPanel stats={stats} />
+          <DistributionPanel stats={stats} currentUser={currentUser} />
         </>
       )}
 

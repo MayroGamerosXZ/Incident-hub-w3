@@ -11,6 +11,7 @@ const {
 } = require('./src/services/emailService.js');
 const {
   getAzureStatus,
+  simulatePipelineFailure,
   triggerPipelineVerification
 } = require('./src/services/azureService.js');
 
@@ -27,12 +28,12 @@ const VALID_CATEGORIES = ['HARDWARE', 'SOFTWARE', 'NETWORK', 'SECURITY', 'ACCESS
 
 // Almacenamiento en memoria resiliente (Mock Data para ejecución autónoma o fallback de BD)
 let users = [
-  { id: 1, name: 'Mayro Gameros (DevOps Lead)', email: 'mbarriosg8@miumg.edu.gt', role: 'ADMIN' },
-  { id: 2, name: 'Carlos Mendoza (Backend)', email: 'backend.dev@incidents.local', role: 'TECHNICIAN' },
-  { id: 3, name: 'Sofia Gomez (Frontend)', email: 'frontend.dev@incidents.local', role: 'TECHNICIAN' },
-  { id: 4, name: 'Diego Ramirez (DB)', email: 'database.admin@incidents.local', role: 'ADMIN' },
-  { id: 5, name: 'Laura Torres (QA)', email: 'qa.tester@incidents.local', role: 'TECHNICIAN' },
-  { id: 6, name: 'Soporte Nivel 1', email: 'support.l1@incidents.local', role: 'TECHNICIAN' }
+  { id: 1, name: 'Mayro Gameros (DevOps Lead)', email: 'mbarriosg8@miumg.edu.gt', role: 'ADMIN', specialty: 'GLOBAL / DEVOPS CI-CD', defaultCategory: '', initials: 'MG', accessCode: 'ADMIN-2026' },
+  { id: 2, name: 'Carlos Mendoza (Especialista Redes)', email: 'cmendoza@miumg.edu.gt', role: 'TECHNICIAN', specialty: 'INFRAESTRUCTURA DE RED', defaultCategory: 'NETWORK', initials: 'CM', accessCode: 'TECH-2026' },
+  { id: 3, name: 'Sofia Gomez (Analista Seguridad)', email: 'sgomez@miumg.edu.gt', role: 'TECHNICIAN', specialty: 'CIBERSEGURIDAD & VPN', defaultCategory: 'SECURITY', initials: 'SG', accessCode: 'TECH-2026' },
+  { id: 4, name: 'Diego Ramirez (Arquitecto BD/SW)', email: 'dramirez@miumg.edu.gt', role: 'TECHNICIAN', specialty: 'SOFTWARE & BASE DE DATOS', defaultCategory: 'SOFTWARE', initials: 'DR', accessCode: 'TECH-2026' },
+  { id: 5, name: 'Laura Torres (Soporte Hardware)', email: 'ltorres@miumg.edu.gt', role: 'TECHNICIAN', specialty: 'HARDWARE & EQUIPOS', defaultCategory: 'HARDWARE', initials: 'LT', accessCode: 'TECH-2026' },
+  { id: 6, name: 'Andres Morales (Gestión Accesos)', email: 'amorales@miumg.edu.gt', role: 'TECHNICIAN', specialty: 'DIRECTORIO ACTIVO & IAM', defaultCategory: 'ACCESS', initials: 'AM', accessCode: 'TECH-2026' }
 ];
 
 let incidents = [
@@ -121,9 +122,41 @@ app.get('/api/health', (req, res) => {
   });
 });
 
-// 2. Usuarios / Técnicos
+// 2. Usuarios / Técnicos y Autenticación por Rol
 app.get('/api/users', (req, res) => {
   res.json(users);
+});
+
+app.post('/api/auth/login', (req, res) => {
+  const { email, accessCode, userId } = req.body || {};
+  let user = null;
+
+  if (userId) {
+    user = users.find(u => u.id === Number(userId));
+  } else if (email) {
+    user = users.find(u => u.email.toLowerCase() === String(email).trim().toLowerCase());
+  }
+
+  if (!user) {
+    return res.status(401).json({ error: 'Usuario o correo institucional no registrado en IT Incident Hub' });
+  }
+
+  // Si se proporciona código de acceso, validamos (o permitimos el código maestro UMG-2026)
+  if (accessCode && String(accessCode).trim() !== '' && accessCode !== user.accessCode && accessCode !== 'UMG-2026') {
+    return res.status(401).json({ error: `Código de acceso inválido para ${user.email}. Usa ${user.accessCode} o acceso rápido.` });
+  }
+
+  res.json({
+    authenticated: true,
+    user,
+    permissions: {
+      isAdmin: user.role === 'ADMIN',
+      canManagePipeline: user.role === 'ADMIN',
+      canConfigureSmtp: user.role === 'ADMIN',
+      canAssignAnyTechnician: user.role === 'ADMIN',
+      defaultCategoryFilter: user.defaultCategory || ''
+    }
+  });
 });
 
 // 3. Listar Incidentes con Filtros (AB#11)
@@ -266,25 +299,46 @@ app.post('/api/incidents/:id/comments', (req, res) => {
   res.status(201).json(newComment);
 });
 
-// 8. Métricas del Dashboard (AB#33)
+// 8. Métricas del Dashboard y Paneles Gráficos (AB#33, AB#34)
 app.get('/api/dashboard/stats', (req, res) => {
   const total = incidents.length;
   const abiertos = incidents.filter(i => ['NUEVO', 'ASIGNADO', 'EN_PROCESO'].includes(i.status)).length;
   const cerrados = incidents.filter(i => ['RESUELTO', 'CERRADO'].includes(i.status)).length;
   const criticos = incidents.filter(i => i.priority === 'CRITICA' && i.status !== 'CERRADO').length;
 
+  const porEstado = VALID_STATUSES.map(st => ({
+    estado: st,
+    total: incidents.filter(i => i.status === st).length
+  }));
+
+  const porPrioridad = VALID_PRIORITIES.map(pr => ({
+    prioridad: pr,
+    total: incidents.filter(i => i.priority === pr).length,
+    activos: incidents.filter(i => i.priority === pr && i.status !== 'CERRADO').length
+  }));
+
   const porCategoria = VALID_CATEGORIES.map(cat => ({
     categoria: cat,
     total: incidents.filter(i => i.category === cat).length
   }));
 
-  const porTecnico = users.map(user => ({
-    id: user.id,
-    nombre: user.name,
-    asignados: incidents.filter(i => i.assigned_to_id === user.id && i.status !== 'CERRADO').length
-  }));
+  const porTecnico = users.map(user => {
+    const asignadosActivos = incidents.filter(i => i.assigned_to_id === user.id && !['RESUELTO', 'CERRADO'].includes(i.status)).length;
+    const resueltos = incidents.filter(i => i.assigned_to_id === user.id && ['RESUELTO', 'CERRADO'].includes(i.status)).length;
+    return {
+      id: user.id,
+      nombre: user.name,
+      initials: user.initials || 'IT',
+      specialty: user.specialty || user.role,
+      role: user.role,
+      asignados: incidents.filter(i => i.assigned_to_id === user.id && i.status !== 'CERRADO').length,
+      activos: asignadosActivos,
+      resueltos,
+      total: asignadosActivos + resueltos
+    };
+  });
 
-  res.json({ total, abiertos, cerrados, criticos, porCategoria, porTecnico });
+  res.json({ total, abiertos, cerrados, criticos, porEstado, porPrioridad, porCategoria, porTecnico });
 });
 
 // 9. Bandeja y Estado de Notificaciones por Correo (mbarriosg8@miumg.edu.gt)
@@ -323,9 +377,19 @@ app.get('/api/azure/status', async (req, res) => {
   res.json(status);
 });
 
-// 13. Disparar Verificación de Pipeline en Azure + Notificación por Correo
+// 13. Simular Fallo Controlado en Pipeline (ROJO ❌) + Alerta a Gmail UMG (AB#22, AB#24)
+app.post('/api/azure/simulate-failure', async (req, res) => {
+  const build = simulatePipelineFailure(req.body?.reason || 'Simulación de Fallo Controlado en Pipeline CI (ERR_ASSERTION: 1 !== -1)');
+  const emailRecord = await sendPipelineNotification(build);
+  res.status(201).json({
+    build,
+    notification_sent: emailRecord
+  });
+});
+
+// 14. Disparar Solución / Verificación de Pipeline en Azure (VERDE ✅) + Notificación por Correo
 app.post('/api/azure/sync', async (req, res) => {
-  const build = triggerPipelineVerification(req.body?.reason || 'Verificación manual desde Interfaz Web');
+  const build = triggerPipelineVerification(req.body?.reason || 'Solución Aplicada y Restauración de Pipeline CI/CD a Verde');
   const emailRecord = await sendPipelineNotification(build);
   res.status(201).json({
     build,

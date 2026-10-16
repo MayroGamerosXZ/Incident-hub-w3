@@ -56,9 +56,9 @@ let notificationHistory = [
     timestamp: new Date('2026-10-14T23:20:00Z').toISOString(),
     html_preview: buildPipelineEmailHtml({
       buildNumber: 'Build #12',
-      status: 'Succeeded',
+      result: 'succeeded',
       branch: 'main',
-      commit: 'a0dcb6f',
+      commit: 'fdbe890',
       agent: 'mayro-local-agent (Pool: Default)',
       artifact: 'incident-hub-drop (v1.0.0)'
     })
@@ -116,16 +116,24 @@ function buildEmailHtml(incident, actionTitle = 'NOTIFICACIÓN DE INCIDENTE') {
 }
 
 function buildPipelineEmailHtml(buildInfo) {
+  const isFailed = (buildInfo.result || buildInfo.status || '').toLowerCase() === 'failed';
+  const accentColor = isFailed ? '#DC2626' : '#2563EB';
+  const statusText = isFailed ? '❌ FAILED (BLOQUEADO POR QUALITY GATE)' : '✅ SUCCEEDED (RESTAURADO Y VERIFICADO)';
+  const statusColor = isFailed ? '#F87171' : '#4ADE80';
+  const headerTitle = isFailed
+    ? `🚨 ALERTA DE FALLO EN PIPELINE (${buildInfo.buildNumber})`
+    : `✅ SOLUCIÓN Y PIPELINE EXITOSO (${buildInfo.buildNumber})`;
+
   return `
     <div style="background-color:#0A0A0A;color:#F5F5F5;font-family:'Inter',Arial,sans-serif;padding:24px;border:1px solid #2E2E2E;border-radius:4px;max-width:620px;margin:0 auto;">
-      <div style="border-bottom:2px solid #2563EB;padding-bottom:12px;margin-bottom:16px;">
-        <span style="background:#2563EB;color:#FFF;padding:3px 8px;font-weight:bold;font-size:11px;border-radius:2px;">AZURE PIPELINES CI/CD</span>
-        <h2 style="margin:8px 0 0 0;color:#FFFFFF;font-size:18px;">EJECUCIÓN DE PIPELINE COMPLETADA (${buildInfo.buildNumber})</h2>
+      <div style="border-bottom:2px solid ${accentColor};padding-bottom:12px;margin-bottom:16px;">
+        <span style="background:${accentColor};color:#FFF;padding:3px 8px;font-weight:bold;font-size:11px;border-radius:2px;">AZURE PIPELINES CI/CD</span>
+        <h2 style="margin:8px 0 0 0;color:#FFFFFF;font-size:18px;">${headerTitle}</h2>
       </div>
       <table style="width:100%;border-collapse:collapse;background:#141414;border:1px solid #2E2E2E;font-size:13px;margin-bottom:16px;">
         <tr>
-          <td style="padding:8px 12px;border-bottom:1px solid #2E2E2E;color:#A3A3A3;width:35%;">Resultado:</td>
-          <td style="padding:8px 12px;border-bottom:1px solid #2E2E2E;color:#4ADE80;font-weight:bold;">✅ ${buildInfo.status || buildInfo.result}</td>
+          <td style="padding:8px 12px;border-bottom:1px solid #2E2E2E;color:#A3A3A3;width:35%;">Estado del Build:</td>
+          <td style="padding:8px 12px;border-bottom:1px solid #2E2E2E;color:${statusColor};font-weight:bold;">${statusText}</td>
         </tr>
         <tr>
           <td style="padding:8px 12px;border-bottom:1px solid #2E2E2E;color:#A3A3A3;">Rama / Commit:</td>
@@ -135,13 +143,18 @@ function buildPipelineEmailHtml(buildInfo) {
           <td style="padding:8px 12px;border-bottom:1px solid #2E2E2E;color:#A3A3A3;">Agente Ejecutor:</td>
           <td style="padding:8px 12px;border-bottom:1px solid #2E2E2E;color:#FFFFFF;">${buildInfo.agent}</td>
         </tr>
+        ${buildInfo.errorDetail ? `
         <tr>
-          <td style="padding:8px 12px;color:#A3A3A3;">Artefacto Publicado:</td>
+          <td style="padding:8px 12px;border-bottom:1px solid #2E2E2E;color:#F87171;font-weight:bold;">Causa del Fallo:</td>
+          <td style="padding:8px 12px;border-bottom:1px solid #2E2E2E;color:#FCA5A5;font-family:monospace;font-size:12px;">${buildInfo.errorDetail}</td>
+        </tr>` : ''}
+        <tr>
+          <td style="padding:8px 12px;color:#A3A3A3;">Artefacto de Release:</td>
           <td style="padding:8px 12px;color:#FBBF24;font-weight:bold;">📦 ${buildInfo.artifact}</td>
         </tr>
       </table>
       <div style="font-size:11px;color:#737373;">
-        Notificación enviada a: <strong>${smtpConfig ? smtpConfig.recipient : DEFAULT_RECIPIENT}</strong>
+        Notificación enviada a: <strong>${smtpConfig ? smtpConfig.recipient : DEFAULT_RECIPIENT}</strong> &bull; Azure Boards: <strong>${(buildInfo.workItems || ['AB#22', 'AB#24']).join(', ')}</strong>
       </div>
     </div>
   `.trim();
@@ -179,9 +192,7 @@ function sendRawSmtpTls({ host, port, user, pass, to, subject, html }) {
     let buffer = '';
     let resolved = false;
 
-    const socket = tls.connect({ host, port, servername: host }, () => {
-      // Conectado, esperando banner 220 del servidor SMTP
-    });
+    const socket = tls.connect({ host, port, servername: host }, () => {});
 
     socket.on('data', (chunk) => {
       buffer += chunk.toString();
@@ -190,7 +201,6 @@ function sendRawSmtpTls({ host, port, user, pass, to, subject, html }) {
 
       for (const line of lines) {
         if (!line.trim()) continue;
-        // En SMTP, las líneas intermedias tienen guión (ej. "250-SIZE") y la línea final tiene espacio (ej. "250 SMTPUTF8")
         if (/^\d{3} /.test(line)) {
           const code = parseInt(line.substring(0, 3), 10);
           if (code >= 400) {
@@ -233,9 +243,6 @@ function sendRawSmtpTls({ host, port, user, pass, to, subject, html }) {
   });
 }
 
-/**
- * Dispara una notificación de correo hacia mbarriosg8@miumg.edu.gt
- */
 async function sendIncidentNotification(incident, eventType = 'INCIDENT_CREATED', customActionTitle = null) {
   const actionTitle = customActionTitle || (
     eventType === 'INCIDENT_CREATED' ? 'NUEVO INCIDENTE REGISTRADO' :
@@ -288,7 +295,10 @@ async function sendIncidentNotification(incident, eventType = 'INCIDENT_CREATED'
 }
 
 async function sendPipelineNotification(buildInfo) {
-  const subject = `[AZURE PIPELINES] ${buildInfo.buildNumber} (${buildInfo.result || buildInfo.status}) - ${buildInfo.branch}`;
+  const isFailed = (buildInfo.result || buildInfo.status || '').toLowerCase() === 'failed';
+  const subject = isFailed
+    ? `🚨 [FALLO EN PIPELINE ❌] ${buildInfo.buildNumber} FAILED - ${buildInfo.branch} (AB#22)`
+    : `✅ [SOLUCIÓN APLICADA] ${buildInfo.buildNumber} SUCCEEDED - ${buildInfo.branch} (AB#30)`;
   const html = buildPipelineEmailHtml(buildInfo);
 
   let transportUsed = 'AZURE_DEVOPS_HOOK';
@@ -318,9 +328,9 @@ async function sendPipelineNotification(buildInfo) {
     to: smtpConfig.recipient,
     from: `Azure Pipelines CI/CD <${smtpConfig.user}>`,
     subject,
-    event_type: 'PIPELINE_BUILD_NOTIFICATION',
+    event_type: isFailed ? 'PIPELINE_BUILD_FAILED' : 'PIPELINE_BUILD_NOTIFICATION',
     incident_id: null,
-    priority: 'ALTA',
+    priority: isFailed ? 'CRITICA' : 'ALTA',
     status: deliveryStatus,
     transport: transportUsed,
     timestamp: new Date().toISOString(),

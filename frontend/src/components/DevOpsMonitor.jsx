@@ -4,10 +4,13 @@ export default function DevOpsMonitor({
   azureStatus,
   notificationsData,
   onTriggerAzureSync,
+  onSimulateFailure,
   onSendTestEmail,
   onSaveSmtpConfig,
   syncingAzure,
-  sendingEmail
+  simulatingFailure,
+  sendingEmail,
+  isAdmin = true
 }) {
   const [selectedEmail, setSelectedEmail] = useState(null);
   const [showSmtpModal, setShowSmtpModal] = useState(false);
@@ -19,6 +22,7 @@ export default function DevOpsMonitor({
   if (!azureStatus || !notificationsData) return null;
 
   const latest = azureStatus.latestBuild || {};
+  const isLatestFailed = (latest.result || '').toLowerCase() === 'failed';
   const notifications = notificationsData.notifications || [];
 
   const handleConfigSubmit = (e) => {
@@ -42,10 +46,10 @@ export default function DevOpsMonitor({
       <div style={{
         backgroundColor: '#141414',
         border: '1px solid #2E2E2E',
-        borderLeft: '4px solid #2563EB',
+        borderLeft: isLatestFailed ? '4px solid #DC2626' : '4px solid #2563EB',
         borderRadius: '4px',
         padding: '16px 20px',
-        boxShadow: '0 0 12px rgba(37, 99, 235, 0.18)'
+        boxShadow: isLatestFailed ? '0 0 14px rgba(220, 38, 38, 0.25)' : '0 0 12px rgba(37, 99, 235, 0.18)'
       }}>
         <div style={{
           display: 'flex',
@@ -61,7 +65,7 @@ export default function DevOpsMonitor({
             <h3 style={{
               fontFamily: 'Anton, sans-serif',
               fontSize: '17px',
-              color: '#60A5FA',
+              color: isLatestFailed ? '#F87171' : '#60A5FA',
               letterSpacing: '0.8px',
               display: 'flex',
               alignItems: 'center',
@@ -74,15 +78,42 @@ export default function DevOpsMonitor({
             </div>
           </div>
 
-          <button
-            type="button"
-            onClick={onTriggerAzureSync}
-            disabled={syncingAzure}
-            className="btn-blue"
-            style={{ padding: '6px 12px', fontSize: '11px' }}
-          >
-            {syncingAzure ? '⏳ Sincronizando...' : '🔄 Verificar Subida en Azure'}
-          </button>
+          {isAdmin ? (
+            <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+              <button
+                type="button"
+                onClick={onSimulateFailure}
+                disabled={simulatingFailure || syncingAzure}
+                className="btn-red"
+                style={{ padding: '6px 10px', fontSize: '10.5px' }}
+                title="Simula el Fallo Controlado en el Pipeline (ROJO) y envía alerta a Gmail"
+              >
+                {simulatingFailure ? '⏳ Fallando...' : '💥 Simular Fallo CI'}
+              </button>
+              <button
+                type="button"
+                onClick={onTriggerAzureSync}
+                disabled={syncingAzure || simulatingFailure}
+                className="btn-blue"
+                style={{ padding: '6px 10px', fontSize: '10.5px' }}
+                title="Aplica el Fix / Solución en el Pipeline (VERDE) y envía alerta a Gmail"
+              >
+                {syncingAzure ? '⏳ Restaurando...' : '🔧 Disparar Solución / Fix'}
+              </button>
+            </div>
+          ) : (
+            <span style={{
+              backgroundColor: '#0A0A0A',
+              border: '1px solid #2E2E2E',
+              color: '#A3A3A3',
+              fontFamily: 'JetBrains Mono, monospace',
+              fontSize: '10px',
+              padding: '4px 8px',
+              borderRadius: '3px'
+            }}>
+              🔒 CONTROL PIPELINE: SOLO ADMIN
+            </span>
+          )}
         </div>
 
         {/* Estado del último Build y Agente */}
@@ -94,12 +125,18 @@ export default function DevOpsMonitor({
           backgroundColor: '#0A0A0A',
           padding: '10px 12px',
           borderRadius: '4px',
-          border: '1px solid #2E2E2E'
+          border: isLatestFailed ? '1px solid rgba(220, 38, 38, 0.5)' : '1px solid #2E2E2E'
         }}>
           <div>
             <div style={{ fontSize: '10px', color: '#A3A3A3', textTransform: 'uppercase', fontWeight: '700' }}>Último Pipeline</div>
-            <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '12.5px', color: '#4ADE80', fontWeight: '700', marginTop: '2px' }}>
-              ✅ {latest.buildNumber} ({latest.result?.toUpperCase()})
+            <div style={{
+              fontFamily: 'JetBrains Mono, monospace',
+              fontSize: '12px',
+              color: isLatestFailed ? '#F87171' : '#4ADE80',
+              fontWeight: '700',
+              marginTop: '2px'
+            }}>
+              {isLatestFailed ? '❌' : '✅'} {latest.buildNumber} ({latest.result?.toUpperCase()})
             </div>
           </div>
           <div>
@@ -111,7 +148,7 @@ export default function DevOpsMonitor({
           <div>
             <div style={{ fontSize: '10px', color: '#A3A3A3', textTransform: 'uppercase', fontWeight: '700' }}>Rama / Commit / Artefacto</div>
             <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '11.5px', color: '#60A5FA', marginTop: '2px' }}>
-              {latest.branch} @ {latest.commit} &bull; 📦 v1.0.0
+              {latest.branch} @ {latest.commit}
             </div>
           </div>
         </div>
@@ -189,24 +226,26 @@ export default function DevOpsMonitor({
           </div>
 
           <div style={{ display: 'flex', gap: '6px' }}>
-            <button
-              type="button"
-              onClick={() => setShowSmtpModal(true)}
-              style={{
-                backgroundColor: '#0A0A0A',
-                color: '#A3A3A3',
-                border: '1px solid #2E2E2E',
-                borderRadius: '4px',
-                padding: '6px 10px',
-                fontSize: '11px',
-                cursor: 'pointer',
-                fontFamily: 'Inter, sans-serif',
-                fontWeight: '600'
-              }}
-              title="Configurar Contraseña de Aplicación Google SMTP"
-            >
-              ⚙️ SMTP
-            </button>
+            {isAdmin && (
+              <button
+                type="button"
+                onClick={() => setShowSmtpModal(true)}
+                style={{
+                  backgroundColor: '#0A0A0A',
+                  color: '#A3A3A3',
+                  border: '1px solid #2E2E2E',
+                  borderRadius: '4px',
+                  padding: '6px 10px',
+                  fontSize: '11px',
+                  cursor: 'pointer',
+                  fontFamily: 'Inter, sans-serif',
+                  fontWeight: '600'
+                }}
+                title="Configurar Contraseña de Aplicación Google SMTP"
+              >
+                ⚙️ SMTP
+              </button>
+            )}
             <button
               type="button"
               onClick={onSendTestEmail}
