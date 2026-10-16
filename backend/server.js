@@ -2,6 +2,17 @@ const express = require('express');
 const cors = require('cors');
 require('dotenv').config();
 
+const {
+  sendIncidentNotification,
+  sendPipelineNotification,
+  getNotifications,
+  updateSmtpConfig
+} = require('./src/services/emailService.js');
+const {
+  getAzureStatus,
+  triggerPipelineVerification
+} = require('./src/services/azureService.js');
+
 const app = express();
 const PORT = process.env.PORT || 5000;
 
@@ -15,7 +26,7 @@ const VALID_CATEGORIES = ['HARDWARE', 'SOFTWARE', 'NETWORK', 'SECURITY', 'ACCESS
 
 // Almacenamiento en memoria resiliente (Mock Data para ejecución autónoma o fallback de BD)
 let users = [
-  { id: 1, name: 'Mayro Gameros (DevOps Lead)', email: 'devops.lead@incidents.local', role: 'ADMIN' },
+  { id: 1, name: 'Mayro Gameros (DevOps Lead)', email: 'mbarriosg8@miumg.edu.gt', role: 'ADMIN' },
   { id: 2, name: 'Carlos Mendoza (Backend)', email: 'backend.dev@incidents.local', role: 'TECHNICIAN' },
   { id: 3, name: 'Sofia Gomez (Frontend)', email: 'frontend.dev@incidents.local', role: 'TECHNICIAN' },
   { id: 4, name: 'Diego Ramirez (DB)', email: 'database.admin@incidents.local', role: 'ADMIN' },
@@ -101,7 +112,12 @@ let incidentComments = [
 
 // 1. Healthcheck
 app.get('/api/health', (req, res) => {
-  res.json({ status: 'UP', timestamp: new Date().toISOString(), service: 'IT Incident Hub API' });
+  res.json({
+    status: 'UP',
+    timestamp: new Date().toISOString(),
+    service: 'IT Incident Hub API',
+    alert_recipient: process.env.ALERT_RECIPIENT || 'mbarriosg8@miumg.edu.gt'
+  });
 });
 
 // 2. Usuarios / Técnicos
@@ -123,7 +139,6 @@ app.get('/api/incidents', (req, res) => {
     filtered = filtered.filter(i => i.title.toLowerCase().includes(s) || i.description.toLowerCase().includes(s));
   }
 
-  // Enriquecer con datos del técnico asignado
   const enriched = filtered.map(inc => ({
     ...inc,
     assigned_technician: users.find(u => u.id === inc.assigned_to_id) || null
@@ -144,8 +159,8 @@ app.get('/api/incidents/:id', (req, res) => {
   res.json({ ...inc, assigned_technician, comments, logs });
 });
 
-// 5. Crear Incidente (AB#8)
-app.post('/api/incidents', (req, res) => {
+// 5. Crear Incidente + Disparo Automático de Alerta a mbarriosg8@miumg.edu.gt (AB#8)
+app.post('/api/incidents', async (req, res) => {
   const { title, description, category, priority, reported_by } = req.body;
 
   if (!title || !description || !category || !reported_by) {
@@ -167,7 +182,6 @@ app.post('/api/incidents', (req, res) => {
 
   incidents.unshift(newIncident);
 
-  // Registro en bitácora de auditoría
   incidentLogs.push({
     id: incidentLogs.length + 1,
     incident_id: newIncident.id,
@@ -178,11 +192,16 @@ app.post('/api/incidents', (req, res) => {
     created_at: new Date()
   });
 
-  res.status(201).json(newIncident);
+  const notification = await sendIncidentNotification(newIncident, 'INCIDENT_CREATED');
+
+  res.status(201).json({
+    ...newIncident,
+    notification_sent: notification
+  });
 });
 
-// 6. Transicionar Estado o Asignar Técnico (AB#15)
-app.patch('/api/incidents/:id/status', (req, res) => {
+// 6. Transicionar Estado o Asignar Técnico + Alerta a mbarriosg8@miumg.edu.gt (AB#15)
+app.patch('/api/incidents/:id/status', async (req, res) => {
   const inc = incidents.find(i => i.id === parseInt(req.params.id));
   if (!inc) return res.status(404).json({ error: 'Incidente no encontrado' });
 
@@ -206,7 +225,6 @@ app.patch('/api/incidents/:id/status', (req, res) => {
 
   inc.updated_at = new Date();
 
-  // Guardar log si cambió estado o asignación
   incidentLogs.push({
     id: incidentLogs.length + 1,
     incident_id: inc.id,
@@ -217,7 +235,12 @@ app.patch('/api/incidents/:id/status', (req, res) => {
     created_at: new Date()
   });
 
-  res.json(inc);
+  const notification = await sendIncidentNotification(inc, 'INCIDENT_STATUS_CHANGED');
+
+  res.json({
+    ...inc,
+    notification_sent: notification
+  });
 });
 
 // 7. Agregar Comentario
@@ -263,9 +286,55 @@ app.get('/api/dashboard/stats', (req, res) => {
   res.json({ total, abiertos, cerrados, criticos, porCategoria, porTecnico });
 });
 
+// 9. Bandeja y Estado de Notificaciones por Correo (mbarriosg8@miumg.edu.gt)
+app.get('/api/notifications', (req, res) => {
+  res.json(getNotifications());
+});
+
+// 10. Disparar Alerta de Prueba a mbarriosg8@miumg.edu.gt
+app.post('/api/notifications/test', async (req, res) => {
+  const sampleIncident = incidents[0] || {
+    id: 99,
+    title: 'Verificación de Alerta Operativa en Vivo',
+    description: 'Prueba de conectividad de alertas hacia correo institucional UMG.',
+    category: 'SECURITY',
+    priority: 'CRITICA',
+    status: 'EN_PROCESO',
+    reported_by: 'mbarriosg8@miumg.edu.gt'
+  };
+  const record = await sendIncidentNotification(
+    sampleIncident,
+    'MANUAL_TEST_ALERT',
+    'PRUEBA DE NOTIFICACIÓN A CORREO INSTITUCIONAL UMG'
+  );
+  res.status(201).json(record);
+});
+
+// 11. Actualizar Configuración SMTP en Caliente (Opcional)
+app.post('/api/notifications/config', (req, res) => {
+  const updated = updateSmtpConfig(req.body || {});
+  res.json(updated);
+});
+
+// 12. Estado de Azure DevOps Pipelines, Agente Self-Hosted y Git
+app.get('/api/azure/status', async (req, res) => {
+  const status = await getAzureStatus();
+  res.json(status);
+});
+
+// 13. Disparar Verificación de Pipeline en Azure + Notificación por Correo
+app.post('/api/azure/sync', async (req, res) => {
+  const build = triggerPipelineVerification(req.body?.reason || 'Verificación manual desde Interfaz Web');
+  const emailRecord = await sendPipelineNotification(build);
+  res.status(201).json({
+    build,
+    notification_sent: emailRecord
+  });
+});
+
 if (process.env.NODE_ENV !== 'test') {
   app.listen(PORT, () => {
-    console.log(`🚀 IT Incident Hub API escuchando en el puerto ${PORT}`);
+    console.log(`🚀 IT Incident Hub API escuchando en el puerto ${PORT} | Alertas: ${process.env.ALERT_RECIPIENT || 'mbarriosg8@miumg.edu.gt'}`);
   });
 }
 

@@ -1,4 +1,4 @@
-﻿const test = require('node:test');
+const test = require('node:test');
 const assert = require('node:assert');
 const {
   VALID_STATUSES,
@@ -12,6 +12,13 @@ const {
 const {
   sanitizeInputString
 } = require('../backend/src/middleware/securityMiddleware.js');
+const {
+  DEFAULT_RECIPIENT,
+  sendIncidentNotification
+} = require('../backend/src/services/emailService.js');
+const {
+  getAzureStatus
+} = require('../backend/src/services/azureService.js');
 
 test('Suite de Pruebas Unitarias e Integracion - IT Incident Hub (AB#24)', async (t) => {
 
@@ -77,5 +84,26 @@ test('Suite de Pruebas Unitarias e Integracion - IT Incident Hub (AB#24)', async
     const dirty = '<script>alert("xss")</script>Fallo en servidor';
     const clean = sanitizeInputString(dirty);
     assert.strictEqual(clean, 'Fallo en servidor');
+  });
+
+  await t.test('7. Validar servicio de notificaciones Gmail UMG (mbarriosg8@miumg.edu.gt) y Azure DevOps (AB#23, AB#30)', async () => {
+    process.env.NODE_ENV = 'test';
+    assert.strictEqual(DEFAULT_RECIPIENT, 'mbarriosg8@miumg.edu.gt');
+    const notif = await sendIncidentNotification({
+      id: 10,
+      title: 'Prueba unitaria de alerta',
+      description: 'Validando disparo de correo',
+      category: 'SECURITY',
+      priority: 'CRITICA',
+      status: 'NUEVO',
+      reported_by: 'mbarriosg8@miumg.edu.gt'
+    });
+    assert.strictEqual(notif.to, 'mbarriosg8@miumg.edu.gt');
+    assert.ok(notif.html_preview.includes('mbarriosg8@miumg.edu.gt'));
+
+    const azure = await getAzureStatus();
+    assert.strictEqual(azure.organization, 'DevOps-UMG-Mayro');
+    assert.strictEqual(azure.project, 'incident-hub');
+    assert.strictEqual(azure.selfHostedAgent.name, 'mayro-local-agent');
   });
 });

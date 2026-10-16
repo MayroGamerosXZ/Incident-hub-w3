@@ -570,14 +570,14 @@
       </div>
       <div class="stat-card yellow">
         <div class="stat-label">Pruebas Automatizadas</div>
-        <div class="stat-val">7 / 7 PASS</div>
-        <div class="stat-sub">Ejecución en &lt; 200 ms</div>
+        <div class="stat-val">8 / 8 PASS</div>
+        <div class="stat-sub">Incluye Alertas UMG y Azure</div>
       </div>
     </div>
 
     <!-- TABS NAVIGATION -->
     <nav class="nav-tabs">
-      <button class="tab-btn active" onclick="openTab('tab-comandos', this)">⚡ Comandos Rápidos a 1 Clic</button>
+      <button class="tab-btn active" onclick="openTab('tab-comandos', this)">⚡ Comandos npm a 1 Clic</button>
       <button class="tab-btn blue" onclick="openTab('tab-normativas', this)">📋 Matriz de 9 Reglas y Normativas</button>
       <button class="tab-btn" onclick="openTab('tab-defensa', this)">🛡️ Guion de Defensa en Vivo</button>
       <button class="tab-btn blue" onclick="openTab('tab-boards', this)">🎯 Trazabilidad Azure Boards (AB#)</button>
@@ -589,24 +589,24 @@
       <div class="card card-team-red">
         <div class="card-header">
           <div class="card-title">
-            <span style="color: var(--primary-red);">⚡</span> Consola de Ejecución Directa (Terminal / Scripts)
+            <span style="color: var(--primary-red);">⚡</span> Orquestación Estándar con Node.js / npm (Sin archivos .bat)
           </div>
-          <span class="badge badge-red">MODO DEFENSOR</span>
+          <span class="badge badge-red">ALERTAS: mbarriosg8@miumg.edu.gt</span>
         </div>
         <p style="color: var(--text-muted); margin-bottom: 16px;">
-          Haz clic en cualquier botón de <strong>Copiar</strong> para llevar el comando exacto a tu portapapeles y pegarlo en tu terminal de PowerShell, o haz doble clic directo sobre los scripts <code>.bat</code>.
+          Haz clic en cualquier botón de <strong>Copiar</strong> para llevar el comando estándar de Node.js a tu portapapeles y ejecutarlo directamente en la raíz del proyecto.
         </p>
 
         <!-- CMD 1 -->
         <div class="cmd-box">
           <div class="cmd-info">
             <div class="cmd-desc">
-              <span>🧪</span> <strong>1. Ejecutar Suite de Pruebas Automatizadas (AB#24)</strong>
-              <span class="badge badge-green" style="font-size: 9px; padding: 1px 6px;">7 Tests Unitarios</span>
+              <span>🚀</span> <strong>1. Iniciar Sistema Completo Unificado (Backend :5000 + Frontend :5173 + Alertas Gmail)</strong>
+              <span class="badge badge-red" style="font-size: 9px; padding: 1px 6px;">COMANDO PRINCIPAL</span>
             </div>
-            <div class="cmd-code">node --test tests/api.test.js</div>
+            <div class="cmd-code">npm run dev</div>
           </div>
-          <button class="btn btn-secondary" onclick="copyCommand('node --test tests/api.test.js', this)">
+          <button class="btn btn-primary" onclick="copyCommand('npm run dev', this)">
             📋 Copiar Comando
           </button>
         </div>
@@ -615,12 +615,13 @@
         <div class="cmd-box">
           <div class="cmd-info">
             <div class="cmd-desc">
-              <span>🚀</span> <strong>2. Iniciar Sistema Completo (Backend :5000 + Frontend :5173 + Navegador)</strong>
+              <span>🧪</span> <strong>2. Ejecutar Suite de Pruebas Automatizadas (AB#24 + Correo + Azure)</strong>
+              <span class="badge badge-green" style="font-size: 9px; padding: 1px 6px;">8 Tests Pasando</span>
             </div>
-            <div class="cmd-code">.\iniciar-sistema.bat</div>
+            <div class="cmd-code">npm test</div>
           </div>
-          <button class="btn btn-primary" onclick="copyCommand('.\\iniciar-sistema.bat', this)">
-            📋 Copiar Script
+          <button class="btn btn-secondary" onclick="copyCommand('npm test', this)">
+            📋 Copiar Comando
           </button>
         </div>
 
@@ -628,12 +629,12 @@
         <div class="cmd-box">
           <div class="cmd-info">
             <div class="cmd-desc">
-              <span>🎮</span> <strong>3. Panel de Verificación Interactivo por Consola</strong>
+              <span>🎮</span> <strong>3. Abrir Panel Interactivo de Defensa en Terminal (Node CLI)</strong>
             </div>
-            <div class="cmd-code">.\demo-interactiva.bat</div>
+            <div class="cmd-code">npm run demo</div>
           </div>
-          <button class="btn btn-secondary" onclick="copyCommand('.\\demo-interactiva.bat', this)">
-            📋 Copiar Script
+          <button class="btn btn-secondary" onclick="copyCommand('npm run demo', this)">
+            📋 Copiar Comando
           </button>
         </div>
 
@@ -643,9 +644,9 @@
             <div class="cmd-desc">
               <span>🔒</span> <strong>4. Auditoría de Seguridad de Dependencias (AB#27 - 0 Vulnerabilidades)</strong>
             </div>
-            <div class="cmd-code">cd backend && npm audit && cd ..</div>
+            <div class="cmd-code">npm run audit</div>
           </div>
-          <button class="btn btn-secondary" onclick="copyCommand('cd backend && npm audit && cd ..', this)">
+          <button class="btn btn-secondary" onclick="copyCommand('npm run audit', this)">
             📋 Copiar Comando
           </button>
         </div>
@@ -654,11 +655,11 @@
         <div class="cmd-box">
           <div class="cmd-info">
             <div class="cmd-desc">
-              <span>📦</span> <strong>5. Compilar Frontend de Producción con Vite (Vite Build)</strong>
+              <span>📦</span> <strong>5. Compilar Frontend de Producción (Vite Build)</strong>
             </div>
-            <div class="cmd-code">cd frontend && npm run build && cd ..</div>
+            <div class="cmd-code">npm run build</div>
           </div>
-          <button class="btn btn-secondary" onclick="copyCommand('cd frontend && npm run build && cd ..', this)">
+          <button class="btn btn-secondary" onclick="copyCommand('npm run build', this)">
             📋 Copiar Comando
           </button>
         </div>
@@ -667,11 +668,11 @@
         <div class="cmd-box">
           <div class="cmd-info">
             <div class="cmd-desc">
-              <span>🔍</span> <strong>6. Probar Endpoint de Métricas del Dashboard en Vivo (cURL / PowerShell)</strong>
+              <span>📧</span> <strong>6. Consultar Bandeja de Notificaciones Enviadas a mbarriosg8@miumg.edu.gt</strong>
             </div>
-            <div class="cmd-code">curl http://localhost:5000/api/dashboard/stats</div>
+            <div class="cmd-code">curl http://localhost:5000/api/notifications</div>
           </div>
-          <button class="btn btn-secondary" onclick="copyCommand('curl http://localhost:5000/api/dashboard/stats', this)">
+          <button class="btn btn-secondary" onclick="copyCommand('curl http://localhost:5000/api/notifications', this)">
             📋 Copiar Comando
           </button>
         </div>

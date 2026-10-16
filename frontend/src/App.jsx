@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import IncidentFilters from './components/IncidentFilters.jsx';
 import DistributionPanel from './components/DistributionPanel.jsx';
+import DevOpsMonitor from './components/DevOpsMonitor.jsx';
 
 const API_BASE = 'http://localhost:5000/api';
 
@@ -8,7 +9,12 @@ export default function App() {
   const [incidents, setIncidents] = useState([]);
   const [users, setUsers] = useState([]);
   const [stats, setStats] = useState(null);
+  const [azureStatus, setAzureStatus] = useState(null);
+  const [notificationsData, setNotificationsData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [syncingAzure, setSyncingAzure] = useState(false);
+  const [sendingEmail, setSendingEmail] = useState(false);
+  const [toastMsg, setToastMsg] = useState(null);
 
   // Filtros (Estado, Prioridad, Categoria, Tecnico y Busqueda)
   const [statusFilter, setStatusFilter] = useState('');
@@ -26,12 +32,19 @@ export default function App() {
   const [newDesc, setNewDesc] = useState('');
   const [newCategory, setNewCategory] = useState('SOFTWARE');
   const [newPriority, setNewPriority] = useState('MEDIA');
-  const [newReportedBy, setNewReportedBy] = useState('');
+  const [newReportedBy, setNewReportedBy] = useState('mbarriosg8@miumg.edu.gt');
 
   // Formulario detalle / cambio de estado
   const [targetStatus, setTargetStatus] = useState('');
   const [targetTech, setTargetTech] = useState('');
   const [newComment, setNewComment] = useState('');
+
+  const showToast = (msg) => {
+    setToastMsg(msg);
+    setTimeout(() => {
+      setToastMsg(null);
+    }, 4500);
+  };
 
   const fetchData = async () => {
     try {
@@ -43,15 +56,19 @@ export default function App() {
       if (techFilter) params.append('assigned_to_id', techFilter);
       if (searchTerm) params.append('search', searchTerm);
 
-      const [incRes, userRes, statsRes] = await Promise.all([
+      const [incRes, userRes, statsRes, azureRes, notifRes] = await Promise.all([
         fetch(`${API_BASE}/incidents?${params.toString()}`).then(r => r.json()),
         fetch(`${API_BASE}/users`).then(r => r.json()),
-        fetch(`${API_BASE}/dashboard/stats`).then(r => r.json())
+        fetch(`${API_BASE}/dashboard/stats`).then(r => r.json()),
+        fetch(`${API_BASE}/azure/status`).then(r => r.json()),
+        fetch(`${API_BASE}/notifications`).then(r => r.json())
       ]);
 
       setIncidents(incRes);
       setUsers(userRes);
       setStats(statsRes);
+      setAzureStatus(azureRes);
+      setNotificationsData(notifRes);
     } catch (err) {
       console.error('Error fetching data:', err);
     } finally {
@@ -78,11 +95,12 @@ export default function App() {
         })
       });
       if (res.ok) {
+        const created = await res.json();
         setShowNewModal(false);
         setNewTitle('');
         setNewDesc('');
-        setNewReportedBy('');
         fetchData();
+        showToast(`📧 Incidente #${created.id} creado y alerta enviada a ${created.notification_sent?.to || 'mbarriosg8@miumg.edu.gt'}`);
       }
     } catch (err) {
       alert('Error al registrar incidente');
@@ -110,13 +128,15 @@ export default function App() {
         body: JSON.stringify({
           status: targetStatus,
           assigned_to_id: targetTech || null,
-          changed_by: 'Operador en Turno',
-          change_reason: 'Transición manual en tablero web'
+          changed_by: 'Mayro Gameros (DevOps Lead)',
+          change_reason: 'Transición operativa en tablero web'
         })
       });
       if (res.ok) {
+        const updated = await res.json();
         openDetail(selectedIncident.id);
         fetchData();
+        showToast(`📧 Estado actualizado a ${updated.status} y notificación enviada a ${updated.notification_sent?.to || 'mbarriosg8@miumg.edu.gt'}`);
       }
     } catch (err) {
       alert('Error al actualizar estado');
@@ -131,7 +151,7 @@ export default function App() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          author_name: 'Mesa de Ayuda',
+          author_name: 'Mayro Gameros (DevOps Lead)',
           comment: newComment
         })
       });
@@ -141,6 +161,54 @@ export default function App() {
       }
     } catch (err) {
       alert('Error al agregar comentario');
+    }
+  };
+
+  const handleTriggerAzureSync = async () => {
+    try {
+      setSyncingAzure(true);
+      const res = await fetch(`${API_BASE}/azure/sync`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          reason: 'Sincronización de verificación desde interfaz web'
+        })
+      });
+      if (res.ok) {
+        const data = await res.json();
+        await fetchData();
+        showToast(`☁️ Azure DevOps ${data.build?.buildNumber} Succeeded y correo enviado a ${data.notification_sent?.to || 'mbarriosg8@miumg.edu.gt'}`);
+      }
+    } finally {
+      setSyncingAzure(false);
+    }
+  };
+
+  const handleSendTestEmail = async () => {
+    try {
+      setSendingEmail(true);
+      const res = await fetch(`${API_BASE}/notifications/test`, {
+        method: 'POST'
+      });
+      if (res.ok) {
+        const record = await res.json();
+        await fetchData();
+        showToast(`📨 Alerta de prueba despachada con éxito a ${record.to}`);
+      }
+    } finally {
+      setSendingEmail(false);
+    }
+  };
+
+  const handleSaveSmtpConfig = async (cfg) => {
+    const res = await fetch(`${API_BASE}/notifications/config`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(cfg)
+    });
+    if (res.ok) {
+      await fetchData();
+      showToast(`⚙️ Configuración de notificaciones actualizada (${cfg.recipient})`);
     }
   };
 
@@ -197,7 +265,28 @@ export default function App() {
 
   return (
     <div style={{ minHeight: '100vh', backgroundColor: '#0A0A0A', color: '#F5F5F5', padding: '24px 32px' }}>
-      
+
+      {/* TOAST DE ALERTA Y CORREO EN TIEMPO REAL */}
+      {toastMsg && (
+        <div style={{
+          position: 'fixed',
+          bottom: '24px',
+          right: '24px',
+          backgroundColor: '#141414',
+          border: '1px solid #22C55E',
+          borderLeft: '4px solid #22C55E',
+          color: '#FFFFFF',
+          padding: '12px 18px',
+          borderRadius: '4px',
+          boxShadow: '0 0 20px rgba(34, 197, 94, 0.45)',
+          fontFamily: 'JetBrains Mono, monospace',
+          fontSize: '12px',
+          zIndex: 300
+        }}>
+          {toastMsg}
+        </div>
+      )}
+
       {/* HEADER PRINCIPAL */}
       <header style={{
         display: 'flex',
@@ -264,11 +353,11 @@ export default function App() {
               padding: '3px 8px',
               borderRadius: '2px'
             }}>
-              DUAL CI/CD GREEN ✅
+              ALERTAS: mbarriosg8@miumg.edu.gt ✅
             </span>
           </div>
           <p style={{ color: '#A3A3A3', fontSize: '13px', marginTop: '6px' }}>
-            Centro de Operaciones y Gestión Continua de Incidentes &bull; Sustitución de Llamadas, WhatsApp y Correos Informales
+            Centro de Operaciones y Gestión Continua de Incidentes &bull; Conectado con Azure DevOps CI/CD y Notificaciones Gmail UMG
           </p>
         </div>
 
@@ -285,7 +374,7 @@ export default function App() {
       {stats && (
         <>
           <section style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px', marginBottom: '20px' }}>
-            
+
             {/* Total Incidentes (Blue) */}
             <div style={{
               backgroundColor: '#141414',
@@ -366,6 +455,17 @@ export default function App() {
               </div>
             </div>
           </section>
+
+          {/* MONITOR DE AZURE DEVOPS & BANDEJA DE NOTIFICACIONES GMAIL */}
+          <DevOpsMonitor
+            azureStatus={azureStatus}
+            notificationsData={notificationsData}
+            onTriggerAzureSync={handleTriggerAzureSync}
+            onSendTestEmail={handleSendTestEmail}
+            onSaveSmtpConfig={handleSaveSmtpConfig}
+            syncingAzure={syncingAzure}
+            sendingEmail={sendingEmail}
+          />
 
           <DistributionPanel stats={stats} />
         </>
@@ -449,7 +549,7 @@ export default function App() {
           <div style={modalBoxStyle}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', borderBottom: '1px solid #2E2E2E', paddingBottom: '12px' }}>
               <h2 style={{ fontFamily: 'Anton, sans-serif', fontSize: '20px', color: '#FFFFFF', letterSpacing: '0.5px' }}>
-                REGISTRAR NUEVO INCIDENTE
+                REGISTRAR NUEVO INCIDENTE (CON ALERTA A GMAIL)
               </h2>
               <button
                 onClick={() => setShowNewModal(false)}
@@ -522,7 +622,7 @@ export default function App() {
                   required
                   value={newReportedBy}
                   onChange={(e) => setNewReportedBy(e.target.value)}
-                  placeholder="usuario@empresa.com"
+                  placeholder="mbarriosg8@miumg.edu.gt"
                   style={inputStyle}
                 />
               </div>
@@ -550,7 +650,7 @@ export default function App() {
                   className="btn-red"
                   style={{ padding: '8px 20px' }}
                 >
-                  Guardar Incidente
+                  Guardar y Notificar
                 </button>
               </div>
             </form>
@@ -586,7 +686,7 @@ export default function App() {
             {/* SECCIÓN TRANSICIÓN DE OPERACIÓN */}
             <div style={{ backgroundColor: '#0A0A0A', border: '1px solid #2E2E2E', borderLeft: '4px solid #2563EB', borderRadius: '4px', padding: '14px', marginBottom: '16px' }}>
               <div style={{ fontFamily: 'Anton, sans-serif', fontSize: '15px', color: '#60A5FA', marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <span>⚙️</span> TRANSICIÓN DE OPERACIÓN
+                <span>⚙️</span> TRANSICIÓN DE OPERACIÓN (NOTIFICA A mbarriosg8@miumg.edu.gt)
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr auto', gap: '10px', alignItems: 'center' }}>
                 <div>

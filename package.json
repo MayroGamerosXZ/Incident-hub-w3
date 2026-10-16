@@ -1,0 +1,18 @@
+{
+  "name": "it-incident-hub",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Orquestador principal de IT Incident Hub - Plataforma DevOps de Gestion de Incidentes (AB#4 - AB#34)",
+  "scripts": {
+    "dev": "node scripts/dev.js",
+    "start": "node scripts/dev.js",
+    "dev:backend": "node backend/server.js",
+    "dev:frontend": "npm --prefix frontend run dev",
+    "test": "node --test tests/api.test.js",
+    "audit": "npm --prefix backend audit",
+    "build": "npm --prefix frontend run build",
+    "demo": "node scripts/demo.js"
+  },
+  "author": "Mayro Geovanni Barrios Gameros (@MayroGamerosXZ) <mbarriosg8@miumg.edu.gt>",
+  "license": "MIT"
+}
