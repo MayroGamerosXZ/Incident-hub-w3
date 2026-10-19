@@ -36,56 +36,60 @@ export default function DevOpsMonitor({
   };
 
   return (
-    <section style={{
-      display: 'grid',
-      gridTemplateColumns: 'repeat(auto-fit, minmax(420px, 1fr))',
-      gap: '16px',
-      marginBottom: '20px'
-    }}>
-      {/* PANEL 1: MONITOR AZURE DEVOPS & PROCESOS DE SUBIDA (BLUE-CODED) */}
-      <div style={{
-        backgroundColor: '#141414',
-        border: '1px solid #2E2E2E',
-        borderLeft: isLatestFailed ? '4px solid #DC2626' : '4px solid #2563EB',
-        borderRadius: '4px',
-        padding: '16px 20px',
-        boxShadow: isLatestFailed ? '0 0 14px rgba(220, 38, 38, 0.25)' : '0 0 12px rgba(37, 99, 235, 0.18)'
-      }}>
+    <section
+      id="devops"
+      style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(420px, 1fr))',
+        gap: '20px',
+        marginBottom: '24px'
+      }}
+    >
+      {/* PANEL 1: MONITOR AZURE DEVOPS & PROCESOS DE SUBIDA */}
+      <div
+        className="isometric-card"
+        style={{
+          backgroundColor: '#161d24',
+          border: '1px solid #222c37',
+          borderLeft: isLatestFailed ? '3px solid #ef4444' : '3px solid #38bdf8',
+          padding: '22px'
+        }}
+      >
         <div style={{
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
-          marginBottom: '12px',
-          paddingBottom: '10px',
-          borderBottom: '1px solid #2E2E2E',
+          marginBottom: '14px',
+          paddingBottom: '12px',
+          borderBottom: '1px solid #222c37',
           flexWrap: 'wrap',
           gap: '8px'
         }}>
           <div>
+            <span className="font-mono" style={{ fontSize: '10px', color: isLatestFailed ? '#f87171' : '#38bdf8', textTransform: 'uppercase', letterSpacing: '0.14em', display: 'block' }}>
+              CI/CD PIPELINE ENCLAVE // {azureStatus.boardsSummary?.range}
+            </span>
             <h3 style={{
-              fontFamily: 'Anton, sans-serif',
-              fontSize: '17px',
-              color: isLatestFailed ? '#F87171' : '#60A5FA',
-              letterSpacing: '0.8px',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px'
+              fontSize: '19px',
+              fontWeight: 700,
+              color: '#ffffff',
+              marginTop: '2px'
             }}>
-              <span>☁️</span> MONITOR AZURE DEVOPS &amp; SUBIDAS CI/CD
+              Azure DevOps &amp; Self-Hosted Agent
             </h3>
-            <div style={{ fontSize: '11px', color: '#A3A3A3', fontFamily: 'JetBrains Mono, monospace', marginTop: '2px' }}>
-              Org: {azureStatus.organization} / {azureStatus.project} ({azureStatus.boardsSummary?.range})
+            <div className="font-mono" style={{ fontSize: '11px', color: '#94a3b8', marginTop: '2px' }}>
+              Org: {azureStatus.organization} / {azureStatus.project}
             </div>
           </div>
 
           {isAdmin ? (
-            <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
               <button
                 type="button"
                 onClick={onSimulateFailure}
                 disabled={simulatingFailure || syncingAzure}
                 className="btn-red"
-                style={{ padding: '6px 10px', fontSize: '10.5px' }}
+                style={{ padding: '8px 12px', fontSize: '10.5px' }}
                 title="Simula el Fallo Controlado en el Pipeline (ROJO) y envía alerta a Gmail"
               >
                 {simulatingFailure ? '⏳ Fallando...' : '💥 Simular Fallo CI'}
@@ -94,22 +98,20 @@ export default function DevOpsMonitor({
                 type="button"
                 onClick={onTriggerAzureSync}
                 disabled={syncingAzure || simulatingFailure}
-                className="btn-blue"
-                style={{ padding: '6px 10px', fontSize: '10.5px' }}
+                className="btn-cyan"
+                style={{ padding: '8px 12px', fontSize: '10.5px' }}
                 title="Aplica el Fix / Solución en el Pipeline (VERDE) y envía alerta a Gmail"
               >
                 {syncingAzure ? '⏳ Restaurando...' : '🔧 Disparar Solución / Fix'}
               </button>
             </div>
           ) : (
-            <span style={{
-              backgroundColor: '#0A0A0A',
-              border: '1px solid #2E2E2E',
-              color: '#A3A3A3',
-              fontFamily: 'JetBrains Mono, monospace',
+            <span className="font-mono" style={{
+              backgroundColor: '#080b0e',
+              border: '1px solid #222c37',
+              color: '#94a3b8',
               fontSize: '10px',
-              padding: '4px 8px',
-              borderRadius: '3px'
+              padding: '5px 10px'
             }}>
               🔒 CONTROL PIPELINE: SOLO ADMIN
             </span>
@@ -119,45 +121,43 @@ export default function DevOpsMonitor({
         {/* Estado del último Build y Agente */}
         <div style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(145px, 1fr))',
           gap: '10px',
-          marginBottom: '12px',
-          backgroundColor: '#0A0A0A',
-          padding: '10px 12px',
-          borderRadius: '4px',
-          border: isLatestFailed ? '1px solid rgba(220, 38, 38, 0.5)' : '1px solid #2E2E2E'
+          marginBottom: '14px',
+          backgroundColor: '#080b0e',
+          padding: '12px 14px',
+          border: isLatestFailed ? '1px solid rgba(239, 68, 68, 0.5)' : '1px solid #222c37'
         }}>
           <div>
-            <div style={{ fontSize: '10px', color: '#A3A3A3', textTransform: 'uppercase', fontWeight: '700' }}>Último Pipeline</div>
-            <div style={{
-              fontFamily: 'JetBrains Mono, monospace',
+            <div className="font-mono" style={{ fontSize: '9.5px', color: '#64748b', textTransform: 'uppercase' }}>Último Pipeline</div>
+            <div className="font-mono" style={{
               fontSize: '12px',
-              color: isLatestFailed ? '#F87171' : '#4ADE80',
-              fontWeight: '700',
-              marginTop: '2px'
+              color: isLatestFailed ? '#f87171' : '#4ade80',
+              fontWeight: 700,
+              marginTop: '3px'
             }}>
               {isLatestFailed ? '❌' : '✅'} {latest.buildNumber} ({latest.result?.toUpperCase()})
             </div>
           </div>
           <div>
-            <div style={{ fontSize: '10px', color: '#A3A3A3', textTransform: 'uppercase', fontWeight: '700' }}>Self-Hosted Agent</div>
-            <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '12px', color: '#FFFFFF', marginTop: '2px' }}>
-              🟢 {azureStatus.selfHostedAgent?.name}
+            <div className="font-mono" style={{ fontSize: '9.5px', color: '#64748b', textTransform: 'uppercase' }}>Self-Hosted Agent</div>
+            <div className="font-mono" style={{ fontSize: '12px', color: '#00f0ff', marginTop: '3px' }}>
+              ● {azureStatus.selfHostedAgent?.name}
             </div>
           </div>
           <div>
-            <div style={{ fontSize: '10px', color: '#A3A3A3', textTransform: 'uppercase', fontWeight: '700' }}>Rama / Commit / Artefacto</div>
-            <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '11.5px', color: '#60A5FA', marginTop: '2px' }}>
+            <div className="font-mono" style={{ fontSize: '9.5px', color: '#64748b', textTransform: 'uppercase' }}>Rama / Commit</div>
+            <div className="font-mono" style={{ fontSize: '11.5px', color: '#ffb03a', marginTop: '3px' }}>
               {latest.branch} @ {latest.commit}
             </div>
           </div>
         </div>
 
         {/* Historial reciente de ejecuciones */}
-        <div style={{ fontSize: '11px', color: '#A3A3A3', fontWeight: '700', textTransform: 'uppercase', marginBottom: '6px', letterSpacing: '0.5px' }}>
-          Historial Reciente de Subidas y Pipelines:
+        <div className="font-mono" style={{ fontSize: '10px', color: '#64748b', textTransform: 'uppercase', marginBottom: '8px', letterSpacing: '0.1em' }}>
+          PIPELINE EXECUTION MATRIX:
         </div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', maxHeight: '130px', overflowY: 'auto' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', maxHeight: '135px', overflowY: 'auto' }}>
           {azureStatus.builds && azureStatus.builds.slice(0, 4).map((b) => (
             <div
               key={b.id}
@@ -165,63 +165,66 @@ export default function DevOpsMonitor({
                 display: 'flex',
                 justifyContent: 'space-between',
                 alignItems: 'center',
-                backgroundColor: '#0A0A0A',
-                padding: '6px 10px',
-                borderRadius: '2px',
-                borderLeft: b.result === 'succeeded' ? '3px solid #22C55E' : '3px solid #DC2626',
+                backgroundColor: '#080b0e',
+                padding: '7px 12px',
+                borderLeft: b.result === 'succeeded' ? '2px solid #22c55e' : '2px solid #ef4444',
+                borderTop: '1px solid rgba(34, 44, 55, 0.45)',
+                borderRight: '1px solid rgba(34, 44, 55, 0.45)',
+                borderBottom: '1px solid rgba(34, 44, 55, 0.45)',
                 fontSize: '12px'
               }}
             >
               <div>
-                <strong style={{ fontFamily: 'JetBrains Mono, monospace', color: b.result === 'succeeded' ? '#4ADE80' : '#F87171' }}>
+                <strong className="font-mono" style={{ color: b.result === 'succeeded' ? '#4ade80' : '#f87171', fontSize: '11.5px' }}>
                   {b.buildNumber}
                 </strong>
-                <span style={{ color: '#D4D4D4', marginLeft: '8px' }}>
+                <span className="font-mono" style={{ color: '#cbd5e1', marginLeft: '8px', fontSize: '11px' }}>
                   {b.branch} ({b.commit})
                 </span>
               </div>
-              <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '11px', color: '#A3A3A3' }}>
-                {b.duration} &bull; {b.result === 'succeeded' ? 'PASSED' : 'FAILED'}
+              <div className="font-mono" style={{ fontSize: '10.5px', color: '#94a3b8' }}>
+                {b.duration} // {b.result === 'succeeded' ? 'PASSED' : 'FAILED'}
               </div>
             </div>
           ))}
         </div>
       </div>
 
-      {/* PANEL 2: NOTIFICACIONES DE CORREO GMAIL / UMG (RED-CODED) */}
-      <div style={{
-        backgroundColor: '#141414',
-        border: '1px solid #2E2E2E',
-        borderLeft: '4px solid #DC2626',
-        borderRadius: '4px',
-        padding: '16px 20px',
-        boxShadow: '0 0 12px rgba(220, 38, 38, 0.18)'
-      }}>
+      {/* PANEL 2: NOTIFICACIONES DE CORREO GMAIL / UMG */}
+      <div
+        className="isometric-card"
+        style={{
+          backgroundColor: '#161d24',
+          border: '1px solid #222c37',
+          borderLeft: '3px solid #ffb03a',
+          padding: '22px'
+        }}
+      >
         <div style={{
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
-          marginBottom: '12px',
-          paddingBottom: '10px',
-          borderBottom: '1px solid #2E2E2E',
+          marginBottom: '14px',
+          paddingBottom: '12px',
+          borderBottom: '1px solid #222c37',
           flexWrap: 'wrap',
           gap: '8px'
         }}>
           <div>
+            <span className="font-mono" style={{ fontSize: '10px', color: '#ffb03a', textTransform: 'uppercase', letterSpacing: '0.14em', display: 'block' }}>
+              SMTP TLS 465 RELAY // GOOGLE WORKSPACE UMG
+            </span>
             <h3 style={{
-              fontFamily: 'Anton, sans-serif',
-              fontSize: '17px',
-              color: '#F87171',
-              letterSpacing: '0.8px',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px'
+              fontSize: '19px',
+              fontWeight: 700,
+              color: '#ffffff',
+              marginTop: '2px'
             }}>
-              <span>📧</span> ALERTAS AUTOMÁTICAS GMAIL ({notificationsData.recipient})
+              Alertas Gmail ({notificationsData.recipient})
             </h3>
-            <div style={{ fontSize: '11px', color: '#A3A3A3', fontFamily: 'JetBrains Mono, monospace', marginTop: '2px' }}>
-              Estado: <span style={{ color: '#4ADE80', fontWeight: '700' }}>ACTIVO ({notificationsData.total_sent} alertas enviadas)</span>
-              {notificationsData.smtp_configured ? ' • SMTP TLS Directo' : ' • Bandeja verificada + Relay'}
+            <div className="font-mono" style={{ fontSize: '11px', color: '#94a3b8', marginTop: '2px' }}>
+              Estado: <span style={{ color: '#4ade80', fontWeight: 700 }}>ACTIVO ({notificationsData.total_sent} alertas)</span>
+              {notificationsData.smtp_configured ? ' • TLS Directo' : ' • Bandeja Verificada'}
             </div>
           </div>
 
@@ -230,17 +233,8 @@ export default function DevOpsMonitor({
               <button
                 type="button"
                 onClick={() => setShowSmtpModal(true)}
-                style={{
-                  backgroundColor: '#0A0A0A',
-                  color: '#A3A3A3',
-                  border: '1px solid #2E2E2E',
-                  borderRadius: '4px',
-                  padding: '6px 10px',
-                  fontSize: '11px',
-                  cursor: 'pointer',
-                  fontFamily: 'Inter, sans-serif',
-                  fontWeight: '600'
-                }}
+                className="btn-blue"
+                style={{ padding: '7px 10px', fontSize: '10.5px' }}
                 title="Configurar Contraseña de Aplicación Google SMTP"
               >
                 ⚙️ SMTP
@@ -250,16 +244,16 @@ export default function DevOpsMonitor({
               type="button"
               onClick={onSendTestEmail}
               disabled={sendingEmail}
-              className="btn-red"
-              style={{ padding: '6px 12px', fontSize: '11px' }}
+              className="btn-amber"
+              style={{ padding: '7px 12px', fontSize: '10.5px' }}
             >
-              {sendingEmail ? '⏳ Enviando...' : '📨 Probar Alerta al Correo'}
+              {sendingEmail ? '⏳ Enviando...' : '📨 Probar Alerta'}
             </button>
           </div>
         </div>
 
-        <div style={{ fontSize: '11px', color: '#A3A3A3', fontWeight: '700', textTransform: 'uppercase', marginBottom: '6px', letterSpacing: '0.5px' }}>
-          Bandeja de Salida en Tiempo Real hacia {notificationsData.recipient}:
+        <div className="font-mono" style={{ fontSize: '10px', color: '#64748b', textTransform: 'uppercase', marginBottom: '8px', letterSpacing: '0.1em' }}>
+          OUTBOUND TELEMETRY LOG ({notificationsData.recipient}):
         </div>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', maxHeight: '195px', overflowY: 'auto' }}>
@@ -270,27 +264,28 @@ export default function DevOpsMonitor({
                 display: 'flex',
                 justifyContent: 'space-between',
                 alignItems: 'center',
-                backgroundColor: '#0A0A0A',
-                padding: '8px 10px',
-                borderRadius: '2px',
-                borderLeft: n.priority === 'CRITICA' ? '3px solid #DC2626' : '3px solid #2563EB',
+                backgroundColor: '#080b0e',
+                padding: '8px 12px',
+                borderLeft: n.priority === 'CRITICA' ? '2px solid #ef4444' : '2px solid #38bdf8',
+                borderTop: '1px solid rgba(34, 44, 55, 0.45)',
+                borderRight: '1px solid rgba(34, 44, 55, 0.45)',
+                borderBottom: '1px solid rgba(34, 44, 55, 0.45)',
                 fontSize: '12px',
                 gap: '8px'
               }}
             >
               <div style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1 }}>
-                <span style={{
-                  fontFamily: 'JetBrains Mono, monospace',
+                <span className="font-mono" style={{
                   fontSize: '10px',
-                  color: '#4ADE80',
+                  color: '#00f0ff',
                   marginRight: '6px',
-                  fontWeight: '700'
+                  fontWeight: 700
                 }}>
-                  [ENVIADO]
+                  [SENT]
                 </span>
-                <span style={{ color: '#F5F5F5', fontWeight: '500' }}>{n.subject}</span>
-                <div style={{ fontSize: '10.5px', color: '#737373', fontFamily: 'JetBrains Mono, monospace' }}>
-                  Para: {n.to} &bull; {new Date(n.timestamp).toLocaleTimeString()}
+                <span style={{ color: '#e2e8f0', fontWeight: 500 }}>{n.subject}</span>
+                <div className="font-mono" style={{ fontSize: '10px', color: '#64748b', marginTop: '2px' }}>
+                  To: {n.to} // {new Date(n.timestamp).toLocaleTimeString()}
                 </div>
               </div>
 
@@ -298,9 +293,9 @@ export default function DevOpsMonitor({
                 type="button"
                 onClick={() => setSelectedEmail(n)}
                 className="btn-blue"
-                style={{ padding: '4px 8px', fontSize: '10px', whiteSpace: 'nowrap' }}
+                style={{ padding: '5px 10px', fontSize: '10px', whiteSpace: 'nowrap' }}
               >
-                👁️ Ver Correo
+                👁️ Inspect
               </button>
             </div>
           ))}
@@ -312,8 +307,8 @@ export default function DevOpsMonitor({
         <div style={{
           position: 'fixed',
           inset: 0,
-          backgroundColor: 'rgba(0,0,0,0.85)',
-          backdropFilter: 'blur(3px)',
+          backgroundColor: 'rgba(8, 11, 14, 0.88)',
+          backdropFilter: 'blur(6px)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
@@ -321,61 +316,58 @@ export default function DevOpsMonitor({
           zIndex: 200
         }}>
           <div style={{
-            backgroundColor: '#141414',
-            border: '1px solid #2E2E2E',
-            borderTop: '3px solid #DC2626',
-            borderRadius: '4px',
+            backgroundColor: '#11161b',
+            border: '1px solid #222c37',
+            borderTop: '3px solid #00f0ff',
             maxWidth: '680px',
             width: '100%',
             maxHeight: '90vh',
             overflowY: 'auto',
-            padding: '20px',
-            boxShadow: '0 0 24px rgba(220, 38, 38, 0.4)'
+            padding: '24px',
+            boxShadow: '0 25px 50px rgba(0, 0, 0, 0.7)'
           }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', borderBottom: '1px solid #2E2E2E', paddingBottom: '10px', marginBottom: '12px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', borderBottom: '1px solid #222c37', paddingBottom: '12px', marginBottom: '14px' }}>
               <div>
-                <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '11px', color: '#4ADE80', fontWeight: '700' }}>
-                  ✅ NOTIFICACIÓN DESPACHADA ({selectedEmail.transport})
+                <span className="font-mono" style={{ fontSize: '10.5px', color: '#4ade80', fontWeight: 700 }}>
+                  [OK] TELEMETRY DISPATCHED ({selectedEmail.transport})
                 </span>
-                <h3 style={{ fontFamily: 'Anton, sans-serif', fontSize: '19px', color: '#FFFFFF', marginTop: '4px' }}>
+                <h3 style={{ fontSize: '19px', fontWeight: 700, color: '#ffffff', marginTop: '4px' }}>
                   {selectedEmail.subject}
                 </h3>
               </div>
               <button
                 onClick={() => setSelectedEmail(null)}
-                style={{ background: 'none', border: 'none', color: '#A3A3A3', fontSize: '18px', cursor: 'pointer' }}
+                style={{ background: 'none', border: 'none', color: '#94a3b8', fontSize: '18px', cursor: 'pointer' }}
               >
                 ✕
               </button>
             </div>
 
-            <div style={{
-              backgroundColor: '#0A0A0A',
-              border: '1px solid #2E2E2E',
-              padding: '10px 12px',
-              borderRadius: '4px',
+            <div className="font-mono" style={{
+              backgroundColor: '#080b0e',
+              border: '1px solid #222c37',
+              padding: '10px 14px',
               marginBottom: '14px',
-              fontSize: '12px',
-              fontFamily: 'JetBrains Mono, monospace'
+              fontSize: '11.5px'
             }}>
-              <div><strong style={{ color: '#A3A3A3' }}>De:</strong> <span style={{ color: '#F5F5F5' }}>{selectedEmail.from}</span></div>
-              <div><strong style={{ color: '#A3A3A3' }}>Para:</strong> <span style={{ color: '#60A5FA', fontWeight: '700' }}>{selectedEmail.to}</span></div>
-              <div><strong style={{ color: '#A3A3A3' }}>Fecha:</strong> <span style={{ color: '#D4D4D4' }}>{new Date(selectedEmail.timestamp).toLocaleString()}</span></div>
+              <div><strong style={{ color: '#64748b' }}>FROM:</strong> <span style={{ color: '#e2e8f0' }}>{selectedEmail.from}</span></div>
+              <div><strong style={{ color: '#64748b' }}>TO:</strong> <span style={{ color: '#00f0ff', fontWeight: 700 }}>{selectedEmail.to}</span></div>
+              <div><strong style={{ color: '#64748b' }}>TIMESTAMP:</strong> <span style={{ color: '#ffb03a' }}>{new Date(selectedEmail.timestamp).toLocaleString()}</span></div>
             </div>
 
             <div
-              style={{ border: '1px solid #2E2E2E', borderRadius: '4px', overflow: 'hidden' }}
+              style={{ border: '1px solid #222c37', overflow: 'hidden' }}
               dangerouslySetInnerHTML={{ __html: selectedEmail.html_preview }}
             />
 
-            <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '14px' }}>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '16px' }}>
               <button
                 type="button"
                 onClick={() => setSelectedEmail(null)}
-                className="btn-red"
-                style={{ padding: '8px 18px', fontSize: '12px' }}
+                className="btn-cyan"
+                style={{ padding: '9px 18px', fontSize: '11px' }}
               >
-                Cerrar Vista de Correo
+                Close Inspector
               </button>
             </div>
           </div>
@@ -387,7 +379,8 @@ export default function DevOpsMonitor({
         <div style={{
           position: 'fixed',
           inset: 0,
-          backgroundColor: 'rgba(0,0,0,0.85)',
+          backgroundColor: 'rgba(8, 11, 14, 0.88)',
+          backdropFilter: 'blur(6px)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
@@ -395,54 +388,54 @@ export default function DevOpsMonitor({
           zIndex: 200
         }}>
           <div style={{
-            backgroundColor: '#141414',
-            border: '1px solid #2E2E2E',
-            borderTop: '3px solid #2563EB',
-            borderRadius: '4px',
+            backgroundColor: '#11161b',
+            border: '1px solid #222c37',
+            borderTop: '3px solid #ffb03a',
             maxWidth: '480px',
             width: '100%',
-            padding: '20px'
+            padding: '24px'
           }}>
-            <h3 style={{ fontFamily: 'Anton, sans-serif', fontSize: '18px', color: '#FFFFFF', marginBottom: '8px' }}>
-              ⚙️ CONFIGURACIÓN DE CORREO GMAIL / UMG (REGLA 9)
+            <h3 style={{ fontSize: '19px', fontWeight: 700, color: '#ffffff', marginBottom: '8px' }}>
+              ⚙️ SMTP TLS 465 Configuration (Regla 9)
             </h3>
-            <p style={{ fontSize: '12px', color: '#A3A3A3', marginBottom: '14px' }}>
-              El correo destinatario predeterminado es <strong>mbarriosg8@miumg.edu.gt</strong>. Si deseas envío SMTP TLS directo a tu bandeja externa además de la bandeja en vivo, ingresa tu Contraseña de Aplicación de Google (16 caracteres) o defínela en <code>backend/.env</code>.
+            <p style={{ fontSize: '12.5px', color: '#94a3b8', marginBottom: '14px', lineHeight: 1.5 }}>
+              El correo destinatario predeterminado es <strong style={{ color: '#ffb03a' }}>mbarriosg8@miumg.edu.gt</strong>. Las credenciales residen de forma segura en <code>backend/.env</code> (ignorado por Git).
             </p>
             <form onSubmit={handleConfigSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
               <div>
-                <label style={{ display: 'block', fontSize: '11px', color: '#A3A3A3', fontWeight: '700', textTransform: 'uppercase', marginBottom: '4px' }}>
+                <label className="font-mono" style={{ display: 'block', fontSize: '10.5px', color: '#94a3b8', textTransform: 'uppercase', marginBottom: '4px' }}>
                   Correo Destinatario / Remitente
                 </label>
                 <input
                   type="email"
                   value={recipientInput}
                   onChange={(e) => setRecipientInput(e.target.value)}
-                  style={{ width: '100%', backgroundColor: '#0A0A0A', border: '1px solid #2E2E2E', borderRadius: '4px', padding: '8px 10px', color: '#FFF', fontSize: '13px' }}
+                  style={{ width: '100%', backgroundColor: '#080b0e', border: '1px solid #222c37', padding: '10px', color: '#fff', fontSize: '12.5px', fontFamily: 'JetBrains Mono, monospace' }}
                 />
               </div>
               <div>
-                <label style={{ display: 'block', fontSize: '11px', color: '#A3A3A3', fontWeight: '700', textTransform: 'uppercase', marginBottom: '4px' }}>
-                  Google App Password (16 caracteres - Opcional)
+                <label className="font-mono" style={{ display: 'block', fontSize: '10.5px', color: '#94a3b8', textTransform: 'uppercase', marginBottom: '4px' }}>
+                  Google App Password (16 caracteres)
                 </label>
                 <input
                   type="password"
                   placeholder="xxxx xxxx xxxx xxxx"
                   value={appPassInput}
                   onChange={(e) => setAppPassInput(e.target.value)}
-                  style={{ width: '100%', backgroundColor: '#0A0A0A', border: '1px solid #2E2E2E', borderRadius: '4px', padding: '8px 10px', color: '#FFF', fontSize: '13px' }}
+                  style={{ width: '100%', backgroundColor: '#080b0e', border: '1px solid #222c37', padding: '10px', color: '#fff', fontSize: '12.5px', fontFamily: 'JetBrains Mono, monospace' }}
                 />
               </div>
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '6px' }}>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '8px' }}>
                 <button
                   type="button"
                   onClick={() => setShowSmtpModal(false)}
-                  style={{ backgroundColor: 'transparent', border: '1px solid #2E2E2E', color: '#A3A3A3', padding: '7px 14px', borderRadius: '4px', cursor: 'pointer', fontSize: '12px' }}
+                  className="btn-blue"
+                  style={{ padding: '8px 14px' }}
                 >
-                  Cancelar
+                  Cancel
                 </button>
-                <button type="submit" className="btn-blue" style={{ padding: '7px 16px', fontSize: '12px' }}>
-                  Guardar Configuración
+                <button type="submit" className="btn-cyan" style={{ padding: '8px 16px' }}>
+                  Save Matrix Config
                 </button>
               </div>
             </form>

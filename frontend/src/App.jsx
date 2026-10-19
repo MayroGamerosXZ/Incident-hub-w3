@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import IncidentFilters from './components/IncidentFilters.jsx';
 import DistributionPanel from './components/DistributionPanel.jsx';
 import DevOpsMonitor from './components/DevOpsMonitor.jsx';
 import LoginPanel from './components/LoginPanel.jsx';
+import SandboxMatrixConsole from './components/SandboxMatrixConsole.jsx';
 
 const API_BASE = 'http://localhost:5000/api';
 
@@ -15,6 +16,7 @@ export default function App() {
       return null;
     }
   });
+  const [scrolled, setScrolled] = useState(false);
   const [incidents, setIncidents] = useState([]);
   const [users, setUsers] = useState([]);
   const [stats, setStats] = useState(null);
@@ -49,6 +51,27 @@ export default function App() {
   const [targetTech, setTargetTech] = useState('');
   const [newComment, setNewComment] = useState('');
 
+  // Partículas flotantes de CORE // ENTER
+  const particles = useMemo(
+    () => [
+      { left: '14%', size: 3, duration: '4.5s', delay: '0s' },
+      { left: '39%', size: 2, duration: '3.8s', delay: '1.2s' },
+      { left: '67%', size: 4, duration: '5.2s', delay: '2.4s' },
+      { left: '83%', size: 2.5, duration: '4.2s', delay: '0.7s' },
+      { left: '58%', size: 2, duration: '4.9s', delay: '3.1s' }
+    ],
+    []
+  );
+
+  useEffect(() => {
+    const onScroll = () => {
+      setScrolled(window.scrollY > 40);
+    };
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+
   const showToast = (msg) => {
     setToastMsg(msg);
     setTimeout(() => {
@@ -63,7 +86,6 @@ export default function App() {
       setTechFilter('');
       setCategoryFilter('');
     } else {
-      // Orientar vista automáticamente al trabajo del técnico
       setTechFilter(String(user.id));
       setCategoryFilter('');
     }
@@ -82,7 +104,7 @@ export default function App() {
     setCurrentUser(data.user);
     sessionStorage.setItem('ih_active_user', JSON.stringify(data.user));
     applyUserRoleContext(data.user);
-    showToast(`🔐 Sesión iniciada: ${data.user.name} [${data.user.role}]`);
+    showToast(`[OK] Enclave Session Initialized: ${data.user.name} [${data.user.role}]`);
   };
 
   const handleLogout = () => {
@@ -288,8 +310,8 @@ export default function App() {
   const modalOverlayStyle = {
     position: 'fixed',
     inset: 0,
-    backgroundColor: 'rgba(0,0,0,0.85)',
-    backdropFilter: 'blur(3px)',
+    backgroundColor: 'rgba(8, 11, 14, 0.88)',
+    backdropFilter: 'blur(6px)',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
@@ -298,37 +320,36 @@ export default function App() {
   };
 
   const modalBoxStyle = {
-    backgroundColor: '#141414',
-    border: '1px solid #2E2E2E',
-    borderTop: '3px solid #DC2626',
-    borderRadius: '4px',
-    maxWidth: '540px',
+    backgroundColor: '#11161b',
+    border: '1px solid #222c37',
+    borderTop: '3px solid #00f0ff',
+    maxWidth: '560px',
     width: '100%',
-    padding: '24px',
-    boxShadow: '0 0 24px rgba(220, 38, 38, 0.35)'
+    padding: '26px',
+    boxShadow: '0 25px 50px rgba(0, 0, 0, 0.75)'
   };
 
   const inputStyle = {
     width: '100%',
-    backgroundColor: '#0A0A0A',
-    border: '1px solid #2E2E2E',
-    borderRadius: '4px',
-    padding: '8px 12px',
-    color: '#F5F5F5',
-    fontSize: '13px',
-    fontFamily: 'Inter, sans-serif',
+    backgroundColor: '#080b0e',
+    border: '1px solid #222c37',
+    padding: '10px 12px',
+    color: '#e2e8f0',
+    fontSize: '12.5px',
+    fontFamily: 'JetBrains Mono, monospace',
     outline: 'none',
     boxSizing: 'border-box'
   };
 
   const labelStyle = {
     display: 'block',
-    fontSize: '11px',
+    fontSize: '10.5px',
     fontWeight: '700',
-    color: '#A3A3A3',
+    color: '#94a3b8',
+    fontFamily: 'JetBrains Mono, monospace',
     textTransform: 'uppercase',
-    letterSpacing: '0.8px',
-    marginBottom: '4px'
+    letterSpacing: '0.1em',
+    marginBottom: '6px'
   };
 
   if (!currentUser) {
@@ -338,22 +359,62 @@ export default function App() {
   const isAdmin = currentUser.role === 'ADMIN';
 
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: '#0A0A0A', color: '#F5F5F5', padding: '24px 32px' }}>
+    <main style={{ minHeight: '100vh', backgroundColor: '#080b0e', color: '#e2e8f0', position: 'relative', overflowX: 'hidden' }}>
+
+      {/* CAPA DE FONDO CORE // ENTER: TERMINAL GRID + AMBIENT LAMP + PARTICULAS */}
+      <div style={{ position: 'fixed', inset: 0, pointerEvents: 'none', zIndex: 0, overflow: 'hidden' }}>
+        <div className="terminal-grid" style={{ position: 'absolute', inset: 0 }} />
+        <div
+          className="ambient-lamp"
+          style={{
+            position: 'absolute',
+            left: '10%',
+            top: '20%',
+            width: '50vw',
+            height: '50vw',
+            borderRadius: '9999px',
+            filter: 'blur(64px)'
+          }}
+        />
+        <div
+          style={{
+            position: 'absolute',
+            right: '-5%',
+            bottom: '10%',
+            width: '40vw',
+            height: '40vw',
+            borderRadius: '9999px',
+            backgroundColor: 'rgba(56, 189, 248, 0.05)',
+            filter: 'blur(120px)'
+          }}
+        />
+        {particles.map((p, i) => (
+          <div
+            key={i}
+            className="particle"
+            style={{
+              left: p.left,
+              width: `${p.size}px`,
+              height: `${p.size}px`,
+              animationDuration: p.duration,
+              animationDelay: p.delay
+            }}
+          />
+        ))}
+      </div>
 
       {/* TOAST DE ALERTA Y CORREO EN TIEMPO REAL */}
       {toastMsg && (
-        <div style={{
+        <div className="font-mono" style={{
           position: 'fixed',
           bottom: '24px',
           right: '24px',
-          backgroundColor: '#141414',
-          border: '1px solid #22C55E',
-          borderLeft: '4px solid #22C55E',
-          color: '#FFFFFF',
-          padding: '12px 18px',
-          borderRadius: '4px',
-          boxShadow: '0 0 20px rgba(34, 197, 94, 0.45)',
-          fontFamily: 'JetBrains Mono, monospace',
+          backgroundColor: '#11161b',
+          border: '1px solid #00f0ff',
+          borderLeft: '4px solid #00f0ff',
+          color: '#ffffff',
+          padding: '13px 18px',
+          boxShadow: '0 0 30px rgba(0, 240, 255, 0.35)',
           fontSize: '12px',
           zIndex: 300
         }}>
@@ -361,414 +422,431 @@ export default function App() {
         </div>
       )}
 
-      {/* HEADER PRINCIPAL */}
-      <header style={{
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        borderBottom: '2px solid #2E2E2E',
-        paddingBottom: '16px',
-        marginBottom: '16px',
-        flexWrap: 'wrap',
-        gap: '16px'
-      }}>
-        <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+      {/* STICKY NAVBAR DINÁMICO CORE // ENTER */}
+      <nav
+        id="top-nav"
+        style={{
+          position: 'sticky',
+          top: 0,
+          zIndex: 50,
+          borderBottom: scrolled ? '1px solid #222c37' : '1px solid rgba(34, 44, 55, 0.45)',
+          backgroundColor: scrolled ? 'rgba(8, 11, 14, 0.92)' : 'rgba(8, 11, 14, 0.75)',
+          backdropFilter: 'blur(12px)',
+          padding: scrolled ? '12px 32px' : '18px 32px',
+          transition: 'all 0.25s ease'
+        }}
+      >
+        <div style={{
+          maxWidth: '1280px',
+          margin: '0 auto',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          flexWrap: 'wrap',
+          gap: '14px'
+        }}>
+          {/* BRAND LOGO */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '20px', flexWrap: 'wrap' }}>
+            <a href="#" className="font-mono" style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '15px', fontWeight: 700, letterSpacing: '0.1em', color: '#ffffff', textDecoration: 'none' }}>
+              <span style={{ position: 'relative', display: 'inline-flex', width: '9px', height: '9px' }}>
+                <span className="ping-dot" style={{ position: 'absolute', inset: 0, borderRadius: '9999px', backgroundColor: '#00f0ff', opacity: 0.75 }} />
+                <span style={{ position: 'relative', display: 'inline-flex', width: '9px', height: '9px', borderRadius: '9999px', backgroundColor: '#00f0ff' }} />
+              </span>
+              CORE // INCIDENT HUB
+            </a>
+
+            <div className="font-mono" style={{ display: 'flex', alignItems: 'center', gap: '16px', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.14em' }}>
+              <a href="#enclave-console" style={{ color: '#94a3b8', textDecoration: 'none' }}>Console</a>
+              <a href="#devops" style={{ color: '#94a3b8', textDecoration: 'none' }}>CI/CD &amp; SMTP</a>
+              <a href="#analytics" style={{ color: '#94a3b8', textDecoration: 'none' }}>Telemetry</a>
+              <a href="#incidents-table" style={{ color: '#94a3b8', textDecoration: 'none' }}>Incidents</a>
+            </div>
+          </div>
+
+          {/* RIGHT CAPSULE: ACTIVE OPERATOR + NEW INCIDENT */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+            <span className="font-mono" style={{
+              border: '1px solid #222c37',
+              backgroundColor: '#11161b',
+              padding: '5px 10px',
+              fontSize: '10px',
+              color: '#ffb03a',
+              letterSpacing: '0.08em'
+            }}>
+              LNKS // mbarriosg8@miumg.edu.gt
+            </span>
+
+            {/* ACTIVE USER CAPSULE (NO IMAGES) */}
             <div style={{
-              width: '36px',
-              height: '36px',
-              backgroundColor: '#141414',
-              border: '1px solid #DC2626',
-              borderRadius: '4px',
               display: 'flex',
               alignItems: 'center',
-              justifyContent: 'center',
-              fontFamily: 'Anton, sans-serif',
-              fontSize: '18px',
-              color: '#DC2626',
-              boxShadow: '0 0 8px rgba(220, 38, 38, 0.4)'
+              gap: '10px',
+              backgroundColor: '#11161b',
+              border: isAdmin ? '1px solid rgba(255, 176, 58, 0.55)' : '1px solid rgba(56, 189, 248, 0.45)',
+              padding: '5px 10px'
             }}>
-              IH
-            </div>
-            <h1 style={{ fontFamily: 'Anton, sans-serif', fontSize: '28px', color: '#FFFFFF', letterSpacing: '0.5px' }}>
-              IT Incident Hub
-            </h1>
-            <span style={{
-              backgroundColor: 'rgba(220, 38, 38, 0.15)',
-              color: '#F87171',
-              border: '1px solid rgba(220, 38, 38, 0.4)',
-              fontFamily: 'JetBrains Mono, monospace',
-              fontSize: '11px',
-              fontWeight: '700',
-              padding: '3px 8px',
-              borderRadius: '2px'
-            }}>
-              v1.0.0 (PROD)
-            </span>
-            <span style={{
-              backgroundColor: 'rgba(37, 99, 235, 0.15)',
-              color: '#60A5FA',
-              border: '1px solid rgba(37, 99, 235, 0.4)',
-              fontFamily: 'JetBrains Mono, monospace',
-              fontSize: '11px',
-              fontWeight: '700',
-              padding: '3px 8px',
-              borderRadius: '2px'
-            }}>
-              AZURE BOARDS: AB#4 - AB#34
-            </span>
-            <span style={{
-              backgroundColor: 'rgba(34, 197, 94, 0.15)',
-              color: '#4ADE80',
-              border: '1px solid rgba(34, 197, 94, 0.4)',
-              fontFamily: 'JetBrains Mono, monospace',
-              fontSize: '11px',
-              fontWeight: '700',
-              padding: '3px 8px',
-              borderRadius: '2px'
-            }}>
-              ALERTAS: mbarriosg8@miumg.edu.gt ✅
-            </span>
-          </div>
-          <p style={{ color: '#A3A3A3', fontSize: '13px', marginTop: '6px' }}>
-            Centro de Operaciones y Gestión Continua de Incidentes &bull; Conectado con Azure DevOps CI/CD y Notificaciones Gmail UMG
-          </p>
-        </div>
-
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
-          {/* TARJETA DE SESIÓN ACTIVA (SIN IMÁGENES) */}
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '10px',
-            backgroundColor: '#141414',
-            border: isAdmin ? '1px solid #DC2626' : '1px solid #2563EB',
-            padding: '6px 12px',
-            borderRadius: '4px'
-          }}>
-            <span style={{
-              fontFamily: 'JetBrains Mono, monospace',
-              fontSize: '12px',
-              fontWeight: '700',
-              backgroundColor: isAdmin ? 'rgba(220, 38, 38, 0.2)' : 'rgba(37, 99, 235, 0.2)',
-              color: isAdmin ? '#F87171' : '#60A5FA',
-              padding: '4px 7px',
-              borderRadius: '3px'
-            }}>
-              {currentUser.initials || 'IT'}
-            </span>
-            <div style={{ lineHeight: 1.2 }}>
-              <div style={{ fontSize: '12px', fontWeight: '700', color: '#FFFFFF' }}>
-                {currentUser.name}
-              </div>
-              <div style={{ fontSize: '10px', fontFamily: 'JetBrains Mono, monospace', color: isAdmin ? '#F87171' : '#60A5FA' }}>
-                {currentUser.role} &bull; {currentUser.email}
-              </div>
-            </div>
-            <button
-              type="button"
-              onClick={handleLogout}
-              style={{
-                backgroundColor: '#0A0A0A',
-                border: '1px solid #2E2E2E',
-                color: '#A3A3A3',
+              <span className="font-mono" style={{
                 fontSize: '11px',
-                padding: '5px 9px',
-                borderRadius: '3px',
-                cursor: 'pointer',
-                marginLeft: '4px',
-                fontFamily: 'Inter, sans-serif',
-                fontWeight: '600'
-              }}
-              title="Volver al Panel de Inicio de Sesión / Cambiar de Rol"
-            >
-              🚪 Cambiar Rol
-            </button>
-          </div>
-
-          <button
-            onClick={() => setShowNewModal(true)}
-            className="btn-red"
-            style={{ padding: '10px 18px', display: 'flex', alignItems: 'center', gap: '8px' }}
-          >
-            <span>➕</span> Nuevo Incidente
-          </button>
-        </div>
-      </header>
-
-      {/* BARRA DE CONTEXTO DE ROL Y FILTRO RÁPIDO DE TRABAJO */}
-      <div style={{
-        backgroundColor: '#141414',
-        border: '1px solid #2E2E2E',
-        borderLeft: isAdmin ? '4px solid #DC2626' : '4px solid #2563EB',
-        borderRadius: '4px',
-        padding: '10px 16px',
-        marginBottom: '20px',
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        flexWrap: 'wrap',
-        gap: '10px'
-      }}>
-        <div style={{ fontSize: '12.5px', color: '#D4D4D4' }}>
-          {isAdmin ? (
-            <>
-              <strong style={{ color: '#F87171', fontFamily: 'JetBrains Mono, monospace' }}>[MODO ADMINISTRADOR GLOBAL]</strong>{' '}
-              Tienes acceso completo a todos los tickets, al control de fallos/soluciones en Azure Pipelines y a la configuración SMTP.
-            </>
-          ) : (
-            <>
-              <strong style={{ color: '#60A5FA', fontFamily: 'JetBrains Mono, monospace' }}>[VISTA ORIENTADA A TÉCNICO: {currentUser.specialty}]</strong>{' '}
-              El tablero filtra prioritariamente los incidentes asignados a tu usuario o especialidad.
-            </>
-          )}
-        </div>
-
-        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-          {!isAdmin && (
-            <>
+                fontWeight: 700,
+                backgroundColor: isAdmin ? 'rgba(255, 176, 58, 0.14)' : 'rgba(56, 189, 248, 0.14)',
+                color: isAdmin ? '#ffb03a' : '#38bdf8',
+                padding: '3px 7px',
+                border: isAdmin ? '1px solid rgba(255, 176, 58, 0.4)' : '1px solid rgba(56, 189, 248, 0.4)'
+              }}>
+                {currentUser.initials || 'OP'}
+              </span>
+              <div style={{ lineHeight: 1.2 }}>
+                <div style={{ fontSize: '11.5px', fontWeight: 700, color: '#ffffff' }}>
+                  {currentUser.name}
+                </div>
+                <div className="font-mono" style={{ fontSize: '9.5px', color: isAdmin ? '#ffb03a' : '#38bdf8' }}>
+                  {currentUser.role} // {currentUser.email}
+                </div>
+              </div>
               <button
                 type="button"
-                onClick={() => { setTechFilter(String(currentUser.id)); setCategoryFilter(''); }}
-                style={{
-                  backgroundColor: techFilter === String(currentUser.id) ? '#2563EB' : '#0A0A0A',
-                  color: '#FFFFFF',
-                  border: '1px solid #2563EB',
-                  borderRadius: '3px',
-                  padding: '4px 10px',
-                  fontSize: '11px',
-                  cursor: 'pointer',
-                  fontFamily: 'JetBrains Mono, monospace'
-                }}
+                onClick={handleLogout}
+                className="btn-blue"
+                style={{ padding: '4px 8px', fontSize: '9.5px', marginLeft: '4px' }}
+                title="Cambiar de Operador / Cerrar Sesión"
               >
-                🎯 Mis Asignados
+                🚪 Switch Role
               </button>
-              {currentUser.defaultCategory && (
+            </div>
+
+            <button
+              onClick={() => setShowNewModal(true)}
+              className="btn-cyan keycap-glow"
+              style={{ padding: '9px 16px' }}
+            >
+              ➕ New Incident
+            </button>
+          </div>
+        </div>
+      </nav>
+
+      {/* CONTENEDOR PRINCIPAL DE OPERACIONES */}
+      <div style={{ position: 'relative', zIndex: 10, maxWidth: '1280px', margin: '0 auto', padding: '24px 32px 64px' }}>
+
+        {/* BARRA DE CONTEXTO DE ROL Y FILTRO RÁPIDO DE ENCLAVE */}
+        <div style={{
+          backgroundColor: '#11161b',
+          border: '1px solid #222c37',
+          borderLeft: isAdmin ? '3px solid #ffb03a' : '3px solid #38bdf8',
+          padding: '12px 18px',
+          marginBottom: '22px',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          flexWrap: 'wrap',
+          gap: '10px'
+        }}>
+          <div style={{ fontSize: '12.5px', color: '#cbd5e1' }}>
+            {isAdmin ? (
+              <>
+                <strong className="font-mono" style={{ color: '#ffb03a' }}>[ADMIN ENCLAVE // SOVEREIGN OPERATOR]</strong>{' '}
+                Acceso total habilitado sobre Incidentes, Azure DevOps Pipelines (Fallo ❌ / Solución ✅) y Alertas SMTP.
+              </>
+            ) : (
+              <>
+                <strong className="font-mono" style={{ color: '#38bdf8' }}>[LOCALIZED OPERATOR CAPSULE // {currentUser.specialty}]</strong>{' '}
+                Vista segmentada y enfocada automáticamente en tu cola de trabajo asignada.
+              </>
+            )}
+          </div>
+
+          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+            {!isAdmin && (
+              <>
                 <button
                   type="button"
-                  onClick={() => { setTechFilter(''); setCategoryFilter(currentUser.defaultCategory); }}
-                  style={{
-                    backgroundColor: categoryFilter === currentUser.defaultCategory ? '#2563EB' : '#0A0A0A',
-                    color: '#FFFFFF',
-                    border: '1px solid #2563EB',
-                    borderRadius: '3px',
-                    padding: '4px 10px',
-                    fontSize: '11px',
-                    cursor: 'pointer',
-                    fontFamily: 'JetBrains Mono, monospace'
-                  }}
+                  onClick={() => { setTechFilter(String(currentUser.id)); setCategoryFilter(''); }}
+                  className={techFilter === String(currentUser.id) ? 'btn-cyan' : 'btn-blue'}
+                  style={{ padding: '5px 10px', fontSize: '10px' }}
                 >
-                  🏷️ Área {currentUser.defaultCategory}
+                  🎯 Mis Asignados
                 </button>
-              )}
-            </>
-          )}
-          <button
-            type="button"
-            onClick={() => { setTechFilter(''); setCategoryFilter(''); setStatusFilter(''); setPriorityFilter(''); }}
-            style={{
-              backgroundColor: (!techFilter && !categoryFilter) ? 'rgba(34, 197, 94, 0.2)' : '#0A0A0A',
-              color: (!techFilter && !categoryFilter) ? '#4ADE80' : '#A3A3A3',
-              border: '1px solid #2E2E2E',
-              borderRadius: '3px',
-              padding: '4px 10px',
-              fontSize: '11px',
-              cursor: 'pointer',
-              fontFamily: 'JetBrains Mono, monospace'
-            }}
-          >
-            🌐 Ver Todos los Incidentes
-          </button>
+                {currentUser.defaultCategory && (
+                  <button
+                    type="button"
+                    onClick={() => { setTechFilter(''); setCategoryFilter(currentUser.defaultCategory); }}
+                    className={categoryFilter === currentUser.defaultCategory ? 'btn-cyan' : 'btn-blue'}
+                    style={{ padding: '5px 10px', fontSize: '10px' }}
+                  >
+                    🏷️ Área {currentUser.defaultCategory}
+                  </button>
+                )}
+              </>
+            )}
+            <button
+              type="button"
+              onClick={() => { setTechFilter(''); setCategoryFilter(''); setStatusFilter(''); setPriorityFilter(''); }}
+              className={(!techFilter && !categoryFilter) ? 'btn-amber' : 'btn-blue'}
+              style={{ padding: '5px 10px', fontSize: '10px' }}
+            >
+              🌐 Global Queue
+            </button>
+          </div>
         </div>
+
+        {/* HERO + INTERACTIVE SANDBOX MATRIX CONSOLE (CORE // ENTER) */}
+        <SandboxMatrixConsole
+          currentUser={currentUser}
+          azureStatus={azureStatus}
+          notificationsData={notificationsData}
+          stats={stats}
+          onOpenNewModal={() => setShowNewModal(true)}
+          onSimulateFailure={handleSimulateFailure}
+          onTriggerAzureSync={handleTriggerAzureSync}
+          onSendTestEmail={handleSendTestEmail}
+          isAdmin={isAdmin}
+        />
+
+        {/* KPI DASHBOARD (AB#34) */}
+        {stats && (
+          <>
+            <section style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '18px', marginBottom: '24px' }}>
+
+              {/* 01: Total Incidentes */}
+              <div className="isometric-card" style={{
+                backgroundColor: '#161d24',
+                padding: '20px 22px',
+                border: '1px solid #222c37',
+                borderLeft: '3px solid #38bdf8'
+              }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span className="font-mono" style={{ color: '#94a3b8', fontSize: '10.5px', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+                    Total Incidentes
+                  </span>
+                  <span className="font-mono" style={{ fontSize: '10px', color: '#64748b' }}>01 / KPI</span>
+                </div>
+                <div className="font-mono" style={{ fontSize: '36px', fontWeight: 700, color: '#ffffff', marginTop: '6px' }}>
+                  {stats.total}
+                </div>
+                <div className="font-mono" style={{ fontSize: '10.5px', color: '#38bdf8', marginTop: '4px' }}>
+                  GLOBAL MATRIX RECORDS
+                </div>
+              </div>
+
+              {/* 02: Abiertos / En Proceso */}
+              <div className="isometric-card" style={{
+                backgroundColor: '#161d24',
+                padding: '20px 22px',
+                border: '1px solid #222c37',
+                borderLeft: '3px solid #ffb03a'
+              }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span className="font-mono" style={{ color: '#94a3b8', fontSize: '10.5px', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+                    Abiertos / En Proceso
+                  </span>
+                  <span className="font-mono" style={{ fontSize: '10px', color: '#64748b' }}>02 / KPI</span>
+                </div>
+                <div className="font-mono" style={{ fontSize: '36px', fontWeight: 700, color: '#ffb03a', marginTop: '6px' }}>
+                  {stats.abiertos}
+                </div>
+                <div className="font-mono" style={{ fontSize: '10.5px', color: '#ffb03a', marginTop: '4px' }}>
+                  ACTIVE EXECUTION QUEUE
+                </div>
+              </div>
+
+              {/* 03: Casos Criticos */}
+              <div className="isometric-card" style={{
+                backgroundColor: '#161d24',
+                padding: '20px 22px',
+                border: '1px solid #222c37',
+                borderLeft: '3px solid #ef4444'
+              }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span className="font-mono" style={{ color: '#94a3b8', fontSize: '10.5px', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+                    Casos Críticos
+                  </span>
+                  <span className="font-mono" style={{ fontSize: '10px', color: '#64748b' }}>03 / KPI</span>
+                </div>
+                <div className="font-mono" style={{ fontSize: '36px', fontWeight: 700, color: '#f87171', marginTop: '6px' }}>
+                  {stats.criticos}
+                </div>
+                <div className="font-mono" style={{ fontSize: '10.5px', color: '#f87171', marginTop: '4px' }}>
+                  HIGH PRIORITY SLA BREACH
+                </div>
+              </div>
+
+              {/* 04: Resueltos / Cerrados */}
+              <div className="isometric-card" style={{
+                backgroundColor: '#161d24',
+                padding: '20px 22px',
+                border: '1px solid #222c37',
+                borderLeft: '3px solid #22c55e'
+              }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span className="font-mono" style={{ color: '#94a3b8', fontSize: '10.5px', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+                    Resueltos / Cerrados
+                  </span>
+                  <span className="font-mono" style={{ fontSize: '10px', color: '#64748b' }}>04 / KPI</span>
+                </div>
+                <div className="font-mono" style={{ fontSize: '36px', fontWeight: 700, color: '#4ade80', marginTop: '6px' }}>
+                  {stats.cerrados}
+                </div>
+                <div className="font-mono" style={{ fontSize: '10.5px', color: '#4ade80', marginTop: '4px' }}>
+                  VERIFIED RESOLUTION
+                </div>
+              </div>
+            </section>
+
+            {/* MONITOR DE AZURE DEVOPS & BANDEJA DE NOTIFICACIONES GMAIL */}
+            <DevOpsMonitor
+              azureStatus={azureStatus}
+              notificationsData={notificationsData}
+              onTriggerAzureSync={handleTriggerAzureSync}
+              onSimulateFailure={handleSimulateFailure}
+              onSendTestEmail={handleSendTestEmail}
+              onSaveSmtpConfig={handleSaveSmtpConfig}
+              syncingAzure={syncingAzure}
+              simulatingFailure={simulatingFailure}
+              sendingEmail={sendingEmail}
+              isAdmin={isAdmin}
+            />
+
+            {/* 3 NODOS DE GRAFICOS SVG NATIVOS (0 VULNERABILIDADES) */}
+            <DistributionPanel stats={stats} currentUser={currentUser} />
+          </>
+        )}
+
+        {/* BARRA DE FILTROS MULTICRITERIO (AB#12) */}
+        <IncidentFilters
+          searchTerm={searchTerm} setSearchTerm={setSearchTerm}
+          statusFilter={statusFilter} setStatusFilter={setStatusFilter}
+          priorityFilter={priorityFilter} setPriorityFilter={setPriorityFilter}
+          categoryFilter={categoryFilter} setCategoryFilter={setCategoryFilter}
+          techFilter={techFilter} setTechFilter={setTechFilter}
+          users={users}
+        />
+
+        {/* TABLA DE INCIDENTES */}
+        <section
+          id="incidents-table"
+          style={{
+            backgroundColor: '#11161b',
+            overflow: 'hidden',
+            border: '1px solid #222c37',
+            boxShadow: '0 15px 35px rgba(0,0,0,0.5)'
+          }}
+        >
+          <div style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            padding: '14px 20px',
+            borderBottom: '1px solid #222c37',
+            backgroundColor: '#161d24'
+          }}>
+            <span className="font-mono" style={{ fontSize: '11px', color: '#00f0ff', letterSpacing: '0.12em', textTransform: 'uppercase' }}>
+              INCIDENT COMPONENT MATRIX // ACTIVE RECORDS ({incidents.length})
+            </span>
+            <span className="font-mono" style={{ fontSize: '10.5px', color: '#64748b' }}>
+              SPECIFICATION ALPHA // AB#8 - AB#15
+            </span>
+          </div>
+
+          <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '13px' }}>
+            <thead>
+              <tr className="font-mono" style={{ backgroundColor: '#080b0e', color: '#64748b', borderBottom: '1px solid #222c37', fontSize: '10.5px', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+                <th style={{ padding: '13px 16px' }}>ID</th>
+                <th style={{ padding: '13px 16px' }}>Título del Incidente</th>
+                <th style={{ padding: '13px 16px' }}>Categoría</th>
+                <th style={{ padding: '13px 16px' }}>Prioridad</th>
+                <th style={{ padding: '13px 16px' }}>Estado</th>
+                <th style={{ padding: '13px 16px' }}>Operador Asignado</th>
+                <th style={{ padding: '13px 16px', textAlign: 'right' }}>Acción</th>
+              </tr>
+            </thead>
+            <tbody>
+              {loading ? (
+                <tr><td colSpan="7" className="font-mono" style={{ padding: '32px', textAlign: 'center', color: '#94a3b8' }}>[LOADING INCIDENT MATRIX...]</td></tr>
+              ) : incidents.length === 0 ? (
+                <tr><td colSpan="7" className="font-mono" style={{ padding: '32px', textAlign: 'center', color: '#64748b' }}>[0 RECORDS MATCH CURRENT QUERY FILTER]</td></tr>
+              ) : (
+                incidents.map((inc) => (
+                  <tr key={inc.id} style={{ borderBottom: '1px solid rgba(34, 44, 55, 0.65)', transition: 'background 150ms ease' }}>
+                    <td className="font-mono" style={{ padding: '14px 16px', fontWeight: 700, color: '#38bdf8' }}>
+                      #{inc.id}
+                    </td>
+                    <td style={{ padding: '14px 16px', fontWeight: 600, color: '#ffffff' }}>
+                      {inc.title}
+                    </td>
+                    <td className="font-mono" style={{ padding: '14px 16px', color: '#94a3b8', fontSize: '11.5px' }}>
+                      {inc.category}
+                    </td>
+                    <td style={{ padding: '14px 16px' }} className={`priority-${inc.priority.toLowerCase()}`}>
+                      {inc.priority}
+                    </td>
+                    <td style={{ padding: '14px 16px' }}>
+                      {getStatusBadge(inc.status)}
+                    </td>
+                    <td style={{ padding: '14px 16px', color: inc.assigned_technician ? '#e2e8f0' : '#64748b', fontSize: '12.5px' }}>
+                      {inc.assigned_technician ? inc.assigned_technician.name : 'Unassigned'}
+                    </td>
+                    <td style={{ padding: '14px 16px', textAlign: 'right' }}>
+                      <button
+                        onClick={() => openDetail(inc.id)}
+                        className="btn-blue"
+                        style={{ padding: '6px 14px', fontSize: '10.5px' }}
+                      >
+                        Inspect Node →
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </section>
       </div>
 
-      {/* KPI DASHBOARD (AB#34) */}
-      {stats && (
-        <>
-          <section style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px', marginBottom: '20px' }}>
-
-            {/* Total Incidentes (Blue) */}
-            <div style={{
-              backgroundColor: '#141414',
-              padding: '16px 20px',
-              borderRadius: '4px',
-              border: '1px solid #2E2E2E',
-              borderLeft: '4px solid #2563EB',
-              boxShadow: '0 0 10px rgba(37, 99, 235, 0.15)'
-            }}>
-              <div style={{ color: '#A3A3A3', fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.8px' }}>
-                Total Incidentes
-              </div>
-              <div style={{ fontFamily: 'Anton, sans-serif', fontSize: '36px', color: '#FFFFFF', marginTop: '4px' }}>
-                {stats.total}
-              </div>
-              <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '11px', color: '#60A5FA', marginTop: '4px' }}>
-                Registros Globales
-              </div>
-            </div>
-
-            {/* Abiertos / En Proceso (Warning) */}
-            <div style={{
-              backgroundColor: '#141414',
-              padding: '16px 20px',
-              borderRadius: '4px',
-              border: '1px solid #2E2E2E',
-              borderLeft: '4px solid #F59E0B',
-              boxShadow: '0 0 10px rgba(245, 158, 11, 0.15)'
-            }}>
-              <div style={{ color: '#A3A3A3', fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.8px' }}>
-                Abiertos / En Proceso
-              </div>
-              <div style={{ fontFamily: 'Anton, sans-serif', fontSize: '36px', color: '#FBBF24', marginTop: '4px' }}>
-                {stats.abiertos}
-              </div>
-              <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '11px', color: '#F59E0B', marginTop: '4px' }}>
-                Requieren Atención
-              </div>
-            </div>
-
-            {/* Casos Criticos (Red) */}
-            <div style={{
-              backgroundColor: '#141414',
-              padding: '16px 20px',
-              borderRadius: '4px',
-              border: '1px solid #2E2E2E',
-              borderLeft: '4px solid #DC2626',
-              boxShadow: '0 0 12px rgba(220, 38, 38, 0.25)'
-            }}>
-              <div style={{ color: '#A3A3A3', fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.8px' }}>
-                Casos Críticos
-              </div>
-              <div style={{ fontFamily: 'Anton, sans-serif', fontSize: '36px', color: '#F87171', marginTop: '4px', textShadow: '0 0 8px rgba(220, 38, 38, 0.5)' }}>
-                {stats.criticos}
-              </div>
-              <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '11px', color: '#F87171', marginTop: '4px' }}>
-                Prioridad Máxima SLA
-              </div>
-            </div>
-
-            {/* Resueltos / Cerrados (Green) */}
-            <div style={{
-              backgroundColor: '#141414',
-              padding: '16px 20px',
-              borderRadius: '4px',
-              border: '1px solid #2E2E2E',
-              borderLeft: '4px solid #22C55E',
-              boxShadow: '0 0 10px rgba(34, 197, 94, 0.15)'
-            }}>
-              <div style={{ color: '#A3A3A3', fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.8px' }}>
-                Resueltos / Cerrados
-              </div>
-              <div style={{ fontFamily: 'Anton, sans-serif', fontSize: '36px', color: '#4ADE80', marginTop: '4px' }}>
-                {stats.cerrados}
-              </div>
-              <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '11px', color: '#4ADE80', marginTop: '4px' }}>
-                Completados con Éxito
-              </div>
-            </div>
-          </section>
-
-          {/* MONITOR DE AZURE DEVOPS & BANDEJA DE NOTIFICACIONES GMAIL */}
-          <DevOpsMonitor
-            azureStatus={azureStatus}
-            notificationsData={notificationsData}
-            onTriggerAzureSync={handleTriggerAzureSync}
-            onSimulateFailure={handleSimulateFailure}
-            onSendTestEmail={handleSendTestEmail}
-            onSaveSmtpConfig={handleSaveSmtpConfig}
-            syncingAzure={syncingAzure}
-            simulatingFailure={simulatingFailure}
-            sendingEmail={sendingEmail}
-            isAdmin={isAdmin}
-          />
-
-          <DistributionPanel stats={stats} currentUser={currentUser} />
-        </>
-      )}
-
-      {/* BARRA DE FILTROS MULTICRITERIO (AB#12) */}
-      <IncidentFilters
-        searchTerm={searchTerm} setSearchTerm={setSearchTerm}
-        statusFilter={statusFilter} setStatusFilter={setStatusFilter}
-        priorityFilter={priorityFilter} setPriorityFilter={setPriorityFilter}
-        categoryFilter={categoryFilter} setCategoryFilter={setCategoryFilter}
-        techFilter={techFilter} setTechFilter={setTechFilter}
-        users={users}
-      />
-
-      {/* TABLA DE INCIDENTES */}
-      <section style={{
-        backgroundColor: '#141414',
-        borderRadius: '4px',
-        overflow: 'hidden',
-        border: '1px solid #2E2E2E',
-        boxShadow: '0 4px 16px rgba(0,0,0,0.5)'
+      {/* FOOTER ESTILO CORE // ENTER */}
+      <footer style={{
+        position: 'relative',
+        zIndex: 10,
+        borderTop: '1px solid rgba(34, 44, 55, 0.6)',
+        backgroundColor: '#11161b',
+        padding: '36px 32px 24px'
       }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '13px' }}>
-          <thead>
-            <tr style={{ backgroundColor: '#0E0E0E', color: '#A3A3A3', borderBottom: '2px solid #2E2E2E' }}>
-              <th style={{ padding: '12px 16px', fontFamily: 'Inter, sans-serif', fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.8px' }}>ID</th>
-              <th style={{ padding: '12px 16px', fontFamily: 'Inter, sans-serif', fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.8px' }}>Título del Incidente</th>
-              <th style={{ padding: '12px 16px', fontFamily: 'Inter, sans-serif', fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.8px' }}>Categoría</th>
-              <th style={{ padding: '12px 16px', fontFamily: 'Inter, sans-serif', fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.8px' }}>Prioridad</th>
-              <th style={{ padding: '12px 16px', fontFamily: 'Inter, sans-serif', fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.8px' }}>Estado</th>
-              <th style={{ padding: '12px 16px', fontFamily: 'Inter, sans-serif', fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.8px' }}>Técnico Asignado</th>
-              <th style={{ padding: '12px 16px', fontFamily: 'Inter, sans-serif', fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.8px', textAlign: 'right' }}>Acción</th>
-            </tr>
-          </thead>
-          <tbody>
-            {loading ? (
-              <tr><td colSpan="7" style={{ padding: '32px', textAlign: 'center', color: '#A3A3A3' }}>Cargando incidentes...</td></tr>
-            ) : incidents.length === 0 ? (
-              <tr><td colSpan="7" style={{ padding: '32px', textAlign: 'center', color: '#737373' }}>No se encontraron incidentes con los filtros seleccionados.</td></tr>
-            ) : (
-              incidents.map((inc) => (
-                <tr key={inc.id} style={{ borderBottom: '1px solid #1E1E1E', transition: 'background 150ms ease' }}>
-                  <td style={{ padding: '12px 16px', fontFamily: 'JetBrains Mono, monospace', fontWeight: '700', color: '#60A5FA' }}>
-                    #{inc.id}
-                  </td>
-                  <td style={{ padding: '12px 16px', fontWeight: '600', color: '#FFFFFF' }}>
-                    {inc.title}
-                  </td>
-                  <td style={{ padding: '12px 16px', color: '#A3A3A3' }}>
-                    {inc.category}
-                  </td>
-                  <td style={{ padding: '12px 16px' }} className={`priority-${inc.priority.toLowerCase()}`}>
-                    {inc.priority}
-                  </td>
-                  <td style={{ padding: '12px 16px' }}>
-                    {getStatusBadge(inc.status)}
-                  </td>
-                  <td style={{ padding: '12px 16px', color: inc.assigned_technician ? '#F5F5F5' : '#737373', fontSize: '12.5px' }}>
-                    {inc.assigned_technician ? inc.assigned_technician.name : 'Sin asignar'}
-                  </td>
-                  <td style={{ padding: '12px 16px', textAlign: 'right' }}>
-                    <button
-                      onClick={() => openDetail(inc.id)}
-                      className="btn-blue"
-                      style={{ padding: '6px 14px', fontSize: '11px' }}
-                    >
-                      Ver Detalle
-                    </button>
-                  </td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-      </section>
+        <div style={{
+          maxWidth: '1280px',
+          margin: '0 auto',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          flexWrap: 'wrap',
+          gap: '16px',
+          fontSize: '11px',
+          color: '#64748b'
+        }} className="font-mono">
+          <div>
+            <strong style={{ color: '#ffffff' }}>CORE // IT INCIDENT HUB v1.0.0</strong> &bull; UMG Análisis de Sistemas II &bull; Sandbox Verified (0 Vulnerabilities)
+          </div>
+          <div style={{ display: 'flex', gap: '20px' }}>
+            <span style={{ color: '#ffb03a' }}>SMTP TLS: mbarriosg8@miumg.edu.gt</span>
+            <span style={{ color: '#38bdf8' }}>AGENT: mayro-local-agent</span>
+          </div>
+        </div>
+      </footer>
 
       {/* MODAL REGISTRAR NUEVO INCIDENTE */}
       {showNewModal && (
         <div style={modalOverlayStyle}>
           <div style={modalBoxStyle}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', borderBottom: '1px solid #2E2E2E', paddingBottom: '12px' }}>
-              <h2 style={{ fontFamily: 'Anton, sans-serif', fontSize: '20px', color: '#FFFFFF', letterSpacing: '0.5px' }}>
-                REGISTRAR NUEVO INCIDENTE (CON ALERTA A GMAIL)
-              </h2>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', borderBottom: '1px solid #222c37', paddingBottom: '12px' }}>
+              <div>
+                <span className="font-mono" style={{ fontSize: '10px', color: '#00f0ff', letterSpacing: '0.14em' }}>
+                  NEW INCIDENT CAPSULE // AB#8
+                </span>
+                <h2 style={{ fontSize: '20px', fontWeight: 700, color: '#ffffff', marginTop: '2px' }}>
+                  Registrar Incidente + Alerta Gmail
+                </h2>
+              </div>
               <button
                 onClick={() => setShowNewModal(false)}
-                style={{ background: 'none', border: 'none', color: '#737373', fontSize: '18px', cursor: 'pointer' }}
+                style={{ background: 'none', border: 'none', color: '#94a3b8', fontSize: '18px', cursor: 'pointer' }}
               >
                 ✕
               </button>
@@ -782,7 +860,7 @@ export default function App() {
                   required
                   value={newTitle}
                   onChange={(e) => setNewTitle(e.target.value)}
-                  placeholder="Ej. Falla de conexión en impresora de RRHH"
+                  placeholder="Ej. Falla de conexión en switch de operaciones"
                   style={inputStyle}
                 />
               </div>
@@ -846,26 +924,17 @@ export default function App() {
                 <button
                   type="button"
                   onClick={() => setShowNewModal(false)}
-                  style={{
-                    backgroundColor: 'transparent',
-                    border: '1px solid #2E2E2E',
-                    color: '#A3A3A3',
-                    padding: '8px 16px',
-                    borderRadius: '4px',
-                    cursor: 'pointer',
-                    fontSize: '12px',
-                    fontWeight: '700',
-                    textTransform: 'uppercase'
-                  }}
+                  className="btn-blue"
+                  style={{ padding: '10px 16px' }}
                 >
-                  Cancelar
+                  Cancel
                 </button>
                 <button
                   type="submit"
-                  className="btn-red"
-                  style={{ padding: '8px 20px' }}
+                  className="btn-cyan keycap-glow"
+                  style={{ padding: '10px 20px' }}
                 >
-                  Guardar y Notificar
+                  Commit &amp; Notify Gmail →
                 </button>
               </div>
             </form>
@@ -877,35 +946,35 @@ export default function App() {
       {selectedIncident && (
         <div style={modalOverlayStyle}>
           <div style={{ ...modalBoxStyle, maxWidth: '680px', maxHeight: '90vh', overflowY: 'auto' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', borderBottom: '1px solid #2E2E2E', paddingBottom: '12px', marginBottom: '16px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', borderBottom: '1px solid #222c37', paddingBottom: '12px', marginBottom: '16px' }}>
               <div>
-                <span style={{ fontFamily: 'JetBrains Mono, monospace', color: '#60A5FA', fontWeight: '700', fontSize: '12px' }}>
-                  INCIDENTE #{selectedIncident.id}
+                <span className="font-mono" style={{ color: '#00f0ff', fontWeight: 700, fontSize: '11px' }}>
+                  INCIDENT NODE #{selectedIncident.id} // {selectedIncident.category}
                 </span>
-                <h2 style={{ fontFamily: 'Anton, sans-serif', fontSize: '22px', color: '#FFFFFF', marginTop: '4px' }}>
+                <h2 style={{ fontSize: '22px', fontWeight: 700, color: '#ffffff', marginTop: '4px' }}>
                   {selectedIncident.title}
                 </h2>
               </div>
               <button
                 onClick={() => setSelectedIncident(null)}
-                style={{ background: 'none', border: 'none', color: '#737373', fontSize: '20px', cursor: 'pointer' }}
+                style={{ background: 'none', border: 'none', color: '#94a3b8', fontSize: '20px', cursor: 'pointer' }}
               >
                 ✕
               </button>
             </div>
 
-            <p style={{ color: '#D4D4D4', fontSize: '13.5px', marginBottom: '16px', backgroundColor: '#0A0A0A', border: '1px solid #2E2E2E', padding: '12px', borderRadius: '4px', lineHeight: '1.5' }}>
+            <p style={{ color: '#cbd5e1', fontSize: '13.5px', marginBottom: '16px', backgroundColor: '#080b0e', border: '1px solid #222c37', padding: '14px', lineHeight: '1.6' }}>
               {selectedIncident.description}
             </p>
 
             {/* SECCIÓN TRANSICIÓN DE OPERACIÓN */}
-            <div style={{ backgroundColor: '#0A0A0A', border: '1px solid #2E2E2E', borderLeft: '4px solid #2563EB', borderRadius: '4px', padding: '14px', marginBottom: '16px' }}>
-              <div style={{ fontFamily: 'Anton, sans-serif', fontSize: '15px', color: '#60A5FA', marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <span>⚙️</span> TRANSICIÓN DE OPERACIÓN (NOTIFICA A mbarriosg8@miumg.edu.gt)
+            <div style={{ backgroundColor: '#080b0e', border: '1px solid #222c37', borderLeft: '3px solid #ffb03a', padding: '16px', marginBottom: '16px' }}>
+              <div className="font-mono" style={{ fontSize: '11.5px', color: '#ffb03a', marginBottom: '12px', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+                ⚙️ STATE OVERRIDE MATRIX (ALERTA A mbarriosg8@miumg.edu.gt)
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr auto', gap: '10px', alignItems: 'center' }}>
                 <div>
-                  <label style={labelStyle}>Estado: {selectedIncident.status}</label>
+                  <label style={labelStyle}>Estado ({selectedIncident.status})</label>
                   <select
                     value={targetStatus}
                     onChange={(e) => setTargetStatus(e.target.value)}
@@ -920,13 +989,13 @@ export default function App() {
                 </div>
 
                 <div>
-                  <label style={labelStyle}>Técnico Asignado</label>
+                  <label style={labelStyle}>Operador Asignado</label>
                   <select
                     value={targetTech}
                     onChange={(e) => setTargetTech(e.target.value)}
                     style={inputStyle}
                   >
-                    <option value="">-- Sin Asignar --</option>
+                    <option value="">-- Unassigned --</option>
                     {users.map(u => <option key={u.id} value={u.id}>{u.name}</option>)}
                   </select>
                 </div>
@@ -934,23 +1003,23 @@ export default function App() {
                 <button
                   type="button"
                   onClick={handleUpdateStatus}
-                  className="btn-red"
-                  style={{ alignSelf: 'flex-end', padding: '9px 16px', fontSize: '12px' }}
+                  className="btn-cyan"
+                  style={{ alignSelf: 'flex-end', padding: '11px 16px' }}
                 >
-                  Actualizar
+                  Apply State
                 </button>
               </div>
             </div>
 
             {/* HISTORIAL DE AUDITORÍA */}
             <div style={{ marginBottom: '16px' }}>
-              <h3 style={{ fontFamily: 'Inter, sans-serif', fontSize: '12px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.8px', color: '#A3A3A3', marginBottom: '8px' }}>
-                📜 Historial de Estados (Auditoría)
+              <h3 className="font-mono" style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.1em', color: '#94a3b8', marginBottom: '8px' }}>
+                📜 Audit Telemetry Log
               </h3>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', maxHeight: '140px', overflowY: 'auto' }}>
                 {selectedIncident.logs && selectedIncident.logs.map(log => (
-                  <div key={log.id} style={{ fontSize: '12px', backgroundColor: '#0A0A0A', padding: '8px 12px', borderRadius: '4px', borderLeft: '3px solid #2563EB', fontFamily: 'Inter, sans-serif' }}>
-                    <span style={{ color: '#737373', fontFamily: 'JetBrains Mono, monospace' }}>{new Date(log.created_at).toLocaleTimeString()}:</span> Transición a <strong style={{ color: '#60A5FA' }}>{log.new_status}</strong> por <em>{log.changed_by}</em> ({log.change_reason})
+                  <div key={log.id} className="font-mono" style={{ fontSize: '11.5px', backgroundColor: '#080b0e', padding: '8px 12px', borderLeft: '2px solid #38bdf8', borderTop: '1px solid #222c37', borderRight: '1px solid #222c37', borderBottom: '1px solid #222c37' }}>
+                    <span style={{ color: '#64748b' }}>[{new Date(log.created_at).toLocaleTimeString()}]</span> Transition → <strong style={{ color: '#00f0ff' }}>{log.new_status}</strong> by <em style={{ color: '#ffb03a' }}>{log.changed_by}</em> ({log.change_reason})
                   </div>
                 ))}
               </div>
@@ -958,20 +1027,20 @@ export default function App() {
 
             {/* COMENTARIOS DE SEGUIMIENTO */}
             <div>
-              <h3 style={{ fontFamily: 'Inter, sans-serif', fontSize: '12px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.8px', color: '#A3A3A3', marginBottom: '8px' }}>
-                💬 Comentarios de Seguimiento
+              <h3 className="font-mono" style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.1em', color: '#94a3b8', marginBottom: '8px' }}>
+                💬 Operator Console Notes
               </h3>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', maxHeight: '120px', overflowY: 'auto', marginBottom: '10px' }}>
                 {selectedIncident.comments && selectedIncident.comments.map(c => (
-                  <div key={c.id} style={{ fontSize: '12px', backgroundColor: '#0A0A0A', padding: '8px 12px', borderRadius: '4px', border: '1px solid #1E1E1E' }}>
-                    <strong style={{ color: '#F87171' }}>{c.author_name}:</strong> {c.comment}
+                  <div key={c.id} style={{ fontSize: '12px', backgroundColor: '#080b0e', padding: '8px 12px', border: '1px solid #222c37' }}>
+                    <strong className="font-mono" style={{ color: '#ffb03a' }}>{c.author_name}:</strong> {c.comment}
                   </div>
                 ))}
               </div>
               <form onSubmit={handleAddComment} style={{ display: 'flex', gap: '8px' }}>
                 <input
                   type="text"
-                  placeholder="Agregar una nota técnica..."
+                  placeholder="Append technical telemetry note..."
                   value={newComment}
                   onChange={(e) => setNewComment(e.target.value)}
                   style={{ ...inputStyle, flex: 1 }}
@@ -979,15 +1048,15 @@ export default function App() {
                 <button
                   type="submit"
                   className="btn-blue"
-                  style={{ padding: '8px 16px', fontSize: '11px' }}
+                  style={{ padding: '10px 16px' }}
                 >
-                  Comentar
+                  Append
                 </button>
               </form>
             </div>
           </div>
         </div>
       )}
-    </div>
+    </main>
   );
 }
