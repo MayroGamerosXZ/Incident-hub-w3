@@ -54,12 +54,13 @@ steps:
       node --test api.test.js
     displayName: '5. Ejecución de Pruebas Unitarias Automatizadas (AB#24)'
 
-  # 6. Compilación / Build (Frontend React)
+  # 6. Compilación y Build de Frontend React (Vite)
   - script: |
-      echo "=== Generando paquete de distribución Frontend ==="
-      if not exist "frontend\dist" mkdir "frontend\dist"
-      copy /Y "frontend\index.html" "frontend\dist\index.html"
-    displayName: '6. Compilación y Preparación de Frontend (Build)'
+      echo "=== Compilando paquete de producción Frontend con Vite ==="
+      cd frontend
+      call npm install --no-audit --no-fund
+      call npm run build
+    displayName: '6. Compilación y Build de Frontend React (Vite)'
 
   # 7. Empaquetado de Artefactos
   - task: CopyFiles@2
@@ -84,4 +85,3 @@ steps:
       PathtoPublish: '$(Build.ArtifactStagingDirectory)/drop'
       ArtifactName: 'incident-hub-drop'
       publishLocation: 'Container'
-

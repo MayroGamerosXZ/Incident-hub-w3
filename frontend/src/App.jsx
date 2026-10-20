@@ -755,15 +755,17 @@ export default function App() {
                 <th style={{ padding: '13px 16px' }}>Categoría</th>
                 <th style={{ padding: '13px 16px' }}>Prioridad</th>
                 <th style={{ padding: '13px 16px' }}>Estado</th>
+                <th style={{ padding: '13px 16px' }}>Solicitante</th>
+                <th style={{ padding: '13px 16px' }}>Fecha</th>
                 <th style={{ padding: '13px 16px' }}>Operador Asignado</th>
                 <th style={{ padding: '13px 16px', textAlign: 'right' }}>Acción</th>
               </tr>
             </thead>
             <tbody>
               {loading ? (
-                <tr><td colSpan="7" className="font-mono" style={{ padding: '32px', textAlign: 'center', color: '#94a3b8' }}>[LOADING INCIDENT MATRIX...]</td></tr>
+                <tr><td colSpan="9" className="font-mono" style={{ padding: '32px', textAlign: 'center', color: '#94a3b8' }}>[LOADING INCIDENT MATRIX...]</td></tr>
               ) : incidents.length === 0 ? (
-                <tr><td colSpan="7" className="font-mono" style={{ padding: '32px', textAlign: 'center', color: '#64748b' }}>[0 RECORDS MATCH CURRENT QUERY FILTER]</td></tr>
+                <tr><td colSpan="9" className="font-mono" style={{ padding: '32px', textAlign: 'center', color: '#64748b' }}>[0 RECORDS MATCH CURRENT QUERY FILTER]</td></tr>
               ) : (
                 incidents.map((inc) => (
                   <tr key={inc.id} style={{ borderBottom: '1px solid rgba(34, 44, 55, 0.65)', transition: 'background 150ms ease' }}>
@@ -781,6 +783,12 @@ export default function App() {
                     </td>
                     <td style={{ padding: '14px 16px' }}>
                       {getStatusBadge(inc.status)}
+                    </td>
+                    <td className="font-mono" style={{ padding: '14px 16px', color: '#cbd5e1', fontSize: '11.5px' }}>
+                      {inc.reported_by}
+                    </td>
+                    <td className="font-mono" style={{ padding: '14px 16px', color: '#94a3b8', fontSize: '11.5px', whiteSpace: 'nowrap' }}>
+                      {new Date(inc.created_at).toLocaleDateString()}
                     </td>
                     <td style={{ padding: '14px 16px', color: inc.assigned_technician ? '#e2e8f0' : '#64748b', fontSize: '12.5px' }}>
                       {inc.assigned_technician ? inc.assigned_technician.name : 'Unassigned'}
@@ -949,11 +957,16 @@ export default function App() {
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', borderBottom: '1px solid #222c37', paddingBottom: '12px', marginBottom: '16px' }}>
               <div>
                 <span className="font-mono" style={{ color: '#00f0ff', fontWeight: 700, fontSize: '11px' }}>
-                  INCIDENT NODE #{selectedIncident.id} // {selectedIncident.category}
+                  INCIDENT NODE #{selectedIncident.id} // {selectedIncident.category} // PRIORIDAD {selectedIncident.priority}
                 </span>
                 <h2 style={{ fontSize: '22px', fontWeight: 700, color: '#ffffff', marginTop: '4px' }}>
                   {selectedIncident.title}
                 </h2>
+                <div className="font-mono" style={{ fontSize: '11px', color: '#94a3b8', marginTop: '6px', display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
+                  <span>👤 <strong style={{ color: '#e2e8f0' }}>Solicitante:</strong> {selectedIncident.reported_by}</span>
+                  <span>📅 <strong style={{ color: '#e2e8f0' }}>Registrado:</strong> {new Date(selectedIncident.created_at).toLocaleString()}</span>
+                  <span>🏷️ <strong style={{ color: '#e2e8f0' }}>Estado:</strong> {selectedIncident.status}</span>
+                </div>
               </div>
               <button
                 onClick={() => setSelectedIncident(null)}

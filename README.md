@@ -41,9 +41,9 @@ Para garantizar el cumplimiento de las normas DevOps de trazabilidad y gobernanz
 
 * **Frontend:** React 18 SPA con Vite (compilación estática optimizada en `frontend/dist/`).
 * **Backend:** Node.js con Express, arquitectura desacoplada por capas (rutas, controladores, middleware, servicios).
-* **Persistencia:** PostgreSQL con esquemas relacionales, triggers de auditoría temporal y vistas analíticas.
+* **Persistencia:** PostgreSQL 16 con esquemas relacionales, triggers de auditoría temporal, vistas analíticas y motor dual resiliente documentado en ADR-004 (conmuta a almacenamiento en memoria cuando el servicio de base de datos no está disponible en agentes efímeros).
 * **Integración y Entrega Continua Dual:**
-  * **Azure Pipelines (`azure-pipelines.yml`):** Compilación, verificación en **Self-Hosted Agent**, pruebas unitarias, escaneo SCA de dependencias y publicación del artefacto `incident-hub-drop`.
+  * **Azure Pipelines (`azure-pipelines.yml`):** Compilación y build real con Vite, verificación en **Self-Hosted Agent**, pruebas unitarias, escaneo SCA de dependencias y publicación del artefacto `incident-hub-drop`.
   * **GitHub Actions (`.github/workflows/ci.yml`):** Validación estática (linting) y escaneo de vulnerabilidades en cada Pull Request.
 * **Seguridad y Secretos (Regla 9):** Variables protegidas bajo candado en **Azure Pipelines Library (`incident-hub-secrets`)** para credenciales de base de datos y tokens, garantizando cero secretos en código.
 
@@ -62,7 +62,7 @@ incident-hub/
 │   │   ├── middleware/          # Sanitización XSS (DT-1) y Manejador de Errores (DT-2)
 │   │   ├── routes/              # Endpoints REST
 │   │   ├── services/            # Servicios de flujo de estados y KPIs
-│   │   └── db.js                # Pool de conexión PostgreSQL
+│   │   └── db.js                # Pool de conexión PostgreSQL + Fallback ADR-004
 │   ├── package.json
 │   └── server.js
 ├── frontend/                    # Cliente Web React 18 + Vite
@@ -77,7 +77,7 @@ incident-hub/
 │   ├── schema.sql               # Esquema DDL con tablas, vistas e índices
 │   └── seed.sql                 # Datos de prueba iniciales
 ├── tests/                       # Pruebas automatizadas (Node Test Runner)
-│   ├── api.test.js              # 7 pruebas unitarias e integración en verde
+│   ├── api.test.js              # 8 pruebas unitarias e integración en verde
 │   └── package.json
 ├── devops/                      # Configuración de contenedores y utilidades
 │   ├── Dockerfile.backend
@@ -85,7 +85,7 @@ incident-hub/
 │   ├── docker-compose.yml
 │   └── switch-git-user.ps1
 ├── docs/                        # Documentación técnica obligatoria
-│   ├── arquitectura.md          # Arquitectura de componentes y datos
+│   ├── arquitectura.md          # Arquitectura de componentes, datos y ADR-001 a ADR-004
 │   ├── branching.md             # Estrategia de ramas (GitFlow adaptado)
 │   ├── deuda_tecnica.md         # Catálogo de 5 deudas técnicas y resolución de 2
 │   ├── fallo_controlado.md      # Evidencia y análisis de causa raíz del fallo de CI
@@ -103,15 +103,22 @@ incident-hub/
 
 ### Prerrequisitos
 * Node.js v18+ y npm v9+
-* PostgreSQL 14+ (o Docker Desktop)
+* PostgreSQL 14+ (o Docker Desktop; opcional gracias al fallback resiliente ADR-004)
 
-### 1. Base de Datos
+### 0. Ejecución Unificada de Todo el Stack (Recomendado)
+```bash
+npm install
+npm run dev
+# Inicia concurrentemente Backend (puerto 5000) y Frontend Vite (puerto 5173)
+```
+
+### 1. Base de Datos (Opcional si se usa servicio local PostgreSQL)
 ```bash
 psql -U postgres -d postgres -f database/schema.sql
 psql -U postgres -d incident_hub_db -f database/seed.sql
 ```
 
-### 2. Backend
+### 2. Backend Individual
 ```bash
 cd backend
 npm install
@@ -119,7 +126,7 @@ npm run dev
 # Servidor escuchando en http://localhost:5000
 ```
 
-### 3. Frontend
+### 3. Frontend Individual
 ```bash
 cd frontend
 npm install
@@ -130,7 +137,7 @@ npm run dev
 ### 4. Pruebas Unitarias Automatizadas
 ```bash
 node --test tests/api.test.js
-# 7 pruebas pasando en verde (100% de éxito)
+# 8 pruebas pasando en verde (100% de éxito)
 ```
 
 ---

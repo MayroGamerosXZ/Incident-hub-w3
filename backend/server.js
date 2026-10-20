@@ -14,9 +14,21 @@ const {
   simulatePipelineFailure,
   triggerPipelineVerification
 } = require('./src/services/azureService.js');
+const {
+  initDatabase,
+  checkDatabaseHealth,
+  isPostgresActive,
+  pool
+} = require('./src/db.js');
+const {
+  canTransitionStatus
+} = require('./src/services/workflowService.js');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
+
+// Inicialización de persistencia PostgreSQL / Fallback Resiliente (ADR-004)
+initDatabase().catch(err => console.error('Error inicializando BD:', err));
 
 app.use(cors());
 app.use(express.json());
@@ -112,13 +124,15 @@ let incidentComments = [
 
 // --- ENDPOINTS DE LA API ---
 
-// 1. Healthcheck
-app.get('/api/health', (req, res) => {
+// 1. Healthcheck con Estado de Base de Datos PostgreSQL (ADR-004)
+app.get('/api/health', async (req, res) => {
+  const dbHealth = await checkDatabaseHealth();
   res.json({
     status: 'UP',
     timestamp: new Date().toISOString(),
     service: 'IT Incident Hub API',
-    alert_recipient: process.env.ALERT_RECIPIENT || 'mbarriosg8@miumg.edu.gt'
+    alert_recipient: process.env.ALERT_RECIPIENT || 'mbarriosg8@miumg.edu.gt',
+    database: dbHealth
   });
 });
 
@@ -246,6 +260,12 @@ app.patch('/api/incidents/:id/status', async (req, res) => {
     const nextStatus = status.toUpperCase();
     if (!VALID_STATUSES.includes(nextStatus)) {
       return res.status(400).json({ error: `Estado no válido. Opciones: ${VALID_STATUSES.join(', ')}` });
+    }
+    // Validación de reglas de transición de estados (AB#15)
+    if (!canTransitionStatus(previous_status, nextStatus)) {
+      return res.status(400).json({
+        error: `Transición de estado no permitida: no es posible pasar de ${previous_status} a ${nextStatus}`
+      });
     }
     inc.status = nextStatus;
   }
