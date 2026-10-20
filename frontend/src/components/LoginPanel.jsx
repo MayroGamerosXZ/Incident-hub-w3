@@ -11,10 +11,13 @@ const DEFAULT_TEAM = [
 
 export default function LoginPanel({ users = [], onLoginSuccess }) {
   const teamList = users.length > 0 ? users : DEFAULT_TEAM;
+  const [selectedUserId, setSelectedUserId] = useState(1);
   const [email, setEmail] = useState('mbarriosg8@miumg.edu.gt');
   const [accessCode, setAccessCode] = useState('ADMIN-2026');
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
+
+  const selectedUser = teamList.find(u => u.id === selectedUserId) || teamList.find(u => u.email === email);
 
   const particles = useMemo(
     () => [
@@ -32,7 +35,11 @@ export default function LoginPanel({ users = [], onLoginSuccess }) {
     setError('');
     setSubmitting(true);
     try {
-      await onLoginSuccess({ email, accessCode });
+      await onLoginSuccess({
+        userId: selectedUser ? selectedUser.id : undefined,
+        email,
+        accessCode
+      });
     } catch (err) {
       setError(err.message || 'Credenciales inválidas');
     } finally {
@@ -40,22 +47,11 @@ export default function LoginPanel({ users = [], onLoginSuccess }) {
     }
   };
 
-  const handleQuickSelect = async (user) => {
+  const handleQuickSelect = (user) => {
     setError('');
+    setSelectedUserId(user.id);
     setEmail(user.email);
     setAccessCode(user.accessCode || (user.role === 'ADMIN' ? 'ADMIN-2026' : 'TECH-2026'));
-    setSubmitting(true);
-    try {
-      await onLoginSuccess({
-        userId: user.id,
-        email: user.email,
-        accessCode: user.accessCode || 'UMG-2026'
-      });
-    } catch (err) {
-      setError(err.message || 'Error al iniciar sesión');
-    } finally {
-      setSubmitting(false);
-    }
   };
 
   const inputStyle = {
@@ -246,6 +242,37 @@ export default function LoginPanel({ users = [], onLoginSuccess }) {
               </div>
             )}
 
+            {/* AVISO DE CÁPSULA SELECCIONADA EN EL FORMULARIO */}
+            <div className="font-mono" style={{
+              backgroundColor: selectedUser?.role === 'ADMIN' ? 'rgba(255, 176, 58, 0.08)' : 'rgba(56, 189, 248, 0.08)',
+              border: selectedUser?.role === 'ADMIN' ? '1px solid rgba(255, 176, 58, 0.45)' : '1px solid rgba(56, 189, 248, 0.45)',
+              padding: '9px 12px',
+              fontSize: '11px',
+              marginBottom: '16px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              gap: '8px'
+            }}>
+              <div>
+                <span style={{ color: selectedUser?.role === 'ADMIN' ? '#ffb03a' : '#00f0ff', fontWeight: 700 }}>
+                  [CÁPSULA CARGADA]:
+                </span>{' '}
+                <span style={{ color: '#ffffff', fontWeight: 600 }}>
+                  {selectedUser ? selectedUser.name : 'Credenciales Manuales'}
+                </span>
+              </div>
+              <span style={{
+                fontSize: '9.5px',
+                padding: '2px 6px',
+                backgroundColor: selectedUser?.role === 'ADMIN' ? 'rgba(255, 176, 58, 0.2)' : 'rgba(56, 189, 248, 0.2)',
+                color: selectedUser?.role === 'ADMIN' ? '#ffb03a' : '#00f0ff',
+                letterSpacing: '0.08em'
+              }}>
+                {selectedUser ? selectedUser.role : 'CUSTOM'}
+              </span>
+            </div>
+
             <form onSubmit={handleFormSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
               <div>
                 <label className="font-mono" style={{ display: 'block', fontSize: '10.5px', textTransform: 'uppercase', letterSpacing: '0.12em', color: '#94a3b8', marginBottom: '6px' }}>
@@ -255,7 +282,11 @@ export default function LoginPanel({ users = [], onLoginSuccess }) {
                   type="email"
                   required
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  onChange={(e) => {
+                    setEmail(e.target.value);
+                    const match = teamList.find(u => u.email.toLowerCase() === e.target.value.toLowerCase());
+                    setSelectedUserId(match ? match.id : null);
+                  }}
                   placeholder="mbarriosg8@miumg.edu.gt"
                   style={inputStyle}
                 />
@@ -284,7 +315,9 @@ export default function LoginPanel({ users = [], onLoginSuccess }) {
                 className="btn-cyan keycap-glow"
                 style={{ padding: '14px', width: '100%', marginTop: '4px' }}
               >
-                {submitting ? 'INITIALIZING SESSION...' : 'INITIALIZE TERMINAL SESSION →'}
+                {submitting
+                  ? 'INITIALIZING SESSION...'
+                  : `INGRESAR AL PANEL // ${selectedUser ? selectedUser.name.split(' ')[0].toUpperCase() : 'OPERATOR'} →`}
               </button>
             </form>
 
@@ -309,8 +342,11 @@ export default function LoginPanel({ users = [], onLoginSuccess }) {
                   CONFIGURED OPERATOR NODES
                 </span>
                 <h2 style={{ fontSize: '21px', fontWeight: 700, color: '#ffffff', marginTop: '2px' }}>
-                  Acceso Rápido por Rol (1 Clic)
+                  Seleccionar Operador (Carga en Formulario)
                 </h2>
+                <div style={{ fontSize: '12px', color: '#94a3b8', marginTop: '3px' }}>
+                  Haz clic en cualquier cápsula para cargar sus credenciales y luego pulsa <strong>Ingresar al Panel</strong>.
+                </div>
               </div>
               <span className="font-mono" style={{ fontSize: '11px', color: '#64748b' }}>6 ACTIVE CAPSULES</span>
             </div>
@@ -318,6 +354,20 @@ export default function LoginPanel({ users = [], onLoginSuccess }) {
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '12px' }}>
               {teamList.map((u, idx) => {
                 const isAdmin = u.role === 'ADMIN';
+                const isSelected = selectedUser && selectedUser.id === u.id;
+
+                let cardBorder = '#222c37';
+                let cardBg = '#161d24';
+                let cardShadow = 'none';
+
+                if (isSelected) {
+                  cardBorder = isAdmin ? '#ffb03a' : '#00f0ff';
+                  cardBg = isAdmin ? 'rgba(255, 176, 58, 0.15)' : 'rgba(0, 240, 255, 0.12)';
+                  cardShadow = isAdmin ? '0 0 20px rgba(255, 176, 58, 0.3)' : '0 0 20px rgba(0, 240, 255, 0.3)';
+                } else if (isAdmin) {
+                  cardBorder = 'rgba(255, 176, 58, 0.35)';
+                }
+
                 return (
                   <button
                     key={u.id}
@@ -325,15 +375,18 @@ export default function LoginPanel({ users = [], onLoginSuccess }) {
                     onClick={() => handleQuickSelect(u)}
                     className="isometric-card"
                     style={{
-                      backgroundColor: '#161d24',
-                      border: isAdmin ? '1px solid rgba(255, 176, 58, 0.55)' : '1px solid #222c37',
+                      backgroundColor: cardBg,
+                      border: `1px solid ${cardBorder}`,
+                      boxShadow: cardShadow,
                       padding: '16px',
                       textAlign: 'left',
                       cursor: 'pointer',
                       display: 'flex',
                       flexDirection: 'column',
                       justifyContent: 'space-between',
-                      gap: '12px'
+                      gap: '12px',
+                      transform: isSelected ? 'scale(1.02)' : 'none',
+                      transition: 'all 0.25s ease'
                     }}
                   >
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', width: '100%' }}>
@@ -343,16 +396,22 @@ export default function LoginPanel({ users = [], onLoginSuccess }) {
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        border: isAdmin ? '1px solid rgba(255, 176, 58, 0.5)' : '1px solid rgba(56, 189, 248, 0.35)',
-                        backgroundColor: isAdmin ? 'rgba(255, 176, 58, 0.12)' : 'rgba(56, 189, 248, 0.1)',
-                        color: isAdmin ? '#ffb03a' : '#38bdf8',
+                        border: isSelected
+                          ? (isAdmin ? '1px solid #ffb03a' : '1px solid #00f0ff')
+                          : (isAdmin ? '1px solid rgba(255, 176, 58, 0.5)' : '1px solid rgba(56, 189, 248, 0.35)'),
+                        backgroundColor: isAdmin ? 'rgba(255, 176, 58, 0.18)' : 'rgba(56, 189, 248, 0.14)',
+                        color: isAdmin ? '#ffb03a' : '#00f0ff',
                         fontSize: '13px',
                         fontWeight: 700
                       }}>
                         {u.initials || 'OP'}
                       </div>
-                      <span className="font-mono" style={{ fontSize: '10px', color: isAdmin ? '#ffb03a' : '#64748b' }}>
-                        0{idx + 1} / {isAdmin ? 'ADMIN NODE' : 'TECH NODE'}
+                      <span className="font-mono" style={{
+                        fontSize: '10px',
+                        color: isSelected ? (isAdmin ? '#ffb03a' : '#00f0ff') : '#64748b',
+                        fontWeight: isSelected ? 700 : 400
+                      }}>
+                        {isSelected ? '● ACTIVO' : `0${idx + 1} / ${isAdmin ? 'ADMIN' : 'TECH'}`}
                       </span>
                     </div>
 
@@ -369,15 +428,18 @@ export default function LoginPanel({ users = [], onLoginSuccess }) {
                       fontSize: '10px',
                       textTransform: 'uppercase',
                       letterSpacing: '0.1em',
-                      color: isAdmin ? '#ffb03a' : '#38bdf8',
+                      color: isSelected ? (isAdmin ? '#ffb03a' : '#00f0ff') : (isAdmin ? '#ffb03a' : '#38bdf8'),
                       borderTop: '1px solid rgba(34, 44, 55, 0.8)',
                       paddingTop: '8px',
                       width: '100%',
                       display: 'flex',
-                      justifyContent: 'space-between'
+                      justifyContent: 'space-between',
+                      alignItems: 'center'
                     }}>
                       <span>{u.specialty || u.role}</span>
-                      <span>ENTER →</span>
+                      <span style={{ fontWeight: isSelected ? 700 : 500 }}>
+                        {isSelected ? 'CARGADO ✓' : 'CARGAR →'}
+                      </span>
                     </div>
                   </button>
                 );
