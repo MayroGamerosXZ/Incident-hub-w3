@@ -153,6 +153,44 @@ export default function DevOpsMonitor({
           </div>
         </div>
 
+        {/* VISOR DE TERMINAL EN VIVO / EXECUTION LOG */}
+        {latest.executionLog && (
+          <div style={{
+            marginTop: '10px',
+            marginBottom: '14px',
+            backgroundColor: '#050709',
+            border: isLatestFailed ? '1px solid rgba(239, 68, 68, 0.6)' : '1px solid rgba(34, 197, 94, 0.6)',
+            padding: '12px 14px'
+          }}>
+            <div style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              borderBottom: '1px solid rgba(34, 44, 55, 0.8)',
+              paddingBottom: '6px',
+              marginBottom: '8px'
+            }}>
+              <span className="font-mono" style={{ fontSize: '10px', color: isLatestFailed ? '#f87171' : '#4ade80', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+                {isLatestFailed ? '❌ PIPELINE FAILURE EXECUTION TRACE (CODE 1)' : '✅ PIPELINE VERIFIED EXECUTION TRACE (CODE 0)'}
+              </span>
+              <span className="font-mono" style={{ fontSize: '9.5px', color: '#64748b' }}>
+                AGENT: mayro-local-agent
+              </span>
+            </div>
+            <pre className="font-mono" style={{
+              margin: 0,
+              fontSize: '11px',
+              color: isLatestFailed ? '#fca5a5' : '#86efac',
+              whiteSpace: 'pre-wrap',
+              maxHeight: '140px',
+              overflowY: 'auto',
+              lineHeight: 1.45
+            }}>
+              {latest.executionLog}
+            </pre>
+          </div>
+        )}
+
         {/* Historial reciente de ejecuciones */}
         <div className="font-mono" style={{ fontSize: '10px', color: '#64748b', textTransform: 'uppercase', marginBottom: '8px', letterSpacing: '0.1em' }}>
           PIPELINE EXECUTION MATRIX:

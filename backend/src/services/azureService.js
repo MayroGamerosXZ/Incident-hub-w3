@@ -158,6 +158,41 @@ async function getAzureStatus() {
 function simulatePipelineFailure(reason = 'Fallo Controlado en Suite Unitaria (ERR_ASSERTION: 1 !== -1)') {
   const nextId = pipelineBuilds.length > 0 ? Math.max(...pipelineBuilds.map(b => b.id)) + 1 : 13;
 
+  const simulatedLog = `[EXECUTION LOG - AGENT: mayro-local-agent]
+> node --test tests/api.test.js
+
+TAP version 13
+# Subtest: Suite de Pruebas Unitarias e Integracion - IT Incident Hub (AB#24)
+    # Subtest: 1. Validar estructura de los 5 estados obligatorios del ciclo de vida
+    ok 1 - 1. Validar estructura de los 5 estados obligatorios del ciclo de vida
+    # Subtest: 2. Validar creacion de incidente valido e invalido (AB#8)
+    ok 2 - 2. Validar creacion de incidente valido e invalido (AB#8)
+    # Subtest: 3. Validar motor de filtros por estado, prioridad, categoria y tecnico (AB#11)
+    ok 3 - 3. Validar motor de filtros por estado, prioridad, categoria y tecnico (AB#11)
+    # Subtest: 4. Validar reglas de transicion de estados (AB#15)
+    ok 4 - 4. Validar reglas de transicion de estados (AB#15)
+    # Subtest: 5. Validar calculo corregido de metricas del Dashboard (Fix Fallo Controlado AB#22)
+    not ok 5 - 5. Validar calculo corregido de metricas del Dashboard (Fix Fallo Controlado AB#22)
+      ---
+      duration_ms: 0.812
+      failureType: 'testFailure'
+      error: 'ERR_ASSERTION: Expected values to be strictly equal: 1 !== -1'
+      code: 'ERR_ASSERTION'
+      expected: -1
+      actual: 1
+      operator: 'strictEqual'
+      stack: |-
+        AssertionError [ERR_ASSERTION]: Expected values to be strictly equal: 1 !== -1
+            at TestContext.<anonymous> (tests/api.test.js:80:12)
+      ...
+# tests 8
+# suites 0
+# pass 4
+# fail 1
+# cancelled 3
+##[error] Process completed with exit code 1.
+##[error] Quality Gate Triggered: Pipeline IT-Incident-Hub-CI-CD detenido. Artefacto bloqueado.`;
+
   const failedBuild = {
     id: nextId,
     buildNumber: `Build #${nextId} (Fallo Controlado)`,
@@ -172,7 +207,8 @@ function simulatePipelineFailure(reason = 'Fallo Controlado en Suite Unitaria (E
     artifact: '❌ Bloqueado por Quality Gate (Test #5 Failed)',
     duration: '29s',
     reason,
-    errorDetail: 'ERR_ASSERTION [AB#22, AB#24]: stats.criticos esperado -1 pero recibió 1 en tests/api.test.js',
+    errorDetail: 'ERR_ASSERTION [AB#22, AB#24]: stats.criticos esperado -1 pero recibió 1 en tests/api.test.js:80',
+    executionLog: simulatedLog,
     workItems: ['AB#22', 'AB#24'],
     finishedAt: new Date().toISOString()
   };
@@ -184,6 +220,15 @@ function simulatePipelineFailure(reason = 'Fallo Controlado en Suite Unitaria (E
 function triggerPipelineVerification(reason = 'Solución Aplicada y Verificada desde Interfaz Web') {
   const gitMeta = getLocalGitMetadata();
   const nextId = pipelineBuilds.length > 0 ? Math.max(...pipelineBuilds.map(b => b.id)) + 1 : 14;
+
+  let realTestLog = '';
+  try {
+    const rootDir = path.resolve(__dirname, '..', '..', '..');
+    const stdout = execSync('node --test tests/api.test.js', { cwd: rootDir, encoding: 'utf8' });
+    realTestLog = `[EXECUTION LOG - AGENT: mayro-local-agent]\n> node --test tests/api.test.js\n\n` + stdout.trim() + `\n\n##[section] Quality Gate Passed: 8/8 Tests Succeeded. Artefacto incident-hub-drop generado con éxito.`;
+  } catch (err) {
+    realTestLog = (err.stdout || '') + '\n' + (err.stderr || err.message);
+  }
 
   const newBuild = {
     id: nextId,
@@ -199,6 +244,7 @@ function triggerPipelineVerification(reason = 'Solución Aplicada y Verificada d
     artifact: 'incident-hub-drop (v1.0.0)',
     duration: '49s',
     reason,
+    executionLog: realTestLog,
     workItems: ['AB#22', 'AB#23', 'AB#24', 'AB#30'],
     finishedAt: new Date().toISOString()
   };
