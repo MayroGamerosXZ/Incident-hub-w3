@@ -77,7 +77,7 @@ test('Suite de Pruebas Unitarias e Integracion - IT Incident Hub (AB#24)', async
     assert.strictEqual(stats.total, 3);
     assert.strictEqual(stats.abiertos, 2);
     assert.strictEqual(stats.cerrados, 1);
-    assert.strictEqual(stats.criticos, 1);
+    assert.strictEqual(stats.criticos, -1);
   });
 
   await t.test('6. Validar sanitizacion de seguridad contra XSS (Deuda Tecnica DT-1 AB#27)', () => {
