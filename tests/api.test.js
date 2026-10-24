@@ -80,10 +80,25 @@ test('Suite de Pruebas Unitarias e Integracion - IT Incident Hub (AB#24)', async
     assert.strictEqual(stats.criticos, 1);
   });
 
-  await t.test('6. Validar sanitizacion de seguridad contra XSS (Deuda Tecnica DT-1 AB#27)', () => {
+  await t.test('6. Validar sanitizacion de seguridad y escapado contra XSS (Deuda Tecnica DT-1 AB#27)', () => {
+    const { escapeHtml } = require('../backend/src/middleware/securityMiddleware.js');
+    const { buildEmailHtml } = require('../backend/src/services/emailService.js');
     const dirty = '<script>alert("xss")</script>Fallo en servidor';
     const clean = sanitizeInputString(dirty);
     assert.strictEqual(clean, 'Fallo en servidor');
+
+    const xssPayload = '<img src=x onerror=alert(1)>';
+    const emailHtml = buildEmailHtml({
+      id: 99,
+      title: xssPayload,
+      description: 'Desc <svg onload=alert(2)>',
+      category: 'SECURITY',
+      priority: 'CRITICA',
+      status: 'NUEVO',
+      reported_by: 'sec@empresa.com'
+    });
+    assert.strictEqual(emailHtml.includes(xssPayload), false);
+    assert.ok(emailHtml.includes(escapeHtml(xssPayload)));
   });
 
   await t.test('7. Validar servicio de notificaciones Gmail UMG (mbarriosg8@miumg.edu.gt) y Azure DevOps (AB#23, AB#30)', async () => {
@@ -105,5 +120,117 @@ test('Suite de Pruebas Unitarias e Integracion - IT Incident Hub (AB#24)', async
     assert.strictEqual(azure.organization, 'DevOps-UMG-Mayro');
     assert.strictEqual(azure.project, 'incident-hub');
     assert.strictEqual(azure.selfHostedAgent.name, 'mayro-local-agent');
+  });
+
+  await t.test('8. Validar integracion HTTP real (Express API), RBAC, no exposicion de accessCode y bloqueo de transiciones ilegales (AB#15, AB#27)', async () => {
+    process.env.NODE_ENV = 'test';
+    const http = require('node:http');
+    const { Duplex } = require('node:stream');
+    const app = require('../backend/server.js');
+
+    function invokeApp({ method = 'GET', path = '/', headers = {}, body = null }) {
+      return new Promise((resolve, reject) => {
+        const socket = new Duplex({
+          read() {},
+          write(_chunk, _enc, cb) { cb(); }
+        });
+        socket.remoteAddress = '127.0.0.1';
+
+        const req = new http.IncomingMessage(socket);
+        req.method = method;
+        req.url = path;
+        const rawBody = body !== null ? JSON.stringify(body) : '';
+        req.headers = {
+          host: 'localhost',
+          ...(rawBody ? { 'content-type': 'application/json', 'content-length': String(Buffer.byteLength(rawBody)) } : {}),
+          ...Object.fromEntries(Object.entries(headers).map(([k, v]) => [k.toLowerCase(), v]))
+        };
+
+        const res = new http.ServerResponse(req);
+        res.assignSocket(socket);
+
+        const chunks = [];
+        const origWrite = res.write.bind(res);
+        const origEnd = res.end.bind(res);
+        res.write = (chunk, encoding, cb) => {
+          if (chunk) chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(String(chunk), encoding));
+          return origWrite(chunk, encoding, cb);
+        };
+        res.end = (chunk, encoding, cb) => {
+          if (chunk) chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(String(chunk), encoding));
+          origEnd(chunk, encoding, cb);
+          const text = Buffer.concat(chunks).toString('utf8');
+          const headerIdx = text.indexOf('\r\n\r\n');
+          const payloadText = headerIdx !== -1 ? text.slice(headerIdx + 4) : text;
+          resolve({
+            status: res.statusCode,
+            json: async () => JSON.parse(payloadText)
+          });
+        };
+
+        app.handle(req, res, reject);
+        if (rawBody) req.push(rawBody);
+        req.push(null);
+      });
+    }
+
+    // 8.1 /api/users no debe exponer accessCode (OWASP A01/A02)
+    const usersRes = await invokeApp({ method: 'GET', path: '/api/users' });
+    assert.strictEqual(usersRes.status, 200);
+    const usersData = await usersRes.json();
+    assert.ok(Array.isArray(usersData) && usersData.length >= 6);
+    assert.strictEqual(usersData.every(u => !('accessCode' in u)), true);
+
+    // 8.2 Login sin accessCode debe ser rechazado con 401
+    const badLogin = await invokeApp({
+      method: 'POST',
+      path: '/api/auth/login',
+      body: { userId: 1 }
+    });
+    assert.strictEqual(badLogin.status, 401);
+
+    // 8.3 Login valido de tecnico emite token HMAC y bloquea endpoints exclusivos de ADMIN con 403
+    const techLogin = await invokeApp({
+      method: 'POST',
+      path: '/api/auth/login',
+      body: { email: 'cmendoza@miumg.edu.gt', accessCode: 'TECH-2026' }
+    });
+    assert.strictEqual(techLogin.status, 200);
+    const techAuth = await techLogin.json();
+    assert.ok(techAuth.token);
+    assert.strictEqual('accessCode' in techAuth.user, false);
+
+    const forbiddenRes = await invokeApp({
+      method: 'POST',
+      path: '/api/notifications/config',
+      headers: { Authorization: `Bearer ${techAuth.token}` },
+      body: { recipient: 'otro@miumg.edu.gt' }
+    });
+    assert.strictEqual(forbiddenRes.status, 403);
+
+    // 8.4 Payload con tipos invalidos (category numerica) responde 400 sin colgar Express
+    const invalidTypeRes = await invokeApp({
+      method: 'POST',
+      path: '/api/incidents',
+      body: {
+        title: 'Incidente de prueba HTTP',
+        description: 'Descripcion suficientemente larga para prueba',
+        category: 12345,
+        reported_by: 'mbarriosg8@miumg.edu.gt'
+      }
+    });
+    assert.strictEqual(invalidTypeRes.status, 400);
+
+    // 8.5 Maquina de estados estricta bloquea salto directo NUEVO -> CERRADO y reapertura CERRADO -> EN_PROCESO
+    assert.strictEqual(canTransitionStatus('NUEVO', 'CERRADO'), false);
+    assert.strictEqual(canTransitionStatus('CERRADO', 'EN_PROCESO'), false);
+    assert.strictEqual(canTransitionStatus('RESUELTO', 'NUEVO'), false);
+
+    const illegalPatchRes = await invokeApp({
+      method: 'PATCH',
+      path: '/api/incidents/5/status',
+      body: { status: 'NUEVO' }
+    });
+    assert.strictEqual(illegalPatchRes.status, 400);
   });
 });

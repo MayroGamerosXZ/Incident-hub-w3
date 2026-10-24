@@ -1,7 +1,7 @@
 -- ==============================================================
 -- PROYECTO INTEGRADOR DEVOPS: IT Incident Hub
--- Script DDL de Base de Datos PostgreSQL
--- Responsable: [DB Engineer] Diego Ramirez (AB#7, AB#18)
+-- Script DDL de Base de Datos PostgreSQL (Endurecido v1.0.0)
+-- Responsable: Mayro Geovanni Barrios Gameros (AB#7, AB#18)
 -- ==============================================================
 
 -- Creación de Base de Datos
@@ -12,7 +12,7 @@ CREATE TABLE IF NOT EXISTS users (
     id SERIAL PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
     email VARCHAR(120) UNIQUE NOT NULL,
-    role VARCHAR(50) NOT NULL DEFAULT 'TECHNICIAN', -- 'ADMIN', 'COORDINATOR', 'TECHNICIAN', 'USER'
+    role VARCHAR(50) NOT NULL DEFAULT 'TECHNICIAN' CHECK (role IN ('ADMIN', 'COORDINATOR', 'TECHNICIAN', 'USER')),
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -21,9 +21,9 @@ CREATE TABLE IF NOT EXISTS incidents (
     id SERIAL PRIMARY KEY,
     title VARCHAR(200) NOT NULL,
     description TEXT NOT NULL,
-    category VARCHAR(50) NOT NULL, -- 'HARDWARE', 'SOFTWARE', 'NETWORK', 'SECURITY', 'ACCESS'
-    priority VARCHAR(20) NOT NULL DEFAULT 'MEDIA', -- 'BAJA', 'MEDIA', 'ALTA', 'CRITICA'
-    status VARCHAR(30) NOT NULL DEFAULT 'NUEVO', -- 'NUEVO', 'ASIGNADO', 'EN_PROCESO', 'RESUELTO', 'CERRADO'
+    category VARCHAR(50) NOT NULL CHECK (category IN ('HARDWARE', 'SOFTWARE', 'NETWORK', 'SECURITY', 'ACCESS')),
+    priority VARCHAR(20) NOT NULL DEFAULT 'MEDIA' CHECK (priority IN ('BAJA', 'MEDIA', 'ALTA', 'CRITICA')),
+    status VARCHAR(30) NOT NULL DEFAULT 'NUEVO' CHECK (status IN ('NUEVO', 'ASIGNADO', 'EN_PROCESO', 'RESUELTO', 'CERRADO')),
     reported_by VARCHAR(100) NOT NULL,
     assigned_to_id INT REFERENCES users(id) ON DELETE SET NULL,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
@@ -52,11 +52,14 @@ CREATE TABLE IF NOT EXISTS incident_comments (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
--- Índices de Rendimiento para Búsquedas y Filtros
+-- Índices Simples y Compuestos de Rendimiento para Búsquedas y Filtros (Resolución DT-3 / DT-5)
 CREATE INDEX IF NOT EXISTS idx_incidents_status ON incidents(status);
 CREATE INDEX IF NOT EXISTS idx_incidents_priority ON incidents(priority);
 CREATE INDEX IF NOT EXISTS idx_incidents_category ON incidents(category);
 CREATE INDEX IF NOT EXISTS idx_incidents_assigned_to ON incidents(assigned_to_id);
+CREATE INDEX IF NOT EXISTS idx_incidents_multicriteria ON incidents(status, priority, category, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_incident_logs_incident_id ON incident_logs(incident_id, created_at ASC);
+CREATE INDEX IF NOT EXISTS idx_incident_comments_incident_id ON incident_comments(incident_id, created_at ASC);
 
 -- 5. Vista Analitica para Indicadores de Dashboard (AB#7, AB#18)
 CREATE OR REPLACE VIEW v_incident_metrics AS

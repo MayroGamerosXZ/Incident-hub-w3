@@ -5,7 +5,7 @@ import DevOpsMonitor from './components/DevOpsMonitor.jsx';
 import LoginPanel from './components/LoginPanel.jsx';
 import SandboxMatrixConsole from './components/SandboxMatrixConsole.jsx';
 
-const API_BASE = 'http://localhost:5000/api';
+const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
 export default function App() {
   const [currentUser, setCurrentUser] = useState(() => {
@@ -16,6 +16,20 @@ export default function App() {
       return null;
     }
   });
+  const [authToken, setAuthToken] = useState(() => sessionStorage.getItem('ih_auth_token') || '');
+
+  const buildApiHeaders = (extra = {}) => {
+    const headers = { ...extra };
+    if (authToken) {
+      headers['Authorization'] = `Bearer ${authToken}`;
+    }
+    if (currentUser) {
+      headers['X-Operator-Role'] = currentUser.role || 'TECHNICIAN';
+      headers['X-Operator-Name'] = currentUser.name || 'Operador';
+      headers['X-Operator-Id'] = String(currentUser.id || '');
+    }
+    return headers;
+  };
   const [scrolled, setScrolled] = useState(false);
   const [incidents, setIncidents] = useState([]);
   const [users, setUsers] = useState([]);
@@ -102,6 +116,10 @@ export default function App() {
       throw new Error(data.error || 'Error de autenticación');
     }
     setCurrentUser(data.user);
+    if (data.token) {
+      setAuthToken(data.token);
+      sessionStorage.setItem('ih_auth_token', data.token);
+    }
     sessionStorage.setItem('ih_active_user', JSON.stringify(data.user));
     applyUserRoleContext(data.user);
     showToast(`[OK] Enclave Session Initialized: ${data.user.name} [${data.user.role}]`);
@@ -109,7 +127,9 @@ export default function App() {
 
   const handleLogout = () => {
     setCurrentUser(null);
+    setAuthToken('');
     sessionStorage.removeItem('ih_active_user');
+    sessionStorage.removeItem('ih_auth_token');
     setTechFilter('');
     setCategoryFilter('');
     setStatusFilter('');
@@ -126,16 +146,17 @@ export default function App() {
       if (techFilter) params.append('assigned_to_id', techFilter);
       if (searchTerm) params.append('search', searchTerm);
 
+      const hdrs = buildApiHeaders();
       const [incRes, userRes, statsRes, azureRes, notifRes] = await Promise.all([
-        fetch(`${API_BASE}/incidents?${params.toString()}`).then(r => r.json()),
-        fetch(`${API_BASE}/users`).then(r => r.json()),
-        fetch(`${API_BASE}/dashboard/stats`).then(r => r.json()),
-        fetch(`${API_BASE}/azure/status`).then(r => r.json()),
-        fetch(`${API_BASE}/notifications`).then(r => r.json())
+        fetch(`${API_BASE}/incidents?${params.toString()}`, { headers: hdrs }).then(r => r.json()),
+        fetch(`${API_BASE}/users`, { headers: hdrs }).then(r => r.json()),
+        fetch(`${API_BASE}/dashboard/stats`, { headers: hdrs }).then(r => r.json()),
+        fetch(`${API_BASE}/azure/status`, { headers: hdrs }).then(r => r.json()),
+        fetch(`${API_BASE}/notifications`, { headers: hdrs }).then(r => r.json())
       ]);
 
-      setIncidents(incRes);
-      setUsers(userRes);
+      setIncidents(Array.isArray(incRes) ? incRes : []);
+      setUsers(Array.isArray(userRes) ? userRes : []);
       setStats(statsRes);
       setAzureStatus(azureRes);
       setNotificationsData(notifRes);
@@ -155,7 +176,7 @@ export default function App() {
     try {
       const res = await fetch(`${API_BASE}/incidents`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: buildApiHeaders({ 'Content-Type': 'application/json' }),
         body: JSON.stringify({
           title: newTitle,
           description: newDesc,
@@ -164,28 +185,30 @@ export default function App() {
           reported_by: newReportedBy
         })
       });
+      const data = await res.json();
       if (res.ok) {
-        const created = await res.json();
         setShowNewModal(false);
         setNewTitle('');
         setNewDesc('');
         fetchData();
-        showToast(`📧 Incidente #${created.id} creado y alerta enviada a ${created.notification_sent?.to || 'mbarriosg8@miumg.edu.gt'}`);
+        showToast(`📧 Incidente #${data.id} creado y alerta enviada a ${data.notification_sent?.to || 'mbarriosg8@miumg.edu.gt'}`);
+      } else {
+        showToast(`⚠️ Error (${res.status}): ${data.error || 'No se pudo registrar el incidente'}`);
       }
     } catch (err) {
-      alert('Error al registrar incidente');
+      showToast('⚠️ Error de red al registrar incidente');
     }
   };
 
   const openDetail = async (id) => {
     try {
-      const res = await fetch(`${API_BASE}/incidents/${id}`);
+      const res = await fetch(`${API_BASE}/incidents/${id}`, { headers: buildApiHeaders() });
       const data = await res.json();
       setSelectedIncident(data);
       setTargetStatus(data.status);
       setTargetTech(data.assigned_to_id || '');
     } catch (err) {
-      alert('Error al cargar detalle');
+      showToast('⚠️ Error al cargar detalle');
     }
   };
 
@@ -194,7 +217,7 @@ export default function App() {
     try {
       const res = await fetch(`${API_BASE}/incidents/${selectedIncident.id}/status`, {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
+        headers: buildApiHeaders({ 'Content-Type': 'application/json' }),
         body: JSON.stringify({
           status: targetStatus,
           assigned_to_id: targetTech || null,
@@ -202,14 +225,16 @@ export default function App() {
           change_reason: `Transición operativa por ${currentUser ? currentUser.role : 'ADMIN'}`
         })
       });
+      const data = await res.json();
       if (res.ok) {
-        const updated = await res.json();
         openDetail(selectedIncident.id);
         fetchData();
-        showToast(`📧 Estado actualizado a ${updated.status} y notificación enviada a ${updated.notification_sent?.to || 'mbarriosg8@miumg.edu.gt'}`);
+        showToast(`📧 Estado actualizado a ${data.status} y notificación enviada a ${data.notification_sent?.to || 'mbarriosg8@miumg.edu.gt'}`);
+      } else {
+        showToast(`⛔ Bloqueo (${res.status}): ${data.error}`);
       }
     } catch (err) {
-      alert('Error al actualizar estado');
+      showToast('⚠️ Error al actualizar estado');
     }
   };
 
@@ -219,7 +244,7 @@ export default function App() {
     try {
       const res = await fetch(`${API_BASE}/incidents/${selectedIncident.id}/comments`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: buildApiHeaders({ 'Content-Type': 'application/json' }),
         body: JSON.stringify({
           author_name: currentUser ? currentUser.name : 'Mayro Gameros (DevOps Lead)',
           comment: newComment
@@ -230,7 +255,7 @@ export default function App() {
         openDetail(selectedIncident.id);
       }
     } catch (err) {
-      alert('Error al agregar comentario');
+      showToast('⚠️ Error al agregar comentario');
     }
   };
 
@@ -239,15 +264,17 @@ export default function App() {
       setSyncingAzure(true);
       const res = await fetch(`${API_BASE}/azure/sync`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: buildApiHeaders({ 'Content-Type': 'application/json' }),
         body: JSON.stringify({
           reason: 'Solución Aplicada y Restauración de Pipeline CI/CD a Verde'
         })
       });
+      const data = await res.json();
       if (res.ok) {
-        const data = await res.json();
         await fetchData();
         showToast(`✅ Solución Aplicada: ${data.build?.buildNumber} Succeeded y correo enviado a ${data.notification_sent?.to || 'mbarriosg8@miumg.edu.gt'}`);
+      } else {
+        showToast(`🔒 ${data.error || 'Permisos insuficientes'}`);
       }
     } finally {
       setSyncingAzure(false);
@@ -259,15 +286,17 @@ export default function App() {
       setSimulatingFailure(true);
       const res = await fetch(`${API_BASE}/azure/simulate-failure`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: buildApiHeaders({ 'Content-Type': 'application/json' }),
         body: JSON.stringify({
           reason: 'Simulación de Fallo Controlado en Pipeline CI (ERR_ASSERTION: 1 !== -1)'
         })
       });
+      const data = await res.json();
       if (res.ok) {
-        const data = await res.json();
         await fetchData();
         showToast(`🚨 Fallo en Pipeline Detectado (${data.build?.buildNumber}) y alerta enviada a ${data.notification_sent?.to || 'mbarriosg8@miumg.edu.gt'}`);
+      } else {
+        showToast(`🔒 ${data.error || 'Permisos insuficientes'}`);
       }
     } finally {
       setSimulatingFailure(false);
@@ -278,7 +307,8 @@ export default function App() {
     try {
       setSendingEmail(true);
       const res = await fetch(`${API_BASE}/notifications/test`, {
-        method: 'POST'
+        method: 'POST',
+        headers: buildApiHeaders()
       });
       if (res.ok) {
         const record = await res.json();
@@ -293,12 +323,15 @@ export default function App() {
   const handleSaveSmtpConfig = async (cfg) => {
     const res = await fetch(`${API_BASE}/notifications/config`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: buildApiHeaders({ 'Content-Type': 'application/json' }),
       body: JSON.stringify(cfg)
     });
+    const data = await res.json();
     if (res.ok) {
       await fetchData();
       showToast(`⚙️ Configuración de notificaciones actualizada (${cfg.recipient})`);
+    } else {
+      showToast(`🔒 ${data.error || 'No se pudo actualizar SMTP'}`);
     }
   };
 

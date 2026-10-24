@@ -18,35 +18,68 @@ const {
   initDatabase,
   checkDatabaseHealth,
   isPostgresActive,
-  pool
+  dbListIncidents,
+  dbGetIncidentById,
+  dbCreateIncident,
+  dbUpdateIncidentStatus,
+  dbAddComment
 } = require('./src/db.js');
 const {
-  canTransitionStatus
+  ALLOWED_TRANSITIONS,
+  canTransitionStatus,
+  computeDashboardMetrics
 } = require('./src/services/workflowService.js');
+const {
+  VALID_STATUSES,
+  validateCreateIncident,
+  validateStatusUpdate,
+  filterIncidentsList
+} = require('./src/validators/incidentValidator.js');
+const {
+  securityHeadersMiddleware,
+  sanitizeInputString,
+  sanitizePayload,
+  toPublicUser,
+  generateAuthToken,
+  attachOperatorContext,
+  requireAdminRole,
+  createRateLimiter
+} = require('./src/middleware/securityMiddleware.js');
+const {
+  AppError,
+  asyncHandler,
+  errorHandlerMiddleware
+} = require('./src/middleware/errorHandler.js');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Inicialización de persistencia PostgreSQL / Fallback Resiliente (ADR-004)
-initDatabase().catch(err => console.error('Error inicializando BD:', err));
+// Seguridad de cabeceras HTTP (DT-1 / OWASP A05), CORS restringible y límite de payload
+app.use(securityHeadersMiddleware);
+const allowedOrigins = process.env.CORS_ORIGINS
+  ? process.env.CORS_ORIGINS.split(',').map(o => o.trim())
+  : null;
+app.use(cors(allowedOrigins ? { origin: allowedOrigins, credentials: true } : undefined));
+app.use(express.json({ limit: '50kb' }));
+app.use(attachOperatorContext);
+app.use('/api/auth/login', createRateLimiter({ windowMs: 15 * 60_000, max: 30 }));
+app.use('/api', createRateLimiter({ windowMs: 60_000, max: 300 }));
 
-app.use(cors());
-app.use(express.json());
-
-// Estados válidos según especificación técnica
-const VALID_STATUSES = ['NUEVO', 'ASIGNADO', 'EN_PROCESO', 'RESUELTO', 'CERRADO'];
-const VALID_PRIORITIES = ['BAJA', 'MEDIA', 'ALTA', 'CRITICA'];
-const VALID_CATEGORIES = ['HARDWARE', 'SOFTWARE', 'NETWORK', 'SECURITY', 'ACCESS'];
-
-// Almacenamiento en memoria resiliente (Mock Data para ejecución autónoma o fallback de BD)
+// Almacenamiento en memoria resiliente (Mock Data para ejecución autónoma o fallback de BD ADR-004)
 let users = [
-  { id: 1, name: 'Mayro Gameros (DevOps Lead)', email: 'mbarriosg8@miumg.edu.gt', role: 'ADMIN', specialty: 'GLOBAL / DEVOPS CI-CD', defaultCategory: '', initials: 'MG', accessCode: 'ADMIN-2026' },
-  { id: 2, name: 'Carlos Mendoza (Especialista Redes)', email: 'cmendoza@miumg.edu.gt', role: 'TECHNICIAN', specialty: 'INFRAESTRUCTURA DE RED', defaultCategory: 'NETWORK', initials: 'CM', accessCode: 'TECH-2026' },
-  { id: 3, name: 'Sofia Gomez (Analista Seguridad)', email: 'sgomez@miumg.edu.gt', role: 'TECHNICIAN', specialty: 'CIBERSEGURIDAD & VPN', defaultCategory: 'SECURITY', initials: 'SG', accessCode: 'TECH-2026' },
-  { id: 4, name: 'Diego Ramirez (Arquitecto BD/SW)', email: 'dramirez@miumg.edu.gt', role: 'TECHNICIAN', specialty: 'SOFTWARE & BASE DE DATOS', defaultCategory: 'SOFTWARE', initials: 'DR', accessCode: 'TECH-2026' },
-  { id: 5, name: 'Laura Torres (Soporte Hardware)', email: 'ltorres@miumg.edu.gt', role: 'TECHNICIAN', specialty: 'HARDWARE & EQUIPOS', defaultCategory: 'HARDWARE', initials: 'LT', accessCode: 'TECH-2026' },
-  { id: 6, name: 'Andres Morales (Gestión Accesos)', email: 'amorales@miumg.edu.gt', role: 'TECHNICIAN', specialty: 'DIRECTORIO ACTIVO & IAM', defaultCategory: 'ACCESS', initials: 'AM', accessCode: 'TECH-2026' }
+  { id: 1, name: 'Mayro Gameros (DevOps Lead)', email: 'mbarriosg8@miumg.edu.gt', role: 'ADMIN', specialty: 'GLOBAL / DEVOPS CI-CD', defaultCategory: '', initials: 'MG', accessCode: process.env.ADMIN_ACCESS_CODE || 'ADMIN-2026' },
+  { id: 2, name: 'Carlos Mendoza (Especialista Redes)', email: 'cmendoza@miumg.edu.gt', role: 'TECHNICIAN', specialty: 'INFRAESTRUCTURA DE RED', defaultCategory: 'NETWORK', initials: 'CM', accessCode: process.env.TECH_ACCESS_CODE || 'TECH-2026' },
+  { id: 3, name: 'Sofia Gomez (Analista Seguridad)', email: 'sgomez@miumg.edu.gt', role: 'TECHNICIAN', specialty: 'CIBERSEGURIDAD & VPN', defaultCategory: 'SECURITY', initials: 'SG', accessCode: process.env.TECH_ACCESS_CODE || 'TECH-2026' },
+  { id: 4, name: 'Diego Ramirez (Arquitecto BD/SW)', email: 'dramirez@miumg.edu.gt', role: 'TECHNICIAN', specialty: 'SOFTWARE & BASE DE DATOS', defaultCategory: 'SOFTWARE', initials: 'DR', accessCode: process.env.TECH_ACCESS_CODE || 'TECH-2026' },
+  { id: 5, name: 'Laura Torres (Soporte Hardware)', email: 'ltorres@miumg.edu.gt', role: 'TECHNICIAN', specialty: 'HARDWARE & EQUIPOS', defaultCategory: 'HARDWARE', initials: 'LT', accessCode: process.env.TECH_ACCESS_CODE || 'TECH-2026' },
+  { id: 6, name: 'Andres Morales (Gestión Accesos)', email: 'amorales@miumg.edu.gt', role: 'TECHNICIAN', specialty: 'DIRECTORIO ACTIVO & IAM', defaultCategory: 'ACCESS', initials: 'AM', accessCode: process.env.TECH_ACCESS_CODE || 'TECH-2026' }
 ];
+
+const usersMap = new Map(users.map(u => [u.id, toPublicUser(u)]));
+
+let nextIncidentId = 6;
+let nextLogId = 4;
+let nextCommentId = 3;
 
 let incidents = [
   {
@@ -59,7 +92,9 @@ let incidents = [
     reported_by: 'mgarcia@empresa.com',
     assigned_to_id: 2,
     created_at: new Date('2026-10-10T08:00:00Z'),
-    updated_at: new Date('2026-10-10T09:30:00Z')
+    updated_at: new Date('2026-10-10T09:30:00Z'),
+    resolved_at: null,
+    closed_at: null
   },
   {
     id: 2,
@@ -71,7 +106,9 @@ let incidents = [
     reported_by: 'monitoring@empresa.com',
     assigned_to_id: 4,
     created_at: new Date('2026-10-11T10:15:00Z'),
-    updated_at: new Date('2026-10-11T11:00:00Z')
+    updated_at: new Date('2026-10-11T11:00:00Z'),
+    resolved_at: null,
+    closed_at: null
   },
   {
     id: 3,
@@ -83,7 +120,9 @@ let incidents = [
     reported_by: 'jlopez@empresa.com',
     assigned_to_id: null,
     created_at: new Date('2026-10-11T14:20:00Z'),
-    updated_at: new Date('2026-10-11T14:20:00Z')
+    updated_at: new Date('2026-10-11T14:20:00Z'),
+    resolved_at: null,
+    closed_at: null
   },
   {
     id: 4,
@@ -95,7 +134,9 @@ let incidents = [
     reported_by: 'claudia.m@empresa.com',
     assigned_to_id: 1,
     created_at: new Date('2026-10-09T12:00:00Z'),
-    updated_at: new Date('2026-10-09T16:45:00Z')
+    updated_at: new Date('2026-10-09T16:45:00Z'),
+    resolved_at: new Date('2026-10-09T16:45:00Z'),
+    closed_at: null
   },
   {
     id: 5,
@@ -107,7 +148,9 @@ let incidents = [
     reported_by: 'rvaldez@empresa.com',
     assigned_to_id: 6,
     created_at: new Date('2026-10-08T09:00:00Z'),
-    updated_at: new Date('2026-10-08T09:30:00Z')
+    updated_at: new Date('2026-10-08T09:30:00Z'),
+    resolved_at: new Date('2026-10-08T09:25:00Z'),
+    closed_at: new Date('2026-10-08T09:30:00Z')
   }
 ];
 
@@ -122,47 +165,54 @@ let incidentComments = [
   { id: 2, incident_id: 2, author_name: 'Diego Ramirez', comment: 'Identificada consulta lenta en nómina sin índices.', created_at: new Date('2026-10-11T11:15:00Z') }
 ];
 
+// Inicialización de persistencia PostgreSQL / Fallback Resiliente (ADR-004)
+initDatabase(users, incidents).catch(err => console.error('Error inicializando BD:', err));
+
 // --- ENDPOINTS DE LA API ---
 
 // 1. Healthcheck con Estado de Base de Datos PostgreSQL (ADR-004)
-app.get('/api/health', async (req, res) => {
+app.get('/api/health', asyncHandler(async (_req, res) => {
   const dbHealth = await checkDatabaseHealth();
   res.json({
     status: 'UP',
     timestamp: new Date().toISOString(),
     service: 'IT Incident Hub API',
     alert_recipient: process.env.ALERT_RECIPIENT || 'mbarriosg8@miumg.edu.gt',
-    database: dbHealth
+    database: dbHealth,
+    allowed_transitions: ALLOWED_TRANSITIONS
   });
-});
+}));
 
-// 2. Usuarios / Técnicos y Autenticación por Rol
-app.get('/api/users', (req, res) => {
-  res.json(users);
+// 2. Usuarios / Técnicos (sin exponer accessCode - OWASP A01/A02)
+app.get('/api/users', (_req, res) => {
+  res.json(users.map(toPublicUser));
 });
 
 app.post('/api/auth/login', (req, res) => {
   const { email, accessCode, userId } = req.body || {};
   let user = null;
 
-  if (userId) {
+  if (typeof email === 'string' && email.trim() !== '') {
+    user = users.find(u => u.email.toLowerCase() === email.trim().toLowerCase());
+  } else if (userId !== undefined && userId !== null) {
     user = users.find(u => u.id === Number(userId));
-  } else if (email) {
-    user = users.find(u => u.email.toLowerCase() === String(email).trim().toLowerCase());
   }
 
   if (!user) {
-    return res.status(401).json({ error: 'Usuario o correo institucional no registrado en IT Incident Hub' });
+    return res.status(401).json({ error: 'Credenciales inválidas o usuario no registrado en IT Incident Hub' });
   }
 
-  // Si se proporciona código de acceso, validamos (o permitimos el código maestro UMG-2026)
-  if (accessCode && String(accessCode).trim() !== '' && accessCode !== user.accessCode && accessCode !== 'UMG-2026') {
-    return res.status(401).json({ error: `Código de acceso inválido para ${user.email}. Usa ${user.accessCode} o acceso rápido.` });
+  if (typeof accessCode !== 'string' || accessCode.trim() === '' || accessCode.trim() !== user.accessCode) {
+    return res.status(401).json({ error: 'Código de acceso inválido para el operador seleccionado' });
   }
+
+  const publicUser = toPublicUser(user);
+  const token = generateAuthToken(user);
 
   res.json({
     authenticated: true,
-    user,
+    token,
+    user: publicUser,
     permissions: {
       isAdmin: user.role === 'ADMIN',
       canManagePipeline: user.role === 'ADMIN',
@@ -173,72 +223,95 @@ app.post('/api/auth/login', (req, res) => {
   });
 });
 
-// 3. Listar Incidentes con Filtros (AB#11)
-app.get('/api/incidents', (req, res) => {
-  const { status, priority, category, assigned_to_id, search } = req.query;
-  let filtered = [...incidents];
-
-  if (status) filtered = filtered.filter(i => i.status.toUpperCase() === status.toUpperCase());
-  if (priority) filtered = filtered.filter(i => i.priority.toUpperCase() === priority.toUpperCase());
-  if (category) filtered = filtered.filter(i => i.category.toUpperCase() === category.toUpperCase());
-  if (assigned_to_id) filtered = filtered.filter(i => String(i.assigned_to_id) === String(assigned_to_id));
-  if (search) {
-    const s = search.toLowerCase();
-    filtered = filtered.filter(i => i.title.toLowerCase().includes(s) || i.description.toLowerCase().includes(s));
-  }
+// 3. Listar Incidentes con Filtros y Enriquecimiento O(1) con Map (AB#11)
+app.get('/api/incidents', asyncHandler(async (req, res) => {
+  const baseList = isPostgresActive() ? await dbListIncidents() : incidents;
+  const filtered = filterIncidentsList(baseList, req.query);
 
   const enriched = filtered.map(inc => ({
     ...inc,
-    assigned_technician: users.find(u => u.id === inc.assigned_to_id) || null
+    assigned_technician: usersMap.get(inc.assigned_to_id) || null
   }));
 
   res.json(enriched);
-});
+}));
 
 // 4. Detalle de Incidente
-app.get('/api/incidents/:id', (req, res) => {
-  const inc = incidents.find(i => i.id === parseInt(req.params.id));
-  if (!inc) return res.status(404).json({ error: 'Incidente no encontrado' });
+app.get('/api/incidents/:id', asyncHandler(async (req, res) => {
+  const id = Number(req.params.id);
+  if (!Number.isInteger(id) || id <= 0) {
+    throw new AppError('Identificador de incidente inválido', 400);
+  }
+
+  if (isPostgresActive()) {
+    const dbInc = await dbGetIncidentById(id);
+    if (!dbInc) throw new AppError('Incidente no encontrado', 404);
+    return res.json({
+      ...dbInc,
+      assigned_technician: usersMap.get(dbInc.assigned_to_id) || null
+    });
+  }
+
+  const inc = incidents.find(i => i.id === id);
+  if (!inc) throw new AppError('Incidente no encontrado', 404);
 
   const comments = incidentComments.filter(c => c.incident_id === inc.id);
   const logs = incidentLogs.filter(l => l.incident_id === inc.id);
-  const assigned_technician = users.find(u => u.id === inc.assigned_to_id) || null;
+  const assigned_technician = usersMap.get(inc.assigned_to_id) || null;
 
   res.json({ ...inc, assigned_technician, comments, logs });
-});
+}));
 
-// 5. Crear Incidente + Disparo Automático de Alerta a mbarriosg8@miumg.edu.gt (AB#8)
-app.post('/api/incidents', async (req, res) => {
-  const { title, description, category, priority, reported_by } = req.body;
-
-  if (!title || !description || !category || !reported_by) {
-    return res.status(400).json({ error: 'Campos obligatorios faltantes (title, description, category, reported_by)' });
+// 5. Crear Incidente + Sanitización XSS (DT-1) + Validación Estricta + Alerta (AB#8)
+app.post('/api/incidents', asyncHandler(async (req, res) => {
+  const cleanBody = sanitizePayload(req.body || {});
+  const validation = validateCreateIncident(cleanBody);
+  if (!validation.valid) {
+    throw new AppError(validation.errors[0], 400, validation.errors);
   }
 
-  const newIncident = {
-    id: incidents.length > 0 ? Math.max(...incidents.map(i => i.id)) + 1 : 1,
-    title: String(title).trim(),
-    description: String(description).trim(),
-    category: VALID_CATEGORIES.includes(category.toUpperCase()) ? category.toUpperCase() : 'SOFTWARE',
-    priority: VALID_PRIORITIES.includes(priority ? priority.toUpperCase() : '') ? priority.toUpperCase() : 'MEDIA',
-    status: 'NUEVO',
-    reported_by: String(reported_by).trim(),
-    assigned_to_id: null,
-    created_at: new Date(),
-    updated_at: new Date()
-  };
+  const normalizedCategory = cleanBody.category.trim().toUpperCase();
+  const normalizedPriority = cleanBody.priority
+    ? cleanBody.priority.trim().toUpperCase()
+    : 'MEDIA';
 
-  incidents.unshift(newIncident);
+  let newIncident;
+  if (isPostgresActive()) {
+    newIncident = await dbCreateIncident({
+      title: cleanBody.title.trim(),
+      description: cleanBody.description.trim(),
+      category: normalizedCategory,
+      priority: normalizedPriority,
+      reported_by: cleanBody.reported_by.trim()
+    });
+  } else {
+    newIncident = {
+      id: nextIncidentId++,
+      title: cleanBody.title.trim(),
+      description: cleanBody.description.trim(),
+      category: normalizedCategory,
+      priority: normalizedPriority,
+      status: 'NUEVO',
+      reported_by: cleanBody.reported_by.trim(),
+      assigned_to_id: null,
+      created_at: new Date(),
+      updated_at: new Date(),
+      resolved_at: null,
+      closed_at: null
+    };
 
-  incidentLogs.push({
-    id: incidentLogs.length + 1,
-    incident_id: newIncident.id,
-    previous_status: null,
-    new_status: 'NUEVO',
-    changed_by: newIncident.reported_by,
-    change_reason: 'Creación de incidente inicial',
-    created_at: new Date()
-  });
+    incidents.unshift(newIncident);
+
+    incidentLogs.push({
+      id: nextLogId++,
+      incident_id: newIncident.id,
+      previous_status: null,
+      new_status: 'NUEVO',
+      changed_by: req.user?.name || newIncident.reported_by,
+      change_reason: 'Creación de incidente inicial',
+      created_at: new Date()
+    });
+  }
 
   const notification = await sendIncidentNotification(newIncident, 'INCIDENT_CREATED');
 
@@ -246,128 +319,153 @@ app.post('/api/incidents', async (req, res) => {
     ...newIncident,
     notification_sent: notification
   });
-});
+}));
 
-// 6. Transicionar Estado o Asignar Técnico + Alerta a mbarriosg8@miumg.edu.gt (AB#15)
-app.patch('/api/incidents/:id/status', async (req, res) => {
-  const inc = incidents.find(i => i.id === parseInt(req.params.id));
-  if (!inc) return res.status(404).json({ error: 'Incidente no encontrado' });
-
-  const { status, assigned_to_id, changed_by, change_reason } = req.body;
-  const previous_status = inc.status;
-
-  if (status) {
-    const nextStatus = status.toUpperCase();
-    if (!VALID_STATUSES.includes(nextStatus)) {
-      return res.status(400).json({ error: `Estado no válido. Opciones: ${VALID_STATUSES.join(', ')}` });
-    }
-    // Validación de reglas de transición de estados (AB#15)
-    if (!canTransitionStatus(previous_status, nextStatus)) {
-      return res.status(400).json({
-        error: `Transición de estado no permitida: no es posible pasar de ${previous_status} a ${nextStatus}`
-      });
-    }
-    inc.status = nextStatus;
+// 6. Transicionar Estado o Asignar Técnico + Máquina de Estados Estricta (AB#15)
+app.patch('/api/incidents/:id/status', asyncHandler(async (req, res) => {
+  const id = Number(req.params.id);
+  if (!Number.isInteger(id) || id <= 0) {
+    throw new AppError('Identificador de incidente inválido', 400);
   }
 
+  const cleanBody = sanitizePayload(req.body || {});
+  const statusValidation = validateStatusUpdate(cleanBody, users);
+  if (!statusValidation.valid) {
+    throw new AppError(statusValidation.errors[0], 400, statusValidation.errors);
+  }
+
+  const currentInc = isPostgresActive()
+    ? await dbGetIncidentById(id)
+    : incidents.find(i => i.id === id);
+
+  if (!currentInc) throw new AppError('Incidente no encontrado', 404);
+
+  const { status, assigned_to_id, changed_by, change_reason } = cleanBody;
+  const previous_status = currentInc.status;
+  let nextStatus = previous_status;
+
+  if (typeof status === 'string' && status.trim() !== '') {
+    const requestedStatus = status.trim().toUpperCase();
+    if (!VALID_STATUSES.includes(requestedStatus)) {
+      throw new AppError(`Estado no válido. Opciones: ${VALID_STATUSES.join(', ')}`, 400);
+    }
+    if (requestedStatus !== previous_status && !canTransitionStatus(previous_status, requestedStatus)) {
+      throw new AppError(
+        `Transición de estado no permitida: no es posible pasar de ${previous_status} a ${requestedStatus}`,
+        400
+      );
+    }
+    nextStatus = requestedStatus;
+  }
+
+  let nextAssignedTo = currentInc.assigned_to_id;
   if (assigned_to_id !== undefined) {
-    inc.assigned_to_id = assigned_to_id ? parseInt(assigned_to_id) : null;
-    if (inc.status === 'NUEVO' && inc.assigned_to_id !== null) {
-      inc.status = 'ASIGNADO';
+    nextAssignedTo = assigned_to_id !== null && assigned_to_id !== '' ? Number(assigned_to_id) : null;
+    if (nextStatus === 'NUEVO' && nextAssignedTo !== null) {
+      nextStatus = 'ASIGNADO';
     }
   }
 
-  inc.updated_at = new Date();
+  const now = new Date();
+  const resolved_at = nextStatus === 'RESUELTO' ? now : currentInc.resolved_at || null;
+  const closed_at = nextStatus === 'CERRADO' ? now : currentInc.closed_at || null;
+  const operatorName = req.user?.name || (typeof changed_by === 'string' && changed_by.trim() ? sanitizeInputString(changed_by) : 'Operador');
+  const reasonText = typeof change_reason === 'string' && change_reason.trim()
+    ? sanitizeInputString(change_reason)
+    : (nextAssignedTo ? `Asignado a técnico #${nextAssignedTo}` : `Transición ${previous_status} -> ${nextStatus}`);
 
-  incidentLogs.push({
-    id: incidentLogs.length + 1,
-    incident_id: inc.id,
-    previous_status,
-    new_status: inc.status,
-    changed_by: changed_by || 'Operador',
-    change_reason: change_reason || (assigned_to_id ? `Asignado a técnico #${assigned_to_id}` : 'Actualización de estado'),
-    created_at: new Date()
-  });
+  let updatedIncident;
+  if (isPostgresActive()) {
+    updatedIncident = await dbUpdateIncidentStatus(id, {
+      previous_status,
+      new_status: nextStatus,
+      assigned_to_id: nextAssignedTo,
+      changed_by: operatorName,
+      change_reason: reasonText,
+      resolved_at,
+      closed_at
+    });
+  } else {
+    currentInc.status = nextStatus;
+    currentInc.assigned_to_id = nextAssignedTo;
+    currentInc.updated_at = now;
+    currentInc.resolved_at = resolved_at;
+    currentInc.closed_at = closed_at;
 
-  const notification = await sendIncidentNotification(inc, 'INCIDENT_STATUS_CHANGED');
+    incidentLogs.push({
+      id: nextLogId++,
+      incident_id: currentInc.id,
+      previous_status,
+      new_status: nextStatus,
+      changed_by: operatorName,
+      change_reason: reasonText,
+      created_at: now
+    });
+    updatedIncident = currentInc;
+  }
+
+  const notification = await sendIncidentNotification(updatedIncident, 'INCIDENT_STATUS_CHANGED');
 
   res.json({
-    ...inc,
+    ...updatedIncident,
     notification_sent: notification
   });
-});
+}));
 
-// 7. Agregar Comentario
-app.post('/api/incidents/:id/comments', (req, res) => {
-  const inc = incidents.find(i => i.id === parseInt(req.params.id));
-  if (!inc) return res.status(404).json({ error: 'Incidente no encontrado' });
-
-  const { author_name, comment } = req.body;
-  if (!author_name || !comment) {
-    return res.status(400).json({ error: 'author_name y comment son obligatorios' });
+// 7. Agregar Comentario Sanitizado (DT-1)
+app.post('/api/incidents/:id/comments', asyncHandler(async (req, res) => {
+  const id = Number(req.params.id);
+  if (!Number.isInteger(id) || id <= 0) {
+    throw new AppError('Identificador de incidente inválido', 400);
   }
 
+  const cleanBody = sanitizePayload(req.body || {});
+  const author_name = req.user?.name || cleanBody.author_name;
+  const comment = cleanBody.comment;
+
+  if (typeof author_name !== 'string' || !author_name.trim() || typeof comment !== 'string' || !comment.trim()) {
+    throw new AppError('author_name y comment son obligatorios', 400);
+  }
+
+  if (isPostgresActive()) {
+    const exists = await dbGetIncidentById(id);
+    if (!exists) throw new AppError('Incidente no encontrado', 404);
+    const createdComment = await dbAddComment(id, {
+      author_name: author_name.trim(),
+      comment: comment.trim()
+    });
+    return res.status(201).json(createdComment);
+  }
+
+  const inc = incidents.find(i => i.id === id);
+  if (!inc) throw new AppError('Incidente no encontrado', 404);
+
   const newComment = {
-    id: incidentComments.length + 1,
+    id: nextCommentId++,
     incident_id: inc.id,
-    author_name: String(author_name).trim(),
-    comment: String(comment).trim(),
+    author_name: author_name.trim(),
+    comment: comment.trim(),
     created_at: new Date()
   };
 
   incidentComments.push(newComment);
   res.status(201).json(newComment);
-});
+}));
 
-// 8. Métricas del Dashboard y Paneles Gráficos (AB#33, AB#34)
-app.get('/api/dashboard/stats', (req, res) => {
-  const total = incidents.length;
-  const abiertos = incidents.filter(i => ['NUEVO', 'ASIGNADO', 'EN_PROCESO'].includes(i.status)).length;
-  const cerrados = incidents.filter(i => ['RESUELTO', 'CERRADO'].includes(i.status)).length;
-  const criticos = incidents.filter(i => i.priority === 'CRITICA' && i.status !== 'CERRADO').length;
-
-  const porEstado = VALID_STATUSES.map(st => ({
-    estado: st,
-    total: incidents.filter(i => i.status === st).length
-  }));
-
-  const porPrioridad = VALID_PRIORITIES.map(pr => ({
-    prioridad: pr,
-    total: incidents.filter(i => i.priority === pr).length,
-    activos: incidents.filter(i => i.priority === pr && i.status !== 'CERRADO').length
-  }));
-
-  const porCategoria = VALID_CATEGORIES.map(cat => ({
-    categoria: cat,
-    total: incidents.filter(i => i.category === cat).length
-  }));
-
-  const porTecnico = users.map(user => {
-    const asignadosActivos = incidents.filter(i => i.assigned_to_id === user.id && !['RESUELTO', 'CERRADO'].includes(i.status)).length;
-    const resueltos = incidents.filter(i => i.assigned_to_id === user.id && ['RESUELTO', 'CERRADO'].includes(i.status)).length;
-    return {
-      id: user.id,
-      nombre: user.name,
-      initials: user.initials || 'IT',
-      specialty: user.specialty || user.role,
-      role: user.role,
-      asignados: incidents.filter(i => i.assigned_to_id === user.id && i.status !== 'CERRADO').length,
-      activos: asignadosActivos,
-      resueltos,
-      total: asignadosActivos + resueltos
-    };
-  });
-
-  res.json({ total, abiertos, cerrados, criticos, porEstado, porPrioridad, porCategoria, porTecnico });
-});
+// 8. Métricas del Dashboard en O(n) usando workflowService (AB#33, AB#34)
+app.get('/api/dashboard/stats', asyncHandler(async (_req, res) => {
+  const list = isPostgresActive() ? await dbListIncidents() : incidents;
+  const metrics = computeDashboardMetrics(list, users);
+  res.json(metrics);
+}));
 
 // 9. Bandeja y Estado de Notificaciones por Correo (mbarriosg8@miumg.edu.gt)
-app.get('/api/notifications', (req, res) => {
+app.get('/api/notifications', (_req, res) => {
   res.json(getNotifications());
 });
 
 // 10. Disparar Alerta de Prueba a mbarriosg8@miumg.edu.gt
-app.post('/api/notifications/test', async (req, res) => {
+app.post('/api/notifications/test', asyncHandler(async (_req, res) => {
   const sampleIncident = incidents[0] || {
     id: 99,
     title: 'Verificación de Alerta Operativa en Vivo',
@@ -383,39 +481,48 @@ app.post('/api/notifications/test', async (req, res) => {
     'PRUEBA DE NOTIFICACIÓN A CORREO INSTITUCIONAL UMG'
   );
   res.status(201).json(record);
-});
+}));
 
-// 11. Actualizar Configuración SMTP en Caliente (Opcional)
-app.post('/api/notifications/config', (req, res) => {
+// 11. Actualizar Configuración SMTP en Caliente (Restringido a ADMIN - OWASP A01)
+app.post('/api/notifications/config', requireAdminRole, asyncHandler(async (req, res) => {
   const updated = updateSmtpConfig(req.body || {});
   res.json(updated);
-});
+}));
 
 // 12. Estado de Azure DevOps Pipelines, Agente Self-Hosted y Git
-app.get('/api/azure/status', async (req, res) => {
+app.get('/api/azure/status', asyncHandler(async (_req, res) => {
   const status = await getAzureStatus();
   res.json(status);
-});
+}));
 
-// 13. Simular Fallo Controlado en Pipeline (ROJO ❌) + Alerta a Gmail UMG (AB#22, AB#24)
-app.post('/api/azure/simulate-failure', async (req, res) => {
-  const build = simulatePipelineFailure(req.body?.reason || 'Simulación de Fallo Controlado en Pipeline CI (ERR_ASSERTION: 1 !== -1)');
+// 13. Simular Fallo Controlado en Pipeline (ROJO ❌) + Alerta a Gmail UMG (Restringido a ADMIN)
+app.post('/api/azure/simulate-failure', requireAdminRole, asyncHandler(async (req, res) => {
+  const reason = typeof req.body?.reason === 'string' && req.body.reason.trim()
+    ? sanitizeInputString(req.body.reason)
+    : 'Simulación de Fallo Controlado en Pipeline CI (ERR_ASSERTION: 1 !== -1)';
+  const build = simulatePipelineFailure(reason);
   const emailRecord = await sendPipelineNotification(build);
   res.status(201).json({
     build,
     notification_sent: emailRecord
   });
-});
+}));
 
-// 14. Disparar Solución / Verificación de Pipeline en Azure (VERDE ✅) + Notificación por Correo
-app.post('/api/azure/sync', async (req, res) => {
-  const build = triggerPipelineVerification(req.body?.reason || 'Solución Aplicada y Restauración de Pipeline CI/CD a Verde');
+// 14. Disparar Solución / Verificación Asíncrona de Pipeline (VERDE ✅) (Restringido a ADMIN)
+app.post('/api/azure/sync', requireAdminRole, asyncHandler(async (req, res) => {
+  const reason = typeof req.body?.reason === 'string' && req.body.reason.trim()
+    ? sanitizeInputString(req.body.reason)
+    : 'Solución Aplicada y Restauración de Pipeline CI/CD a Verde';
+  const build = await triggerPipelineVerification(reason);
   const emailRecord = await sendPipelineNotification(build);
   res.status(201).json({
     build,
     notification_sent: emailRecord
   });
-});
+}));
+
+// Middleware Centralizado de Manejo de Errores (DT-2 - AB#27)
+app.use(errorHandlerMiddleware);
 
 if (process.env.NODE_ENV !== 'test') {
   app.listen(PORT, () => {

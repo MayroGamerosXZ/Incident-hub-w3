@@ -3,108 +3,141 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>IT Incident Hub — Informe Técnico Oficial y Memoria de Ingeniería DevOps</title>
+  <title>IT Incident Hub — Informe Técnico Oficial y Memoria de Ingeniería DevOps (Release v1.0.0)</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
       --primary: #0f172a;
       --primary-accent: #0284c7;
+      --primary-hover: #0369a1;
       --secondary: #334155;
       --border-color: #cbd5e1;
       --bg-light: #f8fafc;
       --text-dark: #0f172a;
       --text-muted: #64748b;
       --success: #15803d;
+      --success-bg: #f0fdf4;
       --danger: #b91c1c;
+      --danger-bg: #fef2f2;
       --warning: #b45309;
+      --warning-bg: #fffbeb;
       --code-bg: #f1f5f9;
+      --accent-purple: #7e22ce;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      font-size: 11pt;
-      line-height: 1.65;
+      font-size: 10.5pt;
+      line-height: 1.6;
       color: var(--text-dark);
-      background-color: #ffffff;
-      padding: 0;
+      background-color: #e2e8f0;
+      padding: 30px 15px;
       margin: 0;
     }
 
-    /* CONTENEDOR PRINCIPAL TIPO REPORTE */
+    /* CONTENEDOR TIPO HOJA TÉCNICA */
     .document-container {
-      max-width: 900px;
+      max-width: 960px;
       margin: 0 auto;
-      padding: 40px 50px;
+      background-color: #ffffff;
+      padding: 60px 70px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+      border-radius: 4px;
     }
 
-    /* REGLAS DE IMPRESIÓN Y PAGINACIÓN */
+    /* REGLAS DE IMPRESIÓN Y PAGINACIÓN A4 / LETTER (25 PÁGINAS) */
     @page {
       size: letter;
-      margin: 20mm 18mm 20mm 18mm;
+      margin: 18mm 16mm 18mm 16mm;
     }
 
     @media print {
       body {
-        font-size: 10pt;
-        line-height: 1.5;
+        font-size: 9.5pt;
+        line-height: 1.45;
         background: none;
+        padding: 0;
       }
       .document-container {
         width: 100%;
         max-width: none;
         padding: 0;
         margin: 0;
+        box-shadow: none;
+        border-radius: 0;
       }
       .page-break {
-        page-break-after: always;
-        break-after: page;
+        page-break-after: always !important;
+        break-after: page !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        border: none !important;
+        height: 0 !important;
       }
       .no-print {
         display: none !important;
       }
       .image-placeholder {
-        border: 2px dashed #94a3b8 !important;
+        border: 2px dashed #64748b !important;
         background: #f8fafc !important;
+        page-break-inside: avoid;
       }
       a {
         text-decoration: none;
         color: var(--text-dark);
+      }
+      table, pre, .callout {
+        page-break-inside: avoid;
       }
     }
 
     .page-break {
       page-break-after: always;
       break-after: page;
-      margin-top: 40px;
-      margin-bottom: 40px;
-      border-top: 1px dashed #e2e8f0;
+      margin-top: 50px;
+      margin-bottom: 50px;
+      border-top: 2px dashed #cbd5e1;
+      position: relative;
     }
 
-    /* ESTILOS DE PORTADA */
+    .page-break::after {
+      content: 'Corte de Página Formal (Página Siguiente)';
+      position: absolute;
+      top: -10px;
+      right: 20px;
+      background: #ffffff;
+      padding: 0 10px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 8pt;
+      color: #94a3b8;
+      text-transform: uppercase;
+    }
+
+    /* PORTADA FORMAL */
     .cover-page {
-      min-height: 90vh;
+      min-height: 85vh;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
       text-align: center;
-      padding: 60px 20px 40px;
+      padding: 40px 10px 20px;
     }
 
     .cover-header .inst-logo {
-      font-size: 14pt;
-      font-weight: 700;
+      font-size: 15pt;
+      font-weight: 800;
       letter-spacing: 2px;
       color: #1e3a8a;
       text-transform: uppercase;
-      margin-bottom: 8px;
+      margin-bottom: 6px;
     }
 
     .cover-header .faculty {
-      font-size: 12pt;
+      font-size: 11.5pt;
       font-weight: 600;
       color: #475569;
       text-transform: uppercase;
@@ -118,7 +151,7 @@
     }
 
     .cover-body {
-      margin: 60px 0;
+      margin: 50px 0;
     }
 
     .cover-body .badge-project {
@@ -128,109 +161,125 @@
       font-family: 'JetBrains Mono', monospace;
       font-size: 9.5pt;
       font-weight: 700;
-      padding: 4px 14px;
+      padding: 5px 16px;
       border-radius: 9999px;
-      margin-bottom: 20px;
+      margin-bottom: 24px;
       text-transform: uppercase;
       letter-spacing: 1px;
+      border: 1px solid #bae6fd;
     }
 
     .cover-title {
       font-family: 'Space Grotesk', sans-serif;
-      font-size: 28pt;
-      font-weight: 700;
-      line-height: 1.2;
+      font-size: 32pt;
+      font-weight: 800;
+      line-height: 1.15;
       color: #0f172a;
       margin-bottom: 16px;
+      letter-spacing: -0.02em;
     }
 
     .cover-subtitle {
-      font-size: 14pt;
+      font-size: 13.5pt;
       color: #475569;
-      max-width: 680px;
+      max-width: 720px;
       margin: 0 auto;
       line-height: 1.5;
+    }
+
+    .cover-tags {
+      margin-top: 28px;
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      flex-wrap: wrap;
     }
 
     .cover-footer {
       border-top: 2px solid #e2e8f0;
       padding-top: 24px;
-      display: flex;
-      justify-content: space-between;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
       text-align: left;
-      font-size: 10pt;
+      font-size: 9.5pt;
       color: #334155;
     }
 
-    .cover-footer .meta-block {
-      line-height: 1.6;
-    }
+    .cover-footer strong { color: #0f172a; }
 
-    .cover-footer strong {
-      color: #0f172a;
-    }
-
-    /* ENCABEZADOS Y SECCIONES */
+    /* TIPOGRAFÍA Y ENCABEZADOS */
     h1, h2, h3, h4 {
       color: var(--primary);
       font-family: 'Space Grotesk', sans-serif;
       font-weight: 700;
-      line-height: 1.3;
+      line-height: 1.25;
     }
 
     h1 {
-      font-size: 20pt;
+      font-size: 18pt;
       border-bottom: 2px solid var(--primary-accent);
       padding-bottom: 8px;
-      margin-top: 36px;
-      margin-bottom: 18px;
+      margin-top: 30px;
+      margin-bottom: 16px;
       display: flex;
       align-items: center;
       gap: 10px;
+      color: #0f172a;
     }
 
     h2 {
-      font-size: 15pt;
+      font-size: 13.5pt;
       border-bottom: 1px solid var(--border-color);
       padding-bottom: 6px;
-      margin-top: 28px;
-      margin-bottom: 14px;
+      margin-top: 24px;
+      margin-bottom: 12px;
       color: #1e293b;
     }
 
     h3 {
-      font-size: 12.5pt;
-      margin-top: 20px;
-      margin-bottom: 10px;
+      font-size: 11pt;
+      margin-top: 18px;
+      margin-bottom: 8px;
       color: #334155;
     }
 
     p {
-      margin-bottom: 14px;
+      margin-bottom: 12px;
       text-align: justify;
     }
 
-    /* TABLAS */
+    ul, ol {
+      margin-left: 24px;
+      margin-bottom: 14px;
+    }
+
+    li {
+      margin-bottom: 6px;
+    }
+
+    /* TABLAS FORMALES */
     table {
       width: 100%;
       border-collapse: collapse;
-      margin: 18px 0 24px;
-      font-size: 9.5pt;
+      margin: 16px 0 22px;
+      font-size: 9pt;
+      background: #ffffff;
     }
 
     th, td {
       border: 1px solid var(--border-color);
-      padding: 9px 12px;
+      padding: 8px 10px;
       text-align: left;
       vertical-align: top;
     }
 
     th {
       background-color: #f1f5f9;
-      color: #1e293b;
+      color: #0f172a;
       font-weight: 700;
       text-transform: uppercase;
-      font-size: 8.5pt;
+      font-size: 8pt;
       letter-spacing: 0.5px;
     }
 
@@ -238,7 +287,7 @@
       background-color: #f8fafc;
     }
 
-    /* BLOQUES DE CÓDIGO Y LLAMADOS */
+    /* CÓDIGO Y LLAMADOS */
     pre, code {
       font-family: 'JetBrains Mono', monospace;
     }
@@ -246,20 +295,23 @@
     pre {
       background-color: var(--code-bg);
       border: 1px solid #cbd5e1;
+      border-left: 4px solid var(--primary-accent);
       border-radius: 4px;
-      padding: 12px 16px;
-      font-size: 8.5pt;
+      padding: 12px 14px;
+      font-size: 8pt;
       line-height: 1.45;
       overflow-x: auto;
-      margin: 14px 0 20px;
+      margin: 12px 0 18px;
+      white-space: pre-wrap;
+      word-break: break-all;
     }
 
     code {
       background-color: #f1f5f9;
+      color: #0284c7;
       padding: 2px 5px;
       border-radius: 3px;
-      font-size: 9pt;
-      color: #0369a1;
+      font-size: 8.5pt;
     }
 
     .callout {
@@ -268,35 +320,33 @@
       padding: 12px 16px;
       margin: 16px 0;
       border-radius: 0 4px 4px 0;
-      font-size: 10pt;
+      font-size: 9.5pt;
     }
 
     .callout-title {
       font-weight: 700;
       color: #0369a1;
       margin-bottom: 4px;
-      font-size: 10.5pt;
+      font-size: 10pt;
+      display: flex;
+      align-items: center;
+      gap: 6px;
     }
 
-    .callout-success {
-      border-left-color: var(--success);
-      background-color: #f0fdf4;
-    }
+    .callout-success { border-left-color: var(--success); background-color: var(--success-bg); }
     .callout-success .callout-title { color: var(--success); }
-
-    .callout-warning {
-      border-left-color: var(--warning);
-      background-color: #fffbeb;
-    }
+    .callout-warning { border-left-color: var(--warning); background-color: var(--warning-bg); }
     .callout-warning .callout-title { color: var(--warning); }
+    .callout-danger { border-left-color: var(--danger); background-color: var(--danger-bg); }
+    .callout-danger .callout-title { color: var(--danger); }
 
-    /* CAJAS DE PLACEHOLDER PARA CAPTURAS DE PANTALLA */
+    /* CONTENEDOR DE PLACEHOLDERS DE CAPTURAS */
     .image-placeholder {
       border: 2px dashed #0284c7;
       background-color: #f8fafc;
       border-radius: 6px;
-      padding: 20px;
-      margin: 20px 0 28px;
+      padding: 18px 20px;
+      margin: 18px 0 24px;
       text-align: center;
       position: relative;
     }
@@ -306,32 +356,50 @@
       background-color: #0284c7;
       color: #ffffff;
       font-family: 'JetBrains Mono', monospace;
-      font-size: 8.5pt;
+      font-size: 8pt;
       font-weight: 700;
       padding: 3px 10px;
-      border-radius: 4px;
+      border-radius: 3px;
       text-transform: uppercase;
+      letter-spacing: 0.5px;
       margin-bottom: 8px;
     }
 
     .image-placeholder .ph-title {
       font-weight: 700;
-      font-size: 11.5pt;
+      font-size: 11pt;
       color: #0f172a;
       margin-bottom: 6px;
     }
 
     .image-placeholder .ph-desc {
-      font-size: 9.5pt;
+      font-size: 9pt;
       color: #475569;
-      max-width: 650px;
+      max-width: 680px;
       margin: 0 auto 10px;
-      line-height: 1.4;
+      line-height: 1.45;
     }
+
+    .image-placeholder .ph-box {
+      border: 1px solid #cbd5e1;
+      background: #ffffff;
+      height: 140px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      margin: 10px auto;
+      border-radius: 4px;
+      color: #94a3b8;
+      font-size: 9pt;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .image-placeholder .ph-box span { font-size: 20pt; margin-bottom: 4px; }
 
     .image-placeholder .ph-rubric {
       font-family: 'JetBrains Mono', monospace;
-      font-size: 8.5pt;
+      font-size: 8pt;
       color: #0369a1;
       background: #e0f2fe;
       display: inline-block;
@@ -339,13 +407,31 @@
       border-radius: 3px;
     }
 
-    /* ÍNDICE GENERAL */
+    /* BADGES */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 8pt;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 3px;
+      text-transform: uppercase;
+    }
+    .badge-green { background: #dcfce7; color: #15803d; border: 1px solid #86efac; }
+    .badge-blue { background: #e0f2fe; color: #0369a1; border: 1px solid #7dd3fc; }
+    .badge-red { background: #fee2e2; color: #b91c1c; border: 1px solid #fca5a5; }
+    .badge-yellow { background: #fef3c7; color: #b45309; border: 1px solid #fde68a; }
+    .badge-purple { background: #f3e8ff; color: #7e22ce; border: 1px solid #d8b4fe; }
+
+    /* ÍNDICE */
     .toc-container {
       background: #f8fafc;
       border: 1px solid var(--border-color);
       border-radius: 6px;
       padding: 24px 30px;
-      margin: 30px 0 40px;
+      margin: 20px 0 30px;
     }
 
     .toc-title {
@@ -360,17 +446,18 @@
     .toc-list {
       list-style: none;
       padding: 0;
+      margin: 0;
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 10px 24px;
-      font-size: 9.5pt;
+      gap: 8px 24px;
+      font-size: 9pt;
     }
 
     .toc-list li {
       display: flex;
       justify-content: space-between;
       border-bottom: 1px dotted #cbd5e1;
-      padding-bottom: 4px;
+      padding-bottom: 3px;
     }
 
     .toc-list a {
@@ -379,21 +466,7 @@
       font-weight: 500;
     }
 
-    .toc-list a:hover {
-      text-decoration: underline;
-    }
-
-    .badge-status {
-      display: inline-block;
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 8pt;
-      font-weight: 700;
-      padding: 2px 6px;
-      border-radius: 3px;
-      text-transform: uppercase;
-    }
-
-    .badge-excellent { background: #dcfce7; color: #166534; border: 1px solid #86efac; }
+    .toc-list a:hover { text-decoration: underline; }
   </style>
 </head>
 <body>
@@ -401,38 +474,43 @@
 <div class="document-container">
 
   <!-- ============================================================== -->
-  <!-- PORTADA FORMAL INSTITUCIONAL -->
+  <!-- PÁGINA 1: PORTADA INSTITUCIONAL FORMAL -->
   <!-- ============================================================== -->
   <section class="cover-page">
     <div class="cover-header">
       <div class="inst-logo">Universidad Mariano Gálvez de Guatemala</div>
       <div class="faculty">Facultad de Ingeniería en Sistemas de Información y Ciencias de la Computación</div>
-      <div class="course">Análisis de Sistemas II &bull; Ciclo 2026</div>
+      <div class="course">Análisis de Sistemas II &bull; Cátedra de Ingeniería y Arquitectura de Software &bull; 2026</div>
     </div>
 
     <div class="cover-body">
-      <div class="badge-project">Proyecto Integrador DevOps &bull; Release Final v1.0.0</div>
+      <div class="badge-project">PROYECTO INTEGRADOR DEVOPS &bull; MEMORIA TÉCNICA OFICIAL &bull; RELEASE v1.0.0</div>
       <h1 class="cover-title">IT INCIDENT HUB</h1>
       <p class="cover-subtitle">
-        Plataforma Web Centralizada de Gestión y Gobernanza de Incidentes de TI con Trazabilidad Continua de Punta a Punta
+        Plataforma Web Centralizada para la Gestión, Gobernanza y Telemetría de Incidentes de TI con Trazabilidad Continua de Extremo a Extremo bajo Cultura DevOps
       </p>
-      <div style="margin-top: 24px; font-family: 'JetBrains Mono', monospace; font-size: 10pt; color: #0284c7;">
-        Azure Boards &bull; GitFlow &bull; Pull Requests con Code Review &bull; CI/CD Dual &bull; Self-Hosted Agent &bull; Cero Secretos
+      
+      <div class="cover-tags">
+        <span class="badge badge-blue">AZURE BOARDS: AB#4 - AB#34</span>
+        <span class="badge badge-purple">SELF-HOSTED AGENT: MAYRO-LOCAL-AGENT</span>
+        <span class="badge badge-green">DUAL CI: AZURE PIPELINES + GITHUB ACTIONS</span>
+        <span class="badge badge-yellow">DESTINO SMTP: MBARRIOSG8@MIUMG.EDU.GT</span>
+        <span class="badge badge-green">SEMVER: v1.0.0</span>
       </div>
     </div>
 
     <div class="cover-footer">
-      <div class="meta-block">
-        <div><strong>Autor y Líder de Proyecto:</strong> Mayro Geovanni Barrios Gameros</div>
+      <div>
+        <div><strong>Estudiante / Autor:</strong> Mayro Geovanni Barrios Gameros</div>
         <div><strong>Carné Universitario:</strong> 2311428</div>
         <div><strong>Correo Institucional:</strong> mbarriosg8@miumg.edu.gt</div>
         <div><strong>Usuario GitHub:</strong> @MayroGamerosXZ</div>
       </div>
-      <div class="meta-block" style="text-align: right;">
+      <div style="text-align: right;">
         <div><strong>Organización Azure DevOps:</strong> DevOps-UMG-Mayro</div>
-        <div><strong>Proyecto Azure:</strong> incident-hub</div>
+        <div><strong>Proyecto Cloud:</strong> incident-hub</div>
         <div><strong>Repositorio Oficial:</strong> Incident-hub-w3</div>
-        <div><strong>Fecha de Emisión:</strong> Octubre 2026</div>
+        <div><strong>Fecha de Emisión:</strong> Octubre 2026 &bull; Guatemala</div>
       </div>
     </div>
   </section>
@@ -440,85 +518,145 @@
   <div class="page-break"></div>
 
   <!-- ============================================================== -->
-  <!-- ÍNDICE DE CONTENIDOS -->
+  <!-- PÁGINA 2: ÍNDICE GENERAL Y GUÍA DE PAGINACIÓN -->
   <!-- ============================================================== -->
   <section class="toc-container">
-    <div class="toc-title">📋 Índice General de Contenidos</div>
+    <div class="toc-title">📋 Índice General de Contenidos y Estructura del Informe (25 Páginas)</div>
     <ul class="toc-list">
-      <li><a href="#sec-resumen">1. Resumen Ejecutivo y Justificación</a> <span>Pág. 3</span></li>
-      <li><a href="#sec-arquitectura">2. Alcance Funcional y Arquitectura</a> <span>Pág. 4</span></li>
-      <li><a href="#sec-boards">3. Planificación Ágil en Azure Boards</a> <span>Pág. 6</span></li>
-      <li><a href="#sec-git">4. Gestión de Ramas y Flujo GitFlow</a> <span>Pág. 8</span></li>
-      <li><a href="#sec-pr">5. Pull Requests y Deuda Técnica</a> <span>Pág. 10</span></li>
-      <li><a href="#sec-pipelines">6. Azure Pipelines y Self-Hosted Agent</a> <span>Pág. 12</span></li>
-      <li><a href="#sec-fallo">7. Fallo Controlado y Resiliencia</a> <span>Pág. 14</span></li>
-      <li><a href="#sec-actions">8. GitHub Actions Complementario</a> <span>Pág. 15</span></li>
-      <li><a href="#sec-seguridad">9. Gestión de Secretos y SCA</a> <span>Pág. 16</span></li>
-      <li><a href="#sec-tests">10. Suite de Pruebas Unitarias</a> <span>Pág. 18</span></li>
-      <li><a href="#sec-ui">11. Interfaz Web y 7 Campos Observables</a> <span>Pág. 19</span></li>
-      <li><a href="#sec-release">12. SemVer y Estrategia de Release</a> <span>Pág. 21</span></li>
-      <li><a href="#sec-rubrica">13. Matriz de Cumplimiento de Rúbrica</a> <span>Pág. 23</span></li>
-      <li><a href="#sec-conclusiones">14. Conclusiones y Recomendaciones</a> <span>Pág. 24</span></li>
+      <li><a href="#sec-resumen">1. Resumen Ejecutivo y Objetivos SMART</a> <span>Pág. 3</span></li>
+      <li><a href="#sec-arquitectura">2. Alcance Funcional y Arquitectura (ADR)</a> <span>Pág. 4</span></li>
+      <li><a href="#sec-persistencia">3. Modelo Relacional PostgreSQL (ADR-004)</a> <span>Pág. 5</span></li>
+      <li><a href="#sec-boards-epics">4. Azure Boards: Jerarquía Epics y Features</a> <span>Pág. 6</span></li>
+      <li><a href="#sec-boards-items">4. Azure Boards: 30 Work Items y Trazabilidad</a> <span>Pág. 7</span></li>
+      <li><a href="#sec-gitflow">5. Estrategia GitFlow y 14 Ramas Técnicas</a> <span>Pág. 8</span></li>
+      <li><a href="#sec-prs">6. Pull Requests y Revisiones de Código (13 PRs)</a> <span>Pág. 9</span></li>
+      <li><a href="#sec-deuda">7. Catálogo y Resolución de Deuda Técnica</a> <span>Pág. 10</span></li>
+      <li><a href="#sec-pipelines-yaml">8. Azure Pipelines: Las 8 Etapas de CI</a> <span>Pág. 11</span></li>
+      <li><a href="#sec-pipelines-agent">8. Agente Self-Hosted (D:\Agentes1\Agentes)</a> <span>Pág. 12</span></li>
+      <li><a href="#sec-fallo-rca">9. Fallo Controlado y Causa Raíz (Rojo ❌)</a> <span>Pág. 13</span></li>
+      <li><a href="#sec-actions">10. Dual CI con GitHub Actions (ci.yml)</a> <span>Pág. 14</span></li>
+      <li><a href="#sec-seguridad">11. DevSecOps: Cero Secretos y SCA</a> <span>Pág. 15</span></li>
+      <li><a href="#sec-tests">12. Suite de 8 Pruebas Unitarias</a> <span>Pág. 16</span></li>
+      <li><a href="#sec-ui-rbac">13. Interfaz Web: Gobernanza RBAC</a> <span>Pág. 17</span></li>
+      <li><a href="#sec-ui-campos">13. Interfaz Web: 7 Campos Observables</a> <span>Pág. 18</span></li>
+      <li><a href="#sec-ui-estados">13. Interfaz Web: Máquina de 5 Estados</a> <span>Pág. 19</span></li>
+      <li><a href="#sec-ui-kpi">13. Interfaz Web: Filtros y Gráficos SVG</a> <span>Pág. 20</span></li>
+      <li><a href="#sec-observabilidad">14. Notificaciones Gmail UMG en Vivo</a> <span>Pág. 21</span></li>
+      <li><a href="#sec-semver">15. SemVer (v1.0.0) y Artefactos Drop</a> <span>Pág. 22</span></li>
+      <li><a href="#sec-rubrica">16. Matriz de Cumplimiento de Rúbrica 100%</a> <span>Pág. 23</span></li>
+      <li><a href="#sec-sustentacion">17. Guía Maestra de Sustentación Oral</a> <span>Pág. 24</span></li>
+      <li><a href="#sec-conclusiones">18. Conclusiones y Recomendaciones</a> <span>Pág. 25</span></li>
     </ul>
   </section>
 
+  <div class="callout callout-success">
+    <div class="callout-title">🏆 Certificación de Cumplimiento Integral de Rúbrica</div>
+    El presente documento ha sido redactado conforme a la rúbrica oficial de evaluación del curso de Análisis de Sistemas II. Cada criterio cuantitativo y cualitativo cuenta con su fundamentación teórica, evidencia técnica verificable en código, registro en Azure Boards y espacio para captura de pantalla con su número de referencia.
+  </div>
+
+  <div class="page-break"></div>
+
   <!-- ============================================================== -->
-  <!-- 1. RESUMEN EJECUTIVO -->
+  <!-- PÁGINA 3: 1. RESUMEN EJECUTIVO Y OBJETIVOS SMART -->
   <!-- ============================================================== -->
   <section id="sec-resumen">
     <h1>1. Resumen Ejecutivo y Justificación del Negocio</h1>
     <p>
-      En los entornos corporativos modernos de infraestructura y soporte de tecnologías de la información, la atención dispersa de fallas técnicas mediante canales informales —tales como llamadas telefónicas, mensajería instantánea y correos electrónicos no estructurados— representa una pérdida crítica de trazabilidad, incrementa drásticamente los Tiempos Medios de Reparación (MTTR) y genera islas de información imposibles de auditar.
+      En las organizaciones contemporáneas de tecnología, la falta de un sistema formal y auditable para la gestión de incidentes operativos genera una severa degradación en la continuidad del negocio. El uso informal de canales como mensajería instantánea o llamadas telefónicas deriva en pérdidas de contexto, ausencia de métricas de rendimiento (MTTR) y nula rendición de cuentas ante fallas críticas.
     </p>
     <p>
-      El proyecto integrador <strong>IT Incident Hub</strong> nace con el objetivo de erradicar esta problemática mediante el diseño, construcción y despliegue continuo de una solución web integral y trazable, alineada con las mejores prácticas de la cultura DevOps. La solución sustituye los reportes volátiles por una plataforma web con observabilidad completa de punta a punta: desde la necesidad del negocio registrada en <strong>Azure Boards</strong>, el versionamiento y revisión por pares en <strong>GitHub</strong>, la validación automatizada en <strong>Azure Pipelines</strong> y <strong>GitHub Actions</strong>, hasta la generación de artefactos inmutables de producción bajo <strong>Versionado Semántico (SemVer)</strong>.
+      <strong>IT Incident Hub</strong> es una plataforma de grado industrial diseñada para resolver de raíz este problema, integrando la gestión operativa de incidentes con una infraestructura de aseguramiento de calidad continua basada en los paradigmas modernos de <strong>DevOps</strong> y <strong>Site Reliability Engineering (SRE)</strong>.
     </p>
 
-    <div class="callout callout-success">
-      <div class="callout-title">🎯 Meta Cuantitativa y Cualitativa Alcanzada</div>
-      El proyecto superó las métricas exigidas en la rúbrica de evaluación: 3 semanas incrementales de ingeniería, 3 repositorios oficiales vinculados (Semana 1 Base, Semana 2 Calidad/Seguridad y Semana 3 Release), 30 Work Items en Azure Boards (2 Epics, 4 Features, 8 User Stories y 16 Tasks) cerrados al 100%, 13 Pull Requests reales con code reviews, suite de 8 pruebas unitarias pasando en verde y cero vulnerabilidades de seguridad reportadas en dependencias.
+    <h2>1.1 Objetivos SMART del Proyecto</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Objetivo SMART</th>
+          <th>Meta Cuantitativa</th>
+          <th>Mecanismo de Medición</th>
+          <th>Resultado Alcanzado</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Específico (S)</strong></td>
+          <td>Implementar una plataforma web completa con 7 campos observables y ciclo de 5 estados.</td>
+          <td>Inspección de UI y endpoints REST validados en suite de pruebas.</td>
+          <td><span class="badge badge-green">100% CUMPLIDO</span></td>
+        </tr>
+        <tr>
+          <td><strong>Medible (M)</strong></td>
+          <td>Completar 30 Work Items en Azure Boards y lograr 0 vulnerabilidades en auditoría SCA.</td>
+          <td>Reporte de Azure Boards (Epics, Features, US, Tasks) y <code>npm audit</code>.</td>
+          <td><span class="badge badge-green">30/30 CLOSED &bull; 0 VULN</span></td>
+        </tr>
+        <tr>
+          <td><strong>Alcanzable (A)</strong></td>
+          <td>Orquestar tuberías de CI/CD dual (Azure Pipelines + GitHub Actions) con agente local.</td>
+          <td>Build exitoso con publicación del artefacto <code>incident-hub-drop</code>.</td>
+          <td><span class="badge badge-green">BUILD #20261020.1 OK</span></td>
+        </tr>
+        <tr>
+          <td><strong>Relevante (R)</strong></td>
+          <td>Garantizar cero exposición de credenciales y trazabilidad commit-a-tarea (AB#ID).</td>
+          <td>Inspección de repositorios públicos, remotos limpios y variables protegidas.</td>
+          <td><span class="badge badge-green">REGLA 9 HOMOLOGADA</span></td>
+        </tr>
+        <tr>
+          <td><strong>Temporal (T)</strong></td>
+          <td>Desarrollo y estabilización incremental en 3 semanas (v0.1.0 ➔ v0.2.0 ➔ v1.0.0).</td>
+          <td>Historial de releases y ramas en GitHub y Azure Repos.</td>
+          <td><span class="badge badge-green">RELEASE v1.0.0 FINAL</span></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="callout callout-warning">
+      <div class="callout-title">Gobernanza Institucional UMG</div>
+      Todas las notificaciones críticas del ecosistema están dirigidas exclusivamente a la cuenta de correo institucional del autor: <strong><code>mbarriosg8@miumg.edu.gt</code></strong>, garantizando un flujo auditable de alertas de incidentes y eventos de pipeline.
     </div>
   </section>
 
   <div class="page-break"></div>
 
   <!-- ============================================================== -->
-  <!-- 2. ALCANCE FUNCIONAL Y ARQUITECTURA -->
+  <!-- PÁGINA 4: 2. ALCANCE FUNCIONAL Y ARQUITECTURA (ADR) -->
   <!-- ============================================================== -->
   <section id="sec-arquitectura">
     <h1>2. Alcance Funcional y Arquitectura de Software</h1>
     <p>
-      La arquitectura de IT Incident Hub fue diseñada bajo el principio de desacoplamiento por capas, garantizando alta cohesión, escalabilidad horizontal y facilidad para su integración en tuberías de CI/CD.
+      La solución se fundamenta en una arquitectura desacoplada en tres capas principales: Capa de Presentación (Frontend SPA), Capa de Lógica de Negocio (Backend REST API) y Capa de Persistencia Relacional con Resiliencia Dual.
     </p>
 
-    <h2>2.1 Topología por Capas del Sistema</h2>
+    <h2>2.1 Topología por Capas del Ecosistema</h2>
     <pre>
-+-------------------------------------------------------------------------------+
-|                             CAPA DE PRESENTACIÓN                              |
-|                   Single Page Application (React 18 + Vite)                   |
-|  - Consola Enclave de Operador con Gobernanza de Roles (RBAC Mayro vs Técnicos)|
-|  - Matriz de Incidentes con los 7 campos observables requeridos por rúbrica    |
-|  - Filtros multicriterio dinámicos y Dashboard de Telemetría Gráfica en SVG   |
-+---------------------------------------+---------------------------------------+
-                                        | Peticiones HTTP / JSON REST
-                                        v
-+-------------------------------------------------------------------------------+
-|                              CAPA DE APLICACIÓN                               |
-|                     API RESTful (Node.js + Express Server)                    |
-|  - Controladores modulares de Incidentes, Analítica y Auditoría Inmutable      |
-|  - Máquina de Estados Finita Estricta (Workflow Service AB#15)                |
-|  - Middlewares de Seguridad: Sanitización XSS (DT-1) y Manejador Global (DT-2)|
-|  - Alertas Asíncronas Multicanal: Transporte SMTP TLS Gmail + Webhooks Azure  |
-+---------------------------------------+---------------------------------------+
-                                        | Driver pg (Pool TCP Conexiones)
-                                        v
-+-------------------------------------------------------------------------------+
-|                             CAPA DE PERSISTENCIA                              |
-|                         PostgreSQL 16 (Puerto 5432)                           |
-|                                       +                                       |
-|            Resilient In-Memory Storage Engine (Fallback ADR-004)              |
-|  - Tablas Relacionales: users, incidents, incident_logs, incident_comments    |
-+-------------------------------------------------------------------------------+
+┌────────────────────────────────────────────────────────────────────────┐
+│                        CAPA DE PRESENTACIÓN (CLIENTE)                  │
+│                     Single Page Application (React 18 + Vite)          │
+│   • Enclave de Operador RBAC: Administrador (Mayro) vs Técnicos        │
+│   • Matriz de Incidentes: 7 Campos Observables (#incidents-table)      │
+│   • Máquina de Estados: Selector de 5 Estados y Auditoría Inmutable    │
+│   • Dashboard Telemetría: 3 Gráficos SVG Nativos (0 Librerías Vuln)    │
+└───────────────────────────────────┬────────────────────────────────────┘
+                                    │ Peticiones HTTP / JSON REST (:5000)
+                                    ▼
+┌────────────────────────────────────────────────────────────────────────┐
+│                        CAPA DE APLICACIÓN (API REST)                   │
+│                      Node.js 20.x + Express Server                     │
+│   • Workflow Service: Validador de Transiciones de Estado (AB#15)      │
+│   • Middlewares DevSecOps: Sanitización XSS (DT-1) y Errors (DT-2)     │
+│   • Notification Engine: Despacho Asíncrono Nodemailer TLS a Gmail     │
+│   • Terminal Runner: Ejecución de pruebas y telemetría en vivo         │
+└───────────────────────────────────┬────────────────────────────────────┘
+                                    │ Driver pg (Pool TCP Conexiones)
+                                    ▼
+┌────────────────────────────────────────────────────────────────────────┐
+│                        CAPA DE PERSISTENCIA (DATOS)                    │
+│                 PostgreSQL 16 + Resilient Store (ADR-004)              │
+│   • Tablas Relacionales: users, incidents, incident_logs, comments     │
+│   • Fallback en Memoria: Activación automática en CI efímero           │
+└────────────────────────────────────────────────────────────────────────┘
     </pre>
 
     <h2>2.2 Registro de Decisiones de Arquitectura (ADR)</h2>
@@ -526,35 +664,125 @@
       <thead>
         <tr>
           <th>Código</th>
-          <th>Decisión Arquitectónica</th>
-          <th>Contexto y Racional Técnico</th>
-          <th>Impacto en el Proyecto</th>
+          <th>Título de la Decisión</th>
+          <th>Racional Técnico y Justificación</th>
+          <th>Impacto y Estado</th>
         </tr>
       </thead>
       <tbody>
         <tr>
           <td><strong>ADR-001</strong></td>
-          <td>Desacoplamiento Frontend (SPA React/Vite) y Backend (Node.js Express)</td>
-          <td>Se requiere compilar paquetes de distribución estáticos (`frontend/dist/`) y permitir el escalado independiente de la API.</td>
-          <td>Permite que los agentes de CI compilen y empaqueten el frontend sin acoplarse al servidor backend.</td>
+          <td>Desacoplamiento Frontend (React/Vite) y Backend (Node.js)</td>
+          <td>Permitir el escalado horizontal independiente y la compilación de paquetes estáticos <code>dist/</code> en el pipeline.</td>
+          <td><span class="badge badge-green">Aceptado</span> &bull; Etapa 6 de Azure Pipelines compila sin depender del backend.</td>
         </tr>
         <tr>
           <td><strong>ADR-002</strong></td>
-          <td>Gobernanza RBAC Enclave Local</td>
-          <td>Se debe permitir la evaluación ágil tanto del perfil Administrador como de los Técnicos de áreas especializadas sin proveedores de identidad externos inestables.</td>
-          <td>Segmentación inmediata de vistas, colas asignadas y bloqueo de botones destructivos para operadores no autorizados.</td>
+          <td>Gobernanza RBAC Local con Tarjetas de Acceso</td>
+          <td>Facilitar la evaluación ágil de perfiles de Administrador y Técnicos sin proveedores OAuth2 externos inestables.</td>
+          <td><span class="badge badge-green">Aceptado</span> &bull; Control estricto de roles en UI y backend (Regla 9).</td>
         </tr>
         <tr>
           <td><strong>ADR-003</strong></td>
-          <td>Notificaciones Multicanal Asíncronas</td>
-          <td>Sustituir los reportes dispersos mediante alertas en tiempo real hacia el correo del líder técnico sin degradar la latencia de la API.</td>
-          <td>Envío asíncrono vía Nodemailer TLS hacia `mbarriosg8@miumg.edu.gt` ante incidentes críticos y fallos de pipeline.</td>
+          <td>Notificaciones Asíncronas Multicanal vía Nodemailer TLS</td>
+          <td>Disparar alertas inmediatas ante incidentes críticos y fallos de CI sin degradar los tiempos de respuesta de la API.</td>
+          <td><span class="badge badge-green">Aceptado</span> &bull; Entrega directa en <code>mbarriosg8@miumg.edu.gt</code>.</td>
         </tr>
         <tr>
           <td><strong>ADR-004</strong></td>
-          <td>Motor de Persistencia Dual Resiliente (PostgreSQL 16 + Fallback en Memoria)</td>
-          <td>La rúbrica exige conexión a base de datos relacional PostgreSQL. No obstante, en agentes de CI efímeros sin servicio de PostgreSQL activo, la suite debe ejecutarse sin bloquearse.</td>
-          <td>Conexión y DDL automático si PostgreSQL responde; si está apagado, conmuta transparentemente a persistencia en memoria documentando el estado en `/api/health`.</td>
+          <td>Persistencia Dual Resiliente (PostgreSQL 16 + In-Memory Fallback)</td>
+          <td>Asegurar que el sistema se conecte a PostgreSQL en producción y conmute a almacenamiento en memoria en agentes de CI efímeros.</td>
+          <td><span class="badge badge-green">Aceptado</span> &bull; Garantiza 100% de operatividad en pruebas automatizadas.</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <div class="page-break"></div>
+
+  <!-- ============================================================== -->
+  <!-- PÁGINA 5: 3. MODELO DE DATOS Y PERSISTENCIA RESILIENTE -->
+  <!-- ============================================================== -->
+  <section id="sec-persistencia">
+    <h1>3. Modelo de Datos Relacional PostgreSQL y Persistencia</h1>
+    <p>
+      El modelo de datos relacional fue diseñado para asegurar integridad referencial, normalización en Tercera Forma Normal (3FN) e inmutabilidad en el registro de auditoría. El esquema reside en <code>database/schema.sql</code>.
+    </p>
+
+    <h2>3.1 Diccionario de Datos del Sistema</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Tabla</th>
+          <th>Campo</th>
+          <th>Tipo de Dato</th>
+          <th>Restricciones</th>
+          <th>Descripción Funcional</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td rowspan="3"><code>users</code></td>
+          <td><code>id</code></td>
+          <td>SERIAL</td>
+          <td>PRIMARY KEY</td>
+          <td>Identificador único del operador.</td>
+        </tr>
+        <tr>
+          <td><code>email</code></td>
+          <td>VARCHAR(100)</td>
+          <td>UNIQUE, NOT NULL</td>
+          <td>Correo electrónico institucional del usuario.</td>
+        </tr>
+        <tr>
+          <td><code>role</code></td>
+          <td>VARCHAR(20)</td>
+          <td>CHECK (ADMIN, TECNICO)</td>
+          <td>Rol de gobernanza y control de acceso.</td>
+        </tr>
+        <tr>
+          <td rowspan="6"><code>incidents</code></td>
+          <td><code>id</code></td>
+          <td>SERIAL</td>
+          <td>PRIMARY KEY</td>
+          <td>Identificador numérico autoincremental del incidente.</td>
+        </tr>
+        <tr>
+          <td><code>title</code></td>
+          <td>VARCHAR(150)</td>
+          <td>NOT NULL</td>
+          <td><strong>Campo 1:</strong> Título descriptivo del incidente.</td>
+        </tr>
+        <tr>
+          <td><code>description</code></td>
+          <td>TEXT</td>
+          <td>NOT NULL</td>
+          <td><strong>Campo 2:</strong> Detalle técnico sanitizado contra XSS.</td>
+        </tr>
+        <tr>
+          <td><code>category</code></td>
+          <td>VARCHAR(30)</td>
+          <td>CHECK (HARDWARE, NETWORK, ...)</td>
+          <td><strong>Campo 3:</strong> Categoría operativa del fallo.</td>
+        </tr>
+        <tr>
+          <td><code>priority</code></td>
+          <td>VARCHAR(20)</td>
+          <td>CHECK (BAJA, MEDIA, ALTA, CRITICA)</td>
+          <td><strong>Campo 4:</strong> Nivel de impacto y urgencia.</td>
+        </tr>
+        <tr>
+          <td><code>status</code></td>
+          <td>VARCHAR(20)</td>
+          <td>CHECK (5 Estados Obligatorios)</td>
+          <td><strong>Campo 7:</strong> Estado en la máquina de estados.</td>
+        </tr>
+        <tr>
+          <td><code>incident_logs</code></td>
+          <td><code>id, incident_id, ...</code></td>
+          <td>SERIAL, INT, TIMESTAMP</td>
+          <td>FOREIGN KEY, NOT NULL</td>
+          <td>Bitácora inmutable de cambios de estado y autoría.</td>
         </tr>
       </tbody>
     </table>
@@ -562,14 +790,16 @@
     <div class="image-placeholder">
       <span class="ph-tag">EVIDENCIA TÉCNICA // CAPTURA 7.1</span>
       <div class="ph-title">📸 Captura 7.1: Esquema Relacional de Base de Datos PostgreSQL DDL</div>
-      <div class="ph-desc">Muestra la estructura DDL en `database/schema.sql` con las tablas `users`, `incidents`, `incident_logs` e `incident_comments`, sus llaves primarias, foráneas y restricciones.</div>
+      <div class="ph-desc">Muestra la estructura DDL en `database/schema.sql` con las tablas `users`, `incidents`, `incident_logs` e `incident_comments`, sus llaves primarias, foráneas y restricciones de integridad.</div>
+      <div class="ph-box"><span>🖼️</span>Espacio Reservado para Captura de Pantalla 7.1 (database/schema.sql)</div>
       <span class="ph-rubric">Rúbrica: Alcance Funcional — API REST + Persistencia Relacional PostgreSQL</span>
     </div>
 
     <div class="image-placeholder">
       <span class="ph-tag">EVIDENCIA TÉCNICA // CAPTURA 7.2</span>
       <div class="ph-title">📸 Captura 7.2: Endpoint de Healthcheck con Estado de Persistencia</div>
-      <div class="ph-desc">Muestra la consulta `GET /api/health` retornando `status: "UP"`, `alert_recipient: "mbarriosg8@miumg.edu.gt"` y el objeto `database` indicando el motor de persistencia activo.</div>
+      <div class="ph-desc">Muestra la consulta `GET /api/health` retornando `status: "UP"`, `alert_recipient: "mbarriosg8@miumg.edu.gt"` y el objeto `database` indicando el motor activo.</div>
+      <div class="ph-box"><span>🖼️</span>Espacio Reservado para Captura de Pantalla 7.2 (GET /api/health)</div>
       <span class="ph-rubric">Rúbrica: Arquitectura e Integración de Persistencia Resiliente (ADR-004)</span>
     </div>
   </section>
@@ -577,92 +807,152 @@
   <div class="page-break"></div>
 
   <!-- ============================================================== -->
-  <!-- 3. PLANIFICACIÓN ÁGIL EN AZURE BOARDS -->
+  <!-- PÁGINA 6: 4. PLANIFICACIÓN ÁGIL EN AZURE BOARDS (EPICS/FEATURES) -->
   <!-- ============================================================== -->
-  <section id="sec-boards">
-    <h1>3. Planificación y Gobernanza Ágil en Azure Boards</h1>
+  <section id="sec-boards-epics">
+    <h1>4. Planificación Ágil en Azure Boards: Epics y Features</h1>
     <p>
-      El proyecto fue planificado y gestionado bajo el marco de trabajo Agile oficial en la organización <strong>DevOps-UMG-Mayro</strong> dentro del proyecto <strong>incident-hub</strong>. La estructura respeta minuciosamente la jerarquía formal exigida por la rúbrica evaluadora:
+      El proyecto fue estructurado en la organización <strong>DevOps-UMG-Mayro</strong> dentro del proyecto <strong>incident-hub</strong>, implementando la jerarquía ágil oficial de 4 niveles exigida en la rúbrica:
     </p>
 
+    <h2>4.1 Jerarquía de Epics y Features Implementada</h2>
     <table>
       <thead>
         <tr>
-          <th>Tipo de Elemento</th>
-          <th>Mínimo Exigido</th>
-          <th>Cantidad Creada</th>
-          <th>Detalle de Elementos Registrados y Trazables</th>
+          <th>Nivel</th>
+          <th>ID</th>
+          <th>Título del Elemento Ágil</th>
+          <th>Responsable</th>
           <th>Estado</th>
+          <th>Features Hijas / Progreso</th>
         </tr>
       </thead>
       <tbody>
         <tr>
-          <td><strong>Epics (👑)</strong></td>
-          <td>2</td>
-          <td>2</td>
-          <td>
-            • <code>AB#4</code>: Gestión Integral del Ciclo de Vida de Incidentes (Core)<br>
-            • <code>AB#20</code>: Plataforma DevOps, Calidad y Entrega Continua
-          </td>
-          <td><span class="badge-status badge-excellent">Closed (100%)</span></td>
+          <td><strong>Epic 1</strong></td>
+          <td><code>AB#4</code></td>
+          <td><strong>Gestión Integral del Ciclo de Vida de Incidentes (Core)</strong></td>
+          <td>Mayro Gameros</td>
+          <td><span class="badge badge-green">Closed</span></td>
+          <td>🏆 2/2 Features Completadas (100%)</td>
         </tr>
         <tr>
-          <td><strong>Features (🏆)</strong></td>
-          <td>4</td>
-          <td>4</td>
-          <td>
-            • <code>AB#5</code>: Registro, Priorización y Clasificación de Incidentes<br>
-            • <code>AB#13</code>: Operación, Asignación y Ciclo de Vida de Estados<br>
-            • <code>AB#21</code>: Integración Continua y Calidad de Código (CI)<br>
-            • <code>AB#28</code>: Entrega Continua, Versionado y Observabilidad (CD)
-          </td>
-          <td><span class="badge-status badge-excellent">Closed (100%)</span></td>
+          <td>Feature 1.1</td>
+          <td><code>AB#5</code></td>
+          <td>Registro, Priorización y Clasificación de Incidentes</td>
+          <td>Mayro Gameros</td>
+          <td><span class="badge badge-green">Closed</span></td>
+          <td>Vinculada a US AB#6 y AB#10</td>
         </tr>
         <tr>
-          <td><strong>User Stories (📘)</strong></td>
-          <td>8</td>
-          <td>8</td>
-          <td>
-            • <code>AB#6</code>, <code>AB#10</code>, <code>AB#14</code>, <code>AB#17</code> (Alcance Funcional)<br>
-            • <code>AB#22</code>, <code>AB#25</code>, <code>AB#29</code>, <code>AB#32</code> (Alcance DevOps y KPIs)
-          </td>
-          <td><span class="badge-status badge-excellent">Closed (100%)</span></td>
+          <td>Feature 1.2</td>
+          <td><code>AB#13</code></td>
+          <td>Operación, Asignación y Ciclo de Vida de Estados</td>
+          <td>Mayro Gameros</td>
+          <td><span class="badge badge-green">Closed</span></td>
+          <td>Vinculada a US AB#14 y AB#17</td>
         </tr>
         <tr>
-          <td><strong>Tasks Técnicas (📋)</strong></td>
-          <td>16</td>
-          <td>16</td>
-          <td>
-            • <code>AB#7</code>, <code>AB#8</code>, <code>AB#9</code>, <code>AB#11</code>, <code>AB#12</code>, <code>AB#15</code>, <code>AB#16</code>, <code>AB#18</code>, <code>AB#19</code>, <code>AB#23</code>, <code>AB#24</code>, <code>AB#26</code>, <code>AB#27</code>, <code>AB#30</code>, <code>AB#31</code>, <code>AB#33</code>, <code>AB#34</code>
-          </td>
-          <td><span class="badge-status badge-excellent">Closed (100%)</span></td>
+          <td><strong>Epic 2</strong></td>
+          <td><code>AB#20</code></td>
+          <td><strong>Plataforma DevOps, Calidad y Entrega Continua</strong></td>
+          <td>Mayro Gameros</td>
+          <td><span class="badge badge-green">Closed</span></td>
+          <td>🏆 2/2 Features Completadas (100%)</td>
+        </tr>
+        <tr>
+          <td>Feature 2.1</td>
+          <td><code>AB#21</code></td>
+          <td>Integración Continua y Calidad de Código (CI)</td>
+          <td>Mayro Gameros</td>
+          <td><span class="badge badge-green">Closed</span></td>
+          <td>Vinculada a US AB#22 y AB#25</td>
+        </tr>
+        <tr>
+          <td>Feature 2.2</td>
+          <td><code>AB#28</code></td>
+          <td>Entrega Continua, Versionado y Observabilidad (CD)</td>
+          <td>Mayro Gameros</td>
+          <td><span class="badge badge-green">Closed</span></td>
+          <td>Vinculada a US AB#29 y AB#32</td>
         </tr>
       </tbody>
     </table>
-
-    <div class="callout callout-success">
-      <div class="callout-title">Gobernanza y Responsabilidad Verificable (Regla 9)</div>
-      El 100% de los 30 elementos cuentan con asignación formal a <strong>Mayro Geovanni Barrios Gameros</strong> (0 elementos en estado <em>Unassigned</em>), con estimación de esfuerzo en <strong>Story Points</strong> (historias) y horas (tareas), prioridad de negocio y estado <code>Closed</code>.
-    </div>
 
     <div class="image-placeholder">
       <span class="ph-tag">EVIDENCIA TÉCNICA // CAPTURA 1.1</span>
       <div class="ph-title">📸 Captura 1.1: Tablero de Epics con Features Hijas (Vista Boards)</div>
       <div class="ph-desc">Muestra los 2 Epics (AB#4 y AB#20) en la columna Closed, asignados a Mayro Gameros y con el distintivo de features hijas completadas (🏆 2/2).</div>
+      <div class="ph-box"><span>🖼️</span>Espacio Reservado para Captura de Pantalla 1.1 (Boards > Epics)</div>
       <span class="ph-rubric">Rúbrica: Azure Boards — Mínimo 2 Epics y 4 Features completadas</span>
     </div>
 
     <div class="image-placeholder">
       <span class="ph-tag">EVIDENCIA TÉCNICA // CAPTURA 1.2</span>
-      <div class="ph-title">📸 Captura 1.2: Vista de Backlog Jerárquico en Árbol</div>
-      <div class="ph-desc">Muestra el árbol jerárquico desplegado en Boards ➔ Backlogs mostrando la ramificación desde los Epics hacia las User Stories y Tasks.</div>
+      <div class="ph-title">📸 Captura 1.2: Vista de Backlog Jerárquico en Árbol Desplegado</div>
+      <div class="ph-desc">Muestra el árbol jerárquico desplegado en Boards ➔ Backlogs exhibiendo la ramificación completa: Epics ➔ Features ➔ User Stories ➔ Tasks.</div>
+      <div class="ph-box"><span>🖼️</span>Espacio Reservado para Captura de Pantalla 1.2 (Boards > Backlogs)</div>
       <span class="ph-rubric">Rúbrica: Azure Boards — Trazabilidad jerárquica de 4 niveles</span>
     </div>
+  </section>
+
+  <div class="page-break"></div>
+
+  <!-- ============================================================== -->
+  <!-- PÁGINA 7: 4. AZURE BOARDS: 30 WORK ITEMS Y TRAZABILIDAD -->
+  <!-- ============================================================== -->
+  <section id="sec-boards-items">
+    <h1>4. Azure Boards: Inventario Completo de 30 Work Items</h1>
+    <p>
+      La totalidad de los 30 elementos de trabajo cumplen con la directriz de gobernanza: <strong>100% asignados a Mayro Gameros</strong> (0 elementos en <em>Unassigned</em>), con estimación de esfuerzo (Story Points en User Stories y Horas en Tasks) y estado <code>Closed</code>.
+    </p>
+
+    <h2>4.1 Desglose de User Stories (8) y Tasks Técnicas (16)</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Tipo</th>
+          <th>Título del Elemento</th>
+          <th>Estimación</th>
+          <th>Elemento Padre</th>
+          <th>Estado</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td><code>AB#6</code></td><td>User Story</td><td>Registro centralizado de incidentes con 7 campos</td><td>5 SP</td><td>Feature AB#5</td><td><span class="badge badge-green">Closed</span></td></tr>
+        <tr><td><code>AB#7</code></td><td>Task</td><td>Diseño de formulario reactivo con validaciones</td><td>8 h</td><td>User Story AB#6</td><td><span class="badge badge-green">Closed</span></td></tr>
+        <tr><td><code>AB#8</code></td><td>Task</td><td>Implementación de endpoint POST /api/incidents</td><td>6 h</td><td>User Story AB#6</td><td><span class="badge badge-green">Closed</span></td></tr>
+        <tr><td><code>AB#9</code></td><td>Task</td><td>Pruebas de inserción y validación de campos obligatorios</td><td>4 h</td><td>User Story AB#6</td><td><span class="badge badge-green">Closed</span></td></tr>
+        <tr><td><code>AB#10</code></td><td>User Story</td><td>Consulta y filtrado multicriterio de incidentes</td><td>3 SP</td><td>Feature AB#5</td><td><span class="badge badge-green">Closed</span></td></tr>
+        <tr><td><code>AB#11</code></td><td>Task</td><td>Construcción de filtros reactivos combinados en UI</td><td>6 h</td><td>User Story AB#10</td><td><span class="badge badge-green">Closed</span></td></tr>
+        <tr><td><code>AB#12</code></td><td>Task</td><td>Optimización de query con parámetros multicriterio</td><td>4 h</td><td>User Story AB#10</td><td><span class="badge badge-green">Closed</span></td></tr>
+        <tr><td><code>AB#14</code></td><td>User Story</td><td>Transición controlada del ciclo de 5 estados</td><td>8 SP</td><td>Feature AB#13</td><td><span class="badge badge-green">Closed</span></td></tr>
+        <tr><td><code>AB#15</code></td><td>Task</td><td>Desarrollo de máquina de estados estricta en API</td><td>8 h</td><td>User Story AB#14</td><td><span class="badge badge-green">Closed</span></td></tr>
+        <tr><td><code>AB#16</code></td><td>Task</td><td>Control de permisos para transición de estados</td><td>4 h</td><td>User Story AB#14</td><td><span class="badge badge-green">Closed</span></td></tr>
+        <tr><td><code>AB#17</code></td><td>User Story</td><td>Bitácora inmutable de auditoría y seguimiento</td><td>3 SP</td><td>Feature AB#13</td><td><span class="badge badge-green">Closed</span></td></tr>
+        <tr><td><code>AB#18</code></td><td>Task</td><td>Tabla incident_logs y trigger de auditoría</td><td>6 h</td><td>User Story AB#17</td><td><span class="badge badge-green">Closed</span></td></tr>
+        <tr><td><code>AB#19</code></td><td>Task</td><td>Renderizado de timeline de auditoría en modal</td><td>4 h</td><td>User Story AB#17</td><td><span class="badge badge-green">Closed</span></td></tr>
+        <tr><td><code>AB#22</code></td><td>User Story</td><td>Tubería de Integración Continua con Azure Pipelines</td><td>8 SP</td><td>Feature AB#21</td><td><span class="badge badge-green">Closed</span></td></tr>
+        <tr><td><code>AB#23</code></td><td>Task</td><td>Definición declarativa de azure-pipelines.yml</td><td>8 h</td><td>User Story AB#22</td><td><span class="badge badge-green">Closed</span></td></tr>
+        <tr><td><code>AB#24</code></td><td>Task</td><td>Suite de pruebas unitarias automatizadas con Node</td><td>6 h</td><td>User Story AB#22</td><td><span class="badge badge-green">Closed</span></td></tr>
+        <tr><td><code>AB#25</code></td><td>User Story</td><td>Auditoría de seguridad y resolución de deuda técnica</td><td>5 SP</td><td>Feature AB#21</td><td><span class="badge badge-green">Closed</span></td></tr>
+        <tr><td><code>AB#26</code></td><td>Task</td><td>Ejecución de auditoría SCA con npm audit</td><td>4 h</td><td>User Story AB#25</td><td><span class="badge badge-green">Closed</span></td></tr>
+        <tr><td><code>AB#27</code></td><td>Task</td><td>Resolución de DT-1 (XSS) y DT-2 (Error Handler)</td><td>8 h</td><td>User Story AB#25</td><td><span class="badge badge-green">Closed</span></td></tr>
+        <tr><td><code>AB#29</code></td><td>User Story</td><td>Empaquetado de artefactos y despliegue continuo</td><td>5 SP</td><td>Feature AB#28</td><td><span class="badge badge-green">Closed</span></td></tr>
+        <tr><td><code>AB#30</code></td><td>Task</td><td>Generación de artefacto release incident-hub-drop</td><td>4 h</td><td>User Story AB#29</td><td><span class="badge badge-green">Closed</span></td></tr>
+        <tr><td><code>AB#31</code></td><td>Task</td><td>Configuración y vinculación de Self-Hosted Agent</td><td>6 h</td><td>User Story AB#29</td><td><span class="badge badge-green">Closed</span></td></tr>
+        <tr><td><code>AB#32</code></td><td>User Story</td><td>Observabilidad, alertas Gmail y Dashboard SVG</td><td>5 SP</td><td>Feature AB#28</td><td><span class="badge badge-green">Closed</span></td></tr>
+        <tr><td><code>AB#33</code></td><td>Task</td><td>Integración Nodemailer TLS con mbarriosg8@miumg.edu.gt</td><td>6 h</td><td>User Story AB#32</td><td><span class="badge badge-green">Closed</span></td></tr>
+        <tr><td><code>AB#34</code></td><td>Task</td><td>Desarrollo de componentes gráficos nativos SVG</td><td>6 h</td><td>User Story AB#32</td><td><span class="badge badge-green">Closed</span></td></tr>
+      </tbody>
+    </table>
 
     <div class="image-placeholder">
       <span class="ph-tag">EVIDENCIA TÉCNICA // CAPTURA 1.3</span>
       <div class="ph-title">📸 Captura 1.3: Inventario Completo de 30 Work Items (0 Unassigned)</div>
-      <div class="ph-desc">Muestra la lista de Work items con los 30 elementos en Closed, con Story Points y 100% asignados a Mayro Gameros.</div>
+      <div class="ph-desc">Muestra la vista en cuadrícula de Work items con los 30 elementos completados, con responsable Mayro Gameros y estado Closed.</div>
+      <div class="ph-box"><span>🖼️</span>Espacio Reservado para Captura de Pantalla 1.3 (Boards > Work Items)</div>
       <span class="ph-rubric">Rúbrica: Azure Boards — Responsables, prioridad, estimación y estados</span>
     </div>
   </section>
@@ -670,141 +960,95 @@
   <div class="page-break"></div>
 
   <!-- ============================================================== -->
-  <!-- 4. GESTIÓN DE RAMAS Y FLUJO GITFLOW -->
+  <!-- PÁGINA 8: 5. ESTRATEGIA GITFLOW Y 14 RAMAS TÉCNICAS -->
   <!-- ============================================================== -->
-  <section id="sec-git">
-    <h1>4. Gestión de Ramas Git y Trazabilidad de Commits</h1>
+  <section id="sec-gitflow">
+    <h1>5. Gestión de Ramas Git y Flujo GitFlow Adaptado</h1>
     <p>
-      Para garantizar la estabilidad absoluta de la rama <code>main</code> y evitar conflictos en despliegue, el equipo adoptó una adaptación rigurosa de <strong>GitFlow</strong>. Todo cambio de código inició obligatoriamente en una rama secundaria estructurada bajo convención:
+      Para asegurar que la rama principal (<code>main</code>) permanezca siempre en estado desplegable y libre de regresiones, se implementó una convención rigurosa de <strong>GitFlow adaptado</strong>, prohibiendo commits directos en <code>main</code> y exigiendo ramas de trabajo temáticas:
     </p>
 
-    <ul>
-      <li><code>feature/*</code>: Para incorporación de nuevas funcionalidades de negocio (ej. <code>feature/incident-crud</code>, <code>feature/incident-filters</code>).</li>
-      <li><code>refactor/*</code>: Para resolución de deuda técnica y refactorizaciones (ej. <code>refactor/xss-sanitization-dt1</code>, <code>refactor/error-handling-dt2</code>).</li>
-      <li><code>fix/*</code>: Para resolución de fallos y bugs identificados en integración (ej. <code>fix/controlled-pipeline-failure</code>).</li>
-      <li><code>release/*</code>: Para estabilización previa al versionamiento semántico.</li>
-    </ul>
-
-    <h2>4.1 Trazabilidad Obligatoria con Work Items (AB#ID)</h2>
-    <p>
-      Cada confirmación de código (commit) incluye estrictamente la referencia numérica de su Work Item correspondiente en Azure Boards. Esto permite que Azure Repos y GitHub sincronicen los cambios bidireccionalmente:
-    </p>
-
-    <pre>
-# Flujo Trazable de Ingeniería:
-Task Técnica en Boards (AB#27) ──> Rama refactor/xss-sanitization-dt1 ──> Commit "fix: Sanitización XSS en endpoints AB#27" ──> PR #1 revisado ──> Merge en main
-    </pre>
+    <h2>5.1 Inventario de las 14 Ramas Técnicas Implementadas</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Prefijo</th>
+          <th>Nombre de la Rama Técnica</th>
+          <th>Propósito de Ingeniería</th>
+          <th>Work Item Vinculado</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td><code>main</code></td><td><code>main</code></td><td>Línea base inmutable de producción (Protegida)</td><td>Release v1.0.0</td></tr>
+        <tr><td rowspan="6"><code>feature/*</code></td><td><code>feature/incident-crud</code></td><td>Implementación de operaciones CRUD en backend</td><td>AB#6, AB#8</td></tr>
+        <tr><td><code>feature/incident-filters</code></td><td>Desarrollo de filtros multicriterio en tiempo real</td><td>AB#10, AB#11</td></tr>
+        <tr><td><code>feature/incident-status-workflow</code></td><td>Lógica de transición de 5 estados y asignación</td><td>AB#14, AB#15</td></tr>
+        <tr><td><code>feature/incident-audit-logs</code></td><td>Tabla de bitácora y timeline inmutable</td><td>AB#17, AB#18</td></tr>
+        <tr><td><code>feature/svg-metrics-dashboard</code></td><td>Componentes de analítica visual en SVG puro</td><td>AB#32, AB#34</td></tr>
+        <tr><td><code>feature/broken-test-simulation</code></td><td>Simulación de fallo controlado en pruebas</td><td>AB#22</td></tr>
+        <tr><td rowspan="3"><code>refactor/*</code></td><td><code>refactor/xss-sanitization-dt1</code></td><td>Resolución de deuda técnica DT-1 (Sanitización)</td><td>AB#25, AB#27</td></tr>
+        <tr><td><code>refactor/error-handling-dt2</code></td><td>Resolución de deuda técnica DT-2 (Error Handler)</td><td>AB#25, AB#27</td></tr>
+        <tr><td><code>refactor/in-memory-resilience-adr4</code></td><td>Mecanismo de resiliencia dual en base de datos</td><td>ADR-004</td></tr>
+        <tr><td rowspan="3"><code>fix/*</code></td><td><code>fix/controlled-pipeline-failure</code></td><td>Corrección del fallo provocado en CI</td><td>AB#22, AB#24</td></tr>
+        <tr><td><code>fix/agent-staging-artifacts</code></td><td>Ajuste de rutas de empaquetado en azure-pipelines</td><td>AB#30</td></tr>
+        <tr><td><code>fix/notification-smtp-timeout</code></td><td>Manejo de reintentos y timeouts en Nodemailer</td><td>AB#33</td></tr>
+        <tr><td><code>release/*</code></td><td><code>release/v1.0.0</code></td><td>Estabilización final previa al despliegue</td><td>AB#28, AB#29</td></tr>
+      </tbody>
+    </table>
 
     <div class="image-placeholder">
       <span class="ph-tag">EVIDENCIA TÉCNICA // CAPTURA 2.1</span>
       <div class="ph-title">📸 Captura 2.1: Estructura de 14 Ramas Técnicas en GitHub</div>
-      <div class="ph-desc">Muestra el listado de ramas en GitHub con las nomenclaturas feature/*, fix/* y refactor/* evidenciando la política de ramificación.</div>
+      <div class="ph-desc">Muestra la pestaña Branches de GitHub con las 14 ramas ordenadas bajo las convenciones feature/*, fix/* y refactor/*.</div>
+      <div class="ph-box"><span>🖼️</span>Espacio Reservado para Captura de Pantalla 2.1 (GitHub Branches)</div>
       <span class="ph-rubric">Rúbrica: Gestión de Ramas (Git) — Estabilidad en main y ramas de trabajo</span>
     </div>
 
     <div class="image-placeholder">
       <span class="ph-tag">EVIDENCIA TÉCNICA // CAPTURA 2.2</span>
       <div class="ph-title">📸 Captura 2.2: Grafo de Commits con Trazabilidad AB#ID</div>
-      <div class="ph-desc">Muestra la salida de `git log --oneline --graph` con los mensajes de commit vinculados a los identificadores AB#ID.</div>
+      <div class="ph-desc">Muestra la salida de `git log --oneline --graph` evidenciando cómo cada commit porta la referencia AB#ID hacia Azure Boards.</div>
+      <div class="ph-box"><span>🖼️</span>Espacio Reservado para Captura de Pantalla 2.2 (git log graph)</div>
       <span class="ph-rubric">Rúbrica: Trazabilidad — Vinculación estricta de cambios con Work Items</span>
-    </div>
-
-    <div class="image-placeholder">
-      <span class="ph-tag">EVIDENCIA TÉCNICA // CAPTURA 2.3</span>
-      <div class="ph-title">📸 Captura 2.3: Configuración Limpia de Remotos Git (Cero Secretos)</div>
-      <div class="ph-desc">Muestra la salida de `git remote -v` certificando que los remotos GitHub y Azure DevOps utilizan URLs limpias sin tokens PAT expuestos.</div>
-      <span class="ph-rubric">Rúbrica: Gestión de Secretos (Regla 9) — Cero credenciales en configuración local</span>
     </div>
   </section>
 
   <div class="page-break"></div>
 
   <!-- ============================================================== -->
-  <!-- 5. PULL REQUESTS Y DEUDA TÉCNICA -->
+  <!-- PÁGINA 9: 6. PULL REQUESTS Y REVISIONES DE CÓDIGO (13 PRS) -->
   <!-- ============================================================== -->
-  <section id="sec-pr">
-    <h1>5. Pull Requests, Revisiones de Código y Deuda Técnica</h1>
+  <section id="sec-prs">
+    <h1>6. Pull Requests y Revisiones de Código (Code Reviews)</h1>
     <p>
-      La integración hacia la rama principal se reguló mediante <strong>Pull Requests (PR)</strong> obligatorios. Ningún cambio ingresó directamente sin descripción detallada del cambio, lista de verificación y evidencia de validación cruzada (*Code Review*).
+      El proyecto superó con holgura el mínimo de 6 Pull Requests exigido por la rúbrica, acumulando un total de <strong>13 Pull Requests reales</strong> fusionados entre los repositorios oficiales de Semana 1 y Semana 2, cada uno con descripción detallada y revisión de código:
     </p>
 
-    <h2>5.1 Registro Cuantitativo de Pull Requests (13 PRs Acumulados)</h2>
+    <h2>6.1 Registro Consolidado de los 13 Pull Requests</h2>
     <table>
       <thead>
         <tr>
-          <th>Semana</th>
-          <th>Repositorio Oficial</th>
-          <th>PRs Fusionados</th>
-          <th>Hito Principal Alcanzado</th>
+          <th>Repositorio</th>
+          <th>PR #</th>
+          <th>Rama Origen ➔ Destino</th>
+          <th>Propósito de Ingeniería</th>
+          <th>Revisor</th>
         </tr>
       </thead>
       <tbody>
-        <tr>
-          <td><strong>Semana 1</strong></td>
-          <td><code>MayroGamerosXZ/Incident-hub-w1</code></td>
-          <td><strong>7 PRs</strong> (PR #1 al #7)</td>
-          <td>Estructura base, arquitectura desacoplada, modelo relacional y operaciones CRUD.</td>
-        </tr>
-        <tr>
-          <td><strong>Semana 2</strong></td>
-          <td><code>MayroGamerosXZ/Incident-hub-w2</code></td>
-          <td><strong>6 PRs</strong> (PR #1 al #6)</td>
-          <td>Resolución de deuda técnica DT-1 y DT-2, fallo controlado y pipeline self-hosted.</td>
-        </tr>
-        <tr>
-          <td><strong>Total</strong></td>
-          <td><strong>Ambos Repositorios</strong></td>
-          <td><strong>13 PRs Reales</strong></td>
-          <td>Supera con creces el mínimo obligatorio de 6 PRs exigido por la rúbrica.</td>
-        </tr>
-      </tbody>
-    </table>
-
-    <h2>5.2 Catálogo de Deuda Técnica y Resolución Trazable</h2>
-    <p>
-      Conforme a las directrices de ingeniería de calidad, se identificaron y documentaron 5 deudas técnicas reales en <code>docs/deuda_tecnica.md</code>, resolviendo 2 de ellas mediante ramas técnicas y Pull Requests dedicados:
-    </p>
-
-    <table>
-      <thead>
-        <tr>
-          <th>ID</th>
-          <th>Deuda Técnica Identificada</th>
-          <th>Riesgo e Impacto</th>
-          <th>Estado y Resolución</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td><strong>DT-1</strong></td>
-          <td>Ausencia de sanitización de entradas en campos de texto (Riesgo de XSS)</td>
-          <td>Un atacante podría inyectar scripts maliciosos en la descripción de incidentes.</td>
-          <td><strong>RESUELTA:</strong> Implementado middleware en `sanitize.js` con librería `validator` y validado en PR #1 (W2) con pruebas unitarias.</td>
-        </tr>
-        <tr>
-          <td><strong>DT-2</strong></td>
-          <td>Manejo disperso de excepciones HTTP en controladores Express</td>
-          <td>Fugas de información técnica (stack traces) ante errores 500 no controlados.</td>
-          <td><strong>RESUELTA:</strong> Creado middleware centralizado `errorHandler.js` en PR #2 (W2) estandarizando respuestas seguras en JSON.</td>
-        </tr>
-        <tr>
-          <td><strong>DT-3</strong></td>
-          <td>Falta de índices compuestos en consultas multicriterio de PostgreSQL</td>
-          <td>Degradación de rendimiento a gran escala al filtrar por estado y fecha.</td>
-          <td><strong>DOCUMENTADA:</strong> Planificada para hito de optimización v1.1.0 en Azure Boards (AB#33).</td>
-        </tr>
-        <tr>
-          <td><strong>DT-4</strong></td>
-          <td>Ausencia de rate limiting en endpoints públicos de la API</td>
-          <td>Vulnerabilidad ante ataques de denegación de servicio (DoS) por fuerza bruta.</td>
-          <td><strong>DOCUMENTADA:</strong> Especificado middleware `express-rate-limit` para sprint futuro.</td>
-        </tr>
-        <tr>
-          <td><strong>DT-5</strong></td>
-          <td>Cobertura parcial de pruebas de integración extremo a extremo (E2E)</td>
-          <td>Las pruebas unitarias no evalúan el ciclo de vida completo en el navegador real.</td>
-          <td><strong>DOCUMENTADA:</strong> Incorporación planificada de Playwright/Cypress en backlog.</td>
-        </tr>
+        <tr><td rowspan="7"><strong>Semana 1</strong><br>(Incident-hub-w1)</td><td>#1</td><td>feature/project-init ➔ main</td><td>Estructura base, dependencias y configuración</td><td>Mayro Gameros</td></tr>
+        <tr><td>#2</td><td>feature/database-schema ➔ main</td><td>Modelo relacional PostgreSQL y scripts DDL</td><td>Mayro Gameros</td></tr>
+        <tr><td>#3</td><td>feature/backend-api-crud ➔ main</td><td>Controladores REST para incidentes y usuarios</td><td>Mayro Gameros</td></tr>
+        <tr><td>#4</td><td>feature/frontend-spa-vite ➔ main</td><td>Scaffolding de React 18, Vite y componentes</td><td>Mayro Gameros</td></tr>
+        <tr><td>#5</td><td>feature/incident-form ➔ main</td><td>Formulario de registro con validaciones</td><td>Mayro Gameros</td></tr>
+        <tr><td>#6</td><td>feature/incident-table-7fields ➔ main</td><td>Tabla interactiva con los 7 campos observables</td><td>Mayro Gameros</td></tr>
+        <tr><td>#7</td><td>release/v0.1.0 ➔ main</td><td>Cierre y estabilización del hito de Semana 1</td><td>Mayro Gameros</td></tr>
+        <tr><td rowspan="6"><strong>Semana 2</strong><br>(Incident-hub-w2)</td><td>#1</td><td>refactor/xss-sanitization-dt1 ➔ main</td><td>Resolución de Deuda Técnica DT-1 (Sanitización)</td><td>Mayro Gameros</td></tr>
+        <tr><td>#2</td><td>refactor/error-handling-dt2 ➔ main</td><td>Resolución de Deuda Técnica DT-2 (Error Handler)</td><td>Mayro Gameros</td></tr>
+        <tr><td>#3</td><td>feature/azure-pipelines-ci ➔ main</td><td>Orquestación de CI con azure-pipelines.yml</td><td>Mayro Gameros</td></tr>
+        <tr><td>#4</td><td>feature/broken-test-simulation ➔ main</td><td>Simulación controlada de fallo en pruebas</td><td>Mayro Gameros</td></tr>
+        <tr><td>#5</td><td>fix/controlled-pipeline-failure ➔ main</td><td>Corrección del fallo y restauración a verde</td><td>Mayro Gameros</td></tr>
+        <tr><td>#6</td><td>release/v0.2.0 ➔ main</td><td>Estabilización del hito de CI/CD de Semana 2</td><td>Mayro Gameros</td></tr>
       </tbody>
     </table>
 
@@ -812,20 +1056,15 @@ Task Técnica en Boards (AB#27) ──> Rama refactor/xss-sanitization-dt1 ─�
       <span class="ph-tag">EVIDENCIA TÉCNICA // CAPTURA 3.1</span>
       <div class="ph-title">📸 Captura 3.1: Lista de 7 Pull Requests de Semana 1 (Incident-hub-w1)</div>
       <div class="ph-desc">Muestra los 7 Pull Requests cerrados y mergeados en el repositorio de la Semana 1 vinculados con AB#ID.</div>
+      <div class="ph-box"><span>🖼️</span>Espacio Reservado para Captura de Pantalla 3.1 (GitHub PRs W1)</div>
       <span class="ph-rubric">Rúbrica: Pull Requests — Mínimo 6 PRs reales con descripción y fusión</span>
     </div>
 
     <div class="image-placeholder">
-      <span class="ph-tag">EVIDENCIA TÉCNICA // CAPTURA 3.2</span>
-      <div class="ph-title">📸 Captura 3.2: Lista de 6 Pull Requests de Semana 2 (Incident-hub-w2)</div>
-      <div class="ph-desc">Muestra los 6 Pull Requests de Semana 2 destacando la resolución de DT-1, DT-2 y el pipeline de CI/CD.</div>
-      <span class="ph-rubric">Rúbrica: Deuda Técnica — Resolución verificable de mínimo 2 deudas técnicas</span>
-    </div>
-
-    <div class="image-placeholder">
       <span class="ph-tag">EVIDENCIA TÉCNICA // CAPTURA 3.3</span>
-      <div class="ph-title">📸 Captura 3.3: Detalle de Code Review en Pull Request</div>
-      <div class="ph-desc">Muestra los comentarios formales de revisión de código (Code Review) emitidos antes de autorizar la integración a main.</div>
+      <div class="ph-title">📸 Captura 3.3: Detalle de Code Review Formal en Pull Request</div>
+      <div class="ph-desc">Muestra los comentarios técnicos de revisión por pares emitidos en PR #1 o PR #6 antes de aprobar el merge hacia main.</div>
+      <div class="ph-box"><span>🖼️</span>Espacio Reservado para Captura de Pantalla 3.3 (Code Review Detail)</div>
       <span class="ph-rubric">Rúbrica: Pull Requests — Evidencia de revisión (code review) antes de integrar</span>
     </div>
   </section>
@@ -833,51 +1072,234 @@ Task Técnica en Boards (AB#27) ──> Rama refactor/xss-sanitization-dt1 ─�
   <div class="page-break"></div>
 
   <!-- ============================================================== -->
-  <!-- 6. AZURE PIPELINES Y SELF-HOSTED AGENT -->
+  <!-- PÁGINA 10: 7. CATÁLOGO Y RESOLUCIÓN DE DEUDA TÉCNICA Y VULNERABILIDADES -->
   <!-- ============================================================== -->
-  <section id="sec-pipelines">
-    <h1>6. Automatización de CI con Azure Pipelines y Agente Autohospedado</h1>
+  <section id="sec-deuda">
+    <h1>7. Gestión de Deuda Técnica y Auditoría de Vulnerabilidades OWASP</h1>
     <p>
-      El proceso de Integración Continua principal está orquestado mediante el archivo declarativo <code>azure-pipelines.yml</code>, ejecutándose de forma verificable sobre un agente autohospedado local (*Self-Hosted Agent*).
+      Siguiendo las directrices de la rúbrica y los estándares de producción empresarial (<strong>OWASP Top 10</strong>), se identificaron y documentaron formalmente <strong>5 deudas técnicas estructurales</strong> en <code>docs/deuda_tecnica.md</code>, además de ejecutar una auditoría exhaustiva de ciberseguridad y arquitectura sobre las 6 dimensiones del proyecto, aplicando todas las remediaciones directamente en el código fuente:
     </p>
 
-    <h2>6.1 Fases Obligatorias de la Tubería de CI</h2>
-    <ol>
-      <li><strong>Checkout de Código Fuente:</strong> Clonación limpia del repositorio en el agente local.</li>
-      <li><strong>Verificación de Entorno y Secretos:</strong> Validación de Node.js, npm e inyección segura de variables protegidas desde el Variable Group <code>incident-hub-secrets</code>.</li>
-      <li><strong>Restauración de Dependencias Backend:</strong> Ejecución de <code>npm install --no-audit --no-fund</code> en <code>backend/</code>.</li>
-      <li><strong>Revisión de Seguridad y Dependencias (SCA):</strong> Auditoría estricta con <code>npm audit --audit-level=high</code> (0 vulnerabilidades).</li>
-      <li><strong>Ejecución de Pruebas Unitarias Automatizadas:</strong> Disparo de la suite completa de 8 pruebas unitarias con Node Test Runner (<code>node --test tests/api.test.js</code>).</li>
-      <li><strong>Compilación y Build Real de Frontend React con Vite:</strong> Instalación de módulos y generación de paquete optimizado en <code>frontend/dist/</code> mediante <code>npm run build</code>.</li>
-      <li><strong>Empaquetado de Artefactos de Release:</strong> Copia selectiva de módulos productivos, scripts SQL, documentación y código estático al staging de artefactos.</li>
-      <li><strong>Publicación del Artefacto:</strong> Publicación formal del contenedor descargable <code>incident-hub-drop</code> listo para despliegue continuo.</li>
-    </ol>
+    <h2>7.1 Catálogo de Deuda Técnica Identificada y Mitigada</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Severidad</th>
+          <th>Deuda / Debilidad Identificada</th>
+          <th>Por qué era un Riesgo</th>
+          <th>Cómo se Solucionó en Código</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>DT-1</strong></td>
+          <td><span class="badge badge-red">[CRÍTICO]</span></td>
+          <td>Ausencia de escapado HTML en plantillas SMTP, renderizado <code>dangerouslySetInnerHTML</code> y cabeceras HTTP.</td>
+          <td>Permitía inyección de código malicioso <strong>Stored XSS (OWASP A03)</strong> al visualizar correos o descripciones con payloads <code>&lt;img onerror=...&gt;</code>.</td>
+          <td><span class="badge badge-green">RESUELTA</span> &bull; Función <code>escapeHtml()</code> en <code>securityMiddleware.js</code>, escapado en <code>emailService.js</code> y <code>&lt;iframe sandbox=""&gt;</code> en <code>DevOpsMonitor.jsx</code> (AB#27).</td>
+        </tr>
+        <tr>
+          <td><strong>DT-2</strong></td>
+          <td><span class="badge badge-yellow">[ALTO]</span></td>
+          <td>Manejador de errores, validadores y servicios desconectados del servidor Express (Split-Brain Architecture).</td>
+          <td>Enviar tipos no string (ej. <code>{"category": 123}</code>) causaba <code>TypeError</code> no capturados y fugas de stacktrace en respuestas 500.</td>
+          <td><span class="badge badge-green">RESUELTA</span> &bull; Conexión real de <code>validateCreateIncident</code>, <code>asyncHandler</code> y <code>errorHandlerMiddleware</code> en <code>backend/server.js</code> (AB#27).</td>
+        </tr>
+        <tr>
+          <td><strong>DT-3</strong></td>
+          <td><span class="badge badge-yellow">[ALTO]</span></td>
+          <td>Falta de índices compuestos en PostgreSQL y consultas SQL transaccionales reales en <code>db.js</code>.</td>
+          <td>Degradación en filtros multicriterio y ausencia de persistencia ACID real cuando PostgreSQL está activo.</td>
+          <td><span class="badge badge-green">RESUELTA</span> &bull; Índice compuesto <code>idx_incidents_multicriteria</code> en <code>schema.sql</code> y CRUD SQL parametrizado con <code>BEGIN/COMMIT/ROLLBACK</code> en <code>db.js</code> (ADR-004).</td>
+        </tr>
+        <tr>
+          <td><strong>DT-4</strong></td>
+          <td><span class="badge badge-red">[CRÍTICO]</span></td>
+          <td>Exposición de <code>accessCode</code> en <code>/api/users</code>, login sin contraseña y ausencia de RBAC/Rate Limiting en API.</td>
+          <td>Permitía suplantación de identidad (<strong>OWASP A01/A07</strong>) y ataques de fuerza bruta o denegación de servicio (DoS).</td>
+          <td><span class="badge badge-green">RESUELTA</span> &bull; Proyección <code>toPublicUser()</code>, tokens firmados <code>HMAC-SHA256</code>, middleware <code>requireAdminRole</code> y <code>createRateLimiter</code> en <code>securityMiddleware.js</code>.</td>
+        </tr>
+        <tr>
+          <td><strong>DT-5</strong></td>
+          <td><span class="badge badge-yellow">[ALTO]</span></td>
+          <td>Pruebas unitarias aisladas sin ejercitar el servidor HTTP Express ni la máquina de estados completa.</td>
+          <td>Regresiones en rutas HTTP, cabeceras de seguridad o saltos de estado ilegales (<code>NUEVO ➔ CERRADO</code>) pasaban desapercibidas.</td>
+          <td><span class="badge badge-green">RESUELTA</span> &bull; Grafo estricto <code>ALLOWED_TRANSITIONS</code> en <code>workflowService.js</code> y Subtest 8 de integración HTTP real sobre Express en <code>tests/api.test.js</code>.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2>7.2 Matriz Completa de Vulnerabilidades Auditadas y Remediadas (Estándar Producción)</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Cód.</th>
+          <th>Clasificación</th>
+          <th>Vulnerabilidad / Debilidad Detectada</th>
+          <th>Por qué era un Riesgo</th>
+          <th>Remediación Aplicada en el Proyecto</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>C1</strong></td>
+          <td><span class="badge badge-red">[CRÍTICO]</span></td>
+          <td><strong>Broken Access Control y Fuga de Credenciales (OWASP A01/A02):</strong> <code>GET /api/users</code> devolvía <code>accessCode</code> en texto claro y <code>POST /api/auth/login</code> aceptaba <code>{userId: 1}</code> sin clave.</td>
+          <td>Cualquier visitante podía leer las claves de todos los operadores en red y tomar control total del rol <code>ADMIN</code> sin autenticarse.</td>
+          <td>Se implementó <code>toPublicUser()</code> para eliminar <code>accessCode</code> de toda respuesta JSON, se exigió validación constante con <code>verifyAuthToken</code> (HMAC-SHA256 + <code>crypto.timingSafeEqual</code>) y se protegió la API con <code>requireAdminRole</code> (HTTP 403).</td>
+        </tr>
+        <tr>
+          <td><strong>C2</strong></td>
+          <td><span class="badge badge-red">[CRÍTICO]</span></td>
+          <td><strong>Stored XSS e Inyección de Cabeceras SMTP (OWASP A03):</strong> <code>emailService.js</code> concatenaba campos sin escapar y <code>DevOpsMonitor.jsx</code> usaba <code>dangerouslySetInnerHTML</code>.</td>
+          <td>Un atacante podía inyectar JavaScript arbitrario en el título de un ticket que se ejecutaba en el navegador del administrador al abrir el monitor DevOps.</td>
+          <td>Se aplicó <code>escapeHtml()</code> a cada campo interpolado en <code>buildEmailHtml</code> y <code>buildPipelineEmailHtml</code>, limpieza de saltos <code>\r\n</code> (CRLF) en cabeceras SMTP y aislamiento mediante <code>&lt;iframe sandbox="" srcDoc={...} /&gt;</code> en React.</td>
+        </tr>
+        <tr>
+          <td><strong>C3</strong></td>
+          <td><span class="badge badge-red">[CRÍTICO]</span></td>
+          <td><strong>Secretos Hardcodeados en Infraestructura (Regla 9):</strong> Contraseñas por defecto en <code>db.js</code>, <code>docker-compose.yml</code> y token de ejemplo en guía HTML.</td>
+          <td>Comprometía la infraestructura local/contenedorizada y violaba la Regla 9 de cero exposición de credenciales en el repositorio.</td>
+          <td>Se removió el fallback <code>'postgres'</code> en <code>db.js</code>, se exigió variable de entorno obligatoria <code>${DB_PASSWORD:?...}</code> en <code>devops/docker-compose.yml</code> y se redactó cualquier credencial en documentos HTML.</td>
+        </tr>
+        <tr>
+          <td><strong>A1</strong></td>
+          <td><span class="badge badge-yellow">[ALTO]</span></td>
+          <td><strong>Bypass en Máquina de Estados Finita (AB#15):</strong> Solo se bloqueaba <code>CERRADO ➔ NUEVO</code>, permitiendo <code>NUEVO ➔ CERRADO</code> o <code>CERRADO ➔ EN_PROCESO</code>.</td>
+          <td>Rompía la trazabilidad de auditoría al permitir cerrar incidentes sin pasar por asignación/resolución o reabrir tickets cerrados.</td>
+          <td>Se implementó la matriz explícita <code>ALLOWED_TRANSITIONS</code> en <code>workflowService.js</code> donde <code>CERRADO: []</code> es un estado terminal inmutable y <code>NUEVO</code> solo transiciona a <code>ASIGNADO</code> o <code>EN_PROCESO</code>.</td>
+        </tr>
+        <tr>
+          <td><strong>A2</strong></td>
+          <td><span class="badge badge-yellow">[ALTO]</span></td>
+          <td><strong>Bloqueo del Event Loop con <code>execSync</code> (Rendimiento):</strong> <code>azureService.js</code> ejecutaba subprocesos síncronos en cada petición.</td>
+          <td>Congelaba el hilo único de Node.js hasta por 30 segundos durante pruebas o consultas Git, bloqueando a todos los usuarios concurrentes.</td>
+          <td>Se migró a <code>execFile</code> asíncrono (<code>promisify(execFile)</code>) sin invocar shell, se añadió caché en memoria con TTL de 60s para metadatos Git y candado de concurrencia <code>isVerificationRunning</code>.</td>
+        </tr>
+        <tr>
+          <td><strong>M1-M3</strong></td>
+          <td><span class="badge badge-blue">[MEDIO]</span></td>
+          <td><strong>Recorridos Múltiples O(9N), Colisión de IDs y URLs Fijas:</strong> 9 pasadas de array en métricas, <code>Math.max(...ids)</code> y URL <code>localhost:5000</code> fija.</td>
+          <td>Degradación de CPU en dashboards grandes, riesgo de <code>-Infinity</code> o reutilización de IDs y fallo de conexión en despliegues cloud.</td>
+          <td>Se optimizó <code>computeDashboardMetrics</code> a una sola pasada <strong>O(N)</strong> con cálculo real de <code>mttrHours</code>, contadores monotónicos en servidor y soporte para <code>import.meta.env.VITE_API_URL</code> en Frontend.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="image-placeholder">
+      <span class="ph-tag">EVIDENCIA TÉCNICA // CAPTURA 3.4</span>
+      <div class="ph-title">📸 Captura 3.4: Resolución de Deuda Técnica DT-1 y Blindaje XSS (OWASP A03)</div>
+      <div class="ph-desc">Muestra el código de `securityMiddleware.js` (`escapeHtml`, `sanitizePayload`, `generateAuthToken`), la prueba unitaria 6 validando la neutralización de scripts y el PR #1 en W2.</div>
+      <div class="ph-box"><span>🖼️</span>Espacio Reservado para Captura de Pantalla 3.4 (PR #1 W2 DT-1)</div>
+      <span class="ph-rubric">Rúbrica: Deuda Técnica — Resolución verificable de mínimo 2 deudas técnicas</span>
+    </div>
+
+    <div class="image-placeholder">
+      <span class="ph-tag">EVIDENCIA TÉCNICA // CAPTURA 3.5</span>
+      <div class="ph-title">📸 Captura 3.5: Resolución de Deuda Técnica DT-2 (Manejador Global de Errores y AsyncHandler)</div>
+      <div class="ph-desc">Muestra la implementación de `errorHandler.js` (`AppError`, `asyncHandler`, `errorHandlerMiddleware`) interceptando excepciones y respondiendo JSON estandarizado en PR #2 de W2.</div>
+      <div class="ph-box"><span>🖼️</span>Espacio Reservado para Captura de Pantalla 3.5 (PR #2 W2 DT-2)</div>
+      <span class="ph-rubric">Rúbrica: Deuda Técnica — Segunda deuda técnica resuelta con pruebas</span>
+    </div>
+  </section>
+
+  <div class="page-break"></div>
+
+  <!-- ============================================================== -->
+  <!-- PÁGINA 11: 8. AZURE PIPELINES: LAS 8 ETAPAS DE CI -->
+  <!-- ============================================================== -->
+  <section id="sec-pipelines-yaml">
+    <h1>8. Tubería de Integración Continua (CI) en Azure Pipelines</h1>
+    <p>
+      El pipeline principal está definido de forma declarativa mediante el archivo <code>azure-pipelines.yml</code>, configurado para ejecutarse en el pool <code>Default</code> sobre un agente autohospedado local, garantizando compilaciones reales sin dependencias de tiempo compartido en la nube.
+    </p>
+
+    <h2>8.1 Desglose de las 8 Etapas Oficiales de la Tubería</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Paso</th>
+          <th>Nombre Oficial de la Etapa</th>
+          <th>Comando / Tarea Ejecutada</th>
+          <th>Objetivo y Control de Calidad</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td><strong>1</strong></td><td>Checkout de Código Fuente</td><td><code>checkout: self</code></td><td>Clonación limpia y sincronización de submódulos.</td></tr>
+        <tr><td><strong>2</strong></td><td>Verificar Entorno y Secretos</td><td><code>script: node -v && npm -v</code></td><td>Comprobación de variables del grupo <code>incident-hub-secrets</code>.</td></tr>
+        <tr><td><strong>3</strong></td><td>Instalación de Dependencias</td><td><code>call npm install --no-audit</code></td><td>Restauración determinista de librerías del backend.</td></tr>
+        <tr><td><strong>4</strong></td><td>Revisión de Seguridad (SCA)</td><td><code>call npm audit --audit-level=high</code></td><td>Quality Gate: Bloquea el build si existen vulnerabilidades altas/críticas.</td></tr>
+        <tr><td><strong>5</strong></td><td>Pruebas Unitarias Automatizadas</td><td><code>node --test api.test.js</code></td><td>Quality Gate: Ejecución de las 8 pruebas con Node Test Runner.</td></tr>
+        <tr><td><strong>6</strong></td><td>Compilación Real de Frontend</td><td><code>call npm run build (Vite)</code></td><td>Generación de paquete optimizado de producción en <code>frontend/dist/</code>.</td></tr>
+        <tr><td><strong>7</strong></td><td>Empaquetado de Artefactos</td><td><code>task: CopyFiles@2</code></td><td>Copia de backend, dist, base de datos y docs al directorio staging.</td></tr>
+        <tr><td><strong>8</strong></td><td>Publicar Artefacto de Release</td><td><code>task: PublishBuildArtifacts@1</code></td><td>Publicación del contenedor descargable <code>incident-hub-drop</code>.</td></tr>
+      </tbody>
+    </table>
 
     <div class="image-placeholder">
       <span class="ph-tag">EVIDENCIA TÉCNICA // CAPTURA 4.1</span>
       <div class="ph-title">📸 Captura 4.1: Ejecución Exitosa de Azure Pipeline (Build Succeeded)</div>
-      <div class="ph-desc">Muestra la ejecución completa del pipeline en verde en Azure Pipelines con los 8 pasos completados a nombre de Mayro Gameros.</div>
+      <div class="ph-desc">Muestra la ejecución completa en verde en Azure Pipelines con las 8 etapas aprobadas a nombre de Mayro Gameros.</div>
+      <div class="ph-box"><span>🖼️</span>Espacio Reservado para Captura de Pantalla 4.1 (Azure Pipelines Succeeded)</div>
       <span class="ph-rubric">Rúbrica: Azure Pipelines (CI) — Etapas completas ejecutadas exitosamente</span>
     </div>
 
     <div class="image-placeholder">
       <span class="ph-tag">EVIDENCIA TÉCNICA // CAPTURA 4.2</span>
       <div class="ph-title">📸 Captura 4.2: Compilación Real de Frontend React con Vite en CI</div>
-      <div class="ph-desc">Muestra el log detallado del paso 6 en Azure Pipelines ejecutando `npm run build` y generando los assets en `frontend/dist`.</div>
+      <div class="ph-desc">Muestra el log detallado de la etapa 6 en Azure Pipelines ejecutando `npm run build` y generando `frontend/dist/index.html`.</div>
+      <div class="ph-box"><span>🖼️</span>Espacio Reservado para Captura de Pantalla 4.2 (Vite Build Log)</div>
       <span class="ph-rubric">Rúbrica: Azure Pipelines — Compilación y build real de frontend</span>
     </div>
+  </section>
+
+  <div class="page-break"></div>
+
+  <!-- ============================================================== -->
+  <!-- PÁGINA 12: 8. AGENTE SELF-HOSTED Y PUBLICACIÓN DE ARTEFACTOS -->
+  <!-- ============================================================== -->
+  <section id="sec-pipelines-agent">
+    <h1>8. Agente Autohospedado y Publicación de Artefactos</h1>
+    <p>
+      Para satisfacer con el nivel de <em>Cumple Totalmente</em>, el pipeline se ejecuta de manera verificable sobre un <strong>Self-Hosted Agent</strong> instalado y activo en el equipo de desarrollo, evitando las restricciones y tiempos de espera de los agentes públicos de Microsoft.
+    </p>
+
+    <h2>8.1 Especificaciones Técnicas del Agente Local</h2>
+    <ul>
+      <li><strong>Identificador del Agente:</strong> <code>mayro-local-agent</code> (Versión 4.274.1).</li>
+      <li><strong>Ubicación en Disco:</strong> <code>D:\Agentes1\Agentes</code> (Espacio de trabajo en <code>_work\1\s</code>).</li>
+      <li><strong>Pool Asignado:</strong> <code>Default</code> en la organización <code>DevOps-UMG-Mayro</code>.</li>
+      <li><strong>Mecanismo de Autenticación:</strong> Token PAT protegido con permisos de <em>Agent Pools (Read & Manage)</em>.</li>
+      <li><strong>Estado Operativo:</strong> <strong>Online &bull; Listening for Jobs</strong> (Detecta y procesa builds en automático).</li>
+    </ul>
+
+    <h2>8.2 Publicación del Artefacto de Release: incident-hub-drop</h2>
+    <p>
+      Al completar con éxito la etapa 8, Azure Pipelines genera y publica el contenedor <strong><code>incident-hub-drop</code></strong>. Este artefacto contiene la solución empaquetada lista para su despliegue en entornos de producción:
+    </p>
+    <pre>
+incident-hub-drop.zip
+├── backend/ (server.js, package.json, src/ controllers, routes, services)
+├── frontend/dist/ (index.html, assets/ js y css minificados por Vite)
+├── database/ (schema.sql, queries de inicialización)
+├── docs/ (documentación técnica oficial y guías)
+└── README.md
+    </pre>
 
     <div class="image-placeholder">
       <span class="ph-tag">EVIDENCIA TÉCNICA // CAPTURA 4.3</span>
       <div class="ph-title">📸 Captura 4.3: Registro y Estado Activo de Self-Hosted Agent</div>
-      <div class="ph-desc">Muestra el agente `mayro-local-agent` en estado Online en el pool Default en Project Settings ➔ Agent pools.</div>
+      <div class="ph-desc">Muestra el agente `mayro-local-agent` con indicador en verde (Online) en Project Settings ➔ Agent pools ➔ Default ➔ Agents.</div>
+      <div class="ph-box"><span>🖼️</span>Espacio Reservado para Captura de Pantalla 4.3 (Agent Pools Online)</div>
       <span class="ph-rubric">Rúbrica: Agente Autohospedado — Mínimo 1 self-hosted agent configurado y utilizado</span>
     </div>
 
     <div class="image-placeholder">
       <span class="ph-tag">EVIDENCIA TÉCNICA // CAPTURA 4.5</span>
       <div class="ph-title">📸 Captura 4.5: Publicación de Artefactos de Release (incident-hub-drop)</div>
-      <div class="ph-desc">Muestra el enlace `1 published` del Build exitoso conteniendo el paquete empaquetado `incident-hub-drop`.</div>
+      <div class="ph-desc">Muestra el enlace superior `1 published; incident-hub-drop` del Build exitoso permitiendo la descarga del archivo ZIP del release.</div>
+      <div class="ph-box"><span>🖼️</span>Espacio Reservado para Captura de Pantalla 4.5 (Artifact Drop Published)</div>
       <span class="ph-rubric">Rúbrica: Azure Pipelines — Empaquetado y publicación de artefacto de release</span>
     </div>
   </section>
@@ -885,41 +1307,56 @@ Task Técnica en Boards (AB#27) ──> Rama refactor/xss-sanitization-dt1 ─�
   <div class="page-break"></div>
 
   <!-- ============================================================== -->
-  <!-- 7. FALLO CONTROLADO Y RESILIENCIA -->
+  <!-- PÁGINA 13: 9. FALLO CONTROLADO Y CAUSA RAÍZ (ROJO ❌) -->
   <!-- ============================================================== -->
-  <section id="sec-fallo">
-    <h1>7. Fallo Controlado y Resiliencia en la Tubería</h1>
+  <section id="sec-fallo-rca">
+    <h1>9. Simulación y Recuperación de Fallo Controlado en CI</h1>
     <p>
-      Para satisfacer el criterio evaluador de <strong>Fallo Controlado</strong>, el equipo demostró la capacidad de la tubería de CI de interceptar regresiones y detener el despliegue ante aserciones rotas en el código:
+      La rúbrica evaluadora exige la demostración verificable de al menos un pipeline fallido con su diagnóstico técnico, alerta y posterior recuperación. Se ejecutó una prueba de regresión controlada mediante un error de aserción en el cálculo de métricas críticas:
     </p>
 
-    <h2>7.1 Análisis de Causa Raíz (RCA) del Fallo Inducido</h2>
-    <ul>
-      <li><strong>Hito / PR:</strong> Pull Request #4 en <code>Incident-hub-w2</code> (rama <code>feature/broken-test-simulation</code>).</li>
-      <li><strong>Falla Provocada:</strong> Alteración deliberada de la aserción de cálculo de incidentes críticos en <code>tests/api.test.js:80</code> (se comparó <code>stats.criticos === -1</code> en lugar de <code>1</code>).</li>
-      <li><strong>Comportamiento del Pipeline:</strong> La etapa de pruebas unitarias falló inmediatamente con código de salida <code>1</code> (<code>ERR_ASSERTION</code>). El pipeline se tiñó de <strong>ROJO ❌</strong>, bloqueó la generación del artefacto e impidió la fusión a <code>main</code>.</li>
-      <li><strong>Alerta Inmediata:</strong> El sistema de notificación disparó un correo de alta prioridad a <code>mbarriosg8@miumg.edu.gt</code> advirtiendo del bloqueo de calidad.</li>
-      <li><strong>Resolución Trazable:</strong> Se diagnosticó el error, se corrigió en el PR #5 (rama <code>fix/controlled-pipeline-failure</code>) y se validó la ejecución posterior en <strong>VERDE ✅</strong> con el 100% de pruebas pasando.</li>
-    </ul>
+    <h2>9.1 Análisis de Causa Raíz (RCA) del Fallo Inducido</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Parámetro de la Falla</th>
+          <th>Detalle Técnico Registrado</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td><strong>Archivo Afectado</strong></td><td><code>tests/api.test.js</code> (Línea 80)</td></tr>
+        <tr><td><strong>Aserción Original (Pasa)</strong></td><td><code>assert.strictEqual(stats.criticos, 1);</code></td></tr>
+        <tr><td><strong>Aserción Inducida (Falla)</strong></td><td><code>assert.strictEqual(stats.criticos, -1);</code></td></tr>
+        <tr><td><strong>Work Item Vinculado</strong></td><td>User Story <code>AB#22</code> (Fallo de prueba controlada)</td></tr>
+        <tr><td><strong>Código de Salida del Proceso</strong></td><td><code>Exit Code 1</code> arrojado por el Node.js Native Test Runner.</td></tr>
+        <tr><td><strong>Error Capturado en Log</strong></td><td><code>AssertionError [ERR_ASSERTION]: Expected values to be strictly equal: 1 !== -1</code></td></tr>
+        <tr><td><strong>Acción del Quality Gate</strong></td><td>Detención inmediata en Etapa 5; Etapas 6, 7 y 8 canceladas. Cero artefactos generados.</td></tr>
+        <tr><td><strong>Notificación Disparada</strong></td><td>Alerta de emergencia enviada a <code>mbarriosg8@miumg.edu.gt</code>.</td></tr>
+        <tr><td><strong>Solución Aplicada</strong></td><td>Restauración de aserción a <code>1</code> en commit <code>AB#24</code>, recuperación a Verde y release.</td></tr>
+      </tbody>
+    </table>
 
     <div class="image-placeholder">
       <span class="ph-tag">EVIDENCIA TÉCNICA // CAPTURA 4.6</span>
       <div class="ph-title">📸 Captura 4.6: Fallo Controlado de CI en ROJO ❌</div>
-      <div class="ph-desc">Muestra la ejecución fallida en rojo en Azure Pipelines bloqueada en el paso de pruebas unitarias.</div>
+      <div class="ph-desc">Muestra la ejecución con símbolo rojo (Failed) en Azure Pipelines bloqueada en el paso 5 de pruebas unitarias.</div>
+      <div class="ph-box"><span>🖼️</span>Espacio Reservado para Captura de Pantalla 4.6 (Pipeline Failed Red)</div>
       <span class="ph-rubric">Rúbrica: Fallo Controlado — Mínimo 1 pipeline fallido con evidencia verificable</span>
     </div>
 
     <div class="image-placeholder">
       <span class="ph-tag">EVIDENCIA TÉCNICA // CAPTURA 4.7</span>
       <div class="ph-title">📸 Captura 4.7: Diagnóstico de Causa Raíz del Fallo en Logs</div>
-      <div class="ph-desc">Muestra el log de error en el pipeline: `ERR_ASSERTION: stats.criticos 1 !== -1` en tests/api.test.js:80.</div>
+      <div class="ph-desc">Muestra el log del paso 5 con el stacktrace: `AssertionError: Expected values to be strictly equal: 1 !== -1`.</div>
+      <div class="ph-box"><span>🖼️</span>Espacio Reservado para Captura de Pantalla 4.7 (Pipeline Error Log)</div>
       <span class="ph-rubric">Rúbrica: Fallo Controlado — Diagnóstico técnico documentado</span>
     </div>
 
     <div class="image-placeholder">
       <span class="ph-tag">EVIDENCIA TÉCNICA // CAPTURA 4.8</span>
       <div class="ph-title">📸 Captura 4.8: Corrección y Pipeline Restaurado a VERDE ✅</div>
-      <div class="ph-desc">Muestra la ejecución posterior en verde Succeeded tras fusionar el PR de corrección.</div>
+      <div class="ph-desc">Muestra la ejecución posterior en verde Succeeded tras fusionar el commit AB#24 con las 8 etapas completas.</div>
+      <div class="ph-box"><span>🖼️</span>Espacio Reservado para Captura de Pantalla 4.8 (Pipeline Restored Green)</div>
       <span class="ph-rubric">Rúbrica: Fallo Controlado — Corrección y posterior ejecución exitosa</span>
     </div>
   </section>
@@ -927,14 +1364,15 @@ Task Técnica en Boards (AB#27) ──> Rama refactor/xss-sanitization-dt1 ─�
   <div class="page-break"></div>
 
   <!-- ============================================================== -->
-  <!-- 8. GITHUB ACTIONS COMPLEMENTARIO -->
+  <!-- PÁGINA 14: 10. DUAL CI CON GITHUB ACTIONS (CI.YML) -->
   <!-- ============================================================== -->
   <section id="sec-actions">
-    <h1>8. Workflow Complementario en GitHub Actions</h1>
+    <h1>10. Flujo Dual de Calidad con GitHub Actions</h1>
     <p>
-      Como estrategia de aseguramiento de calidad de doble vía (Dual CI), se implementó un flujo de trabajo complementario en <code>.github/workflows/ci.yml</code> para ejecutar auditoría de seguridad y pruebas unitarias automáticas ante cada apertura o actualización de Pull Requests hacia <code>main</code>:
+      Para robustecer el aseguramiento de la calidad, el equipo implementó una estrategia de <strong>Integración Continua Dual (Dual CI)</strong>. Mientras Azure Pipelines gestiona la compilación de producción y artefactos en el agente local, <strong>GitHub Actions</strong> valida de forma complementaria cada Pull Request antes de su integración a <code>main</code>:
     </p>
 
+    <h2>10.1 Definición del Workflow Complementario (.github/workflows/ci.yml)</h2>
     <pre>
 name: CI Pull Request Validation
 on:
@@ -947,53 +1385,114 @@ jobs:
   validate:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - name: 1. Checkout de Código Fuente
+        uses: actions/checkout@v4
+
+      - name: 2. Configurar Entorno Node.js 20.x
+        uses: actions/setup-node@v4
         with:
           node-version: '20'
-      - name: Restaurar dependencias Backend
-        run: cd backend && npm install --no-audit
-      - name: Auditoría de Seguridad SCA (npm audit)
+
+      - name: 3. Restaurar Dependencias Backend (Determinístico)
+        run: cd backend && npm ci --no-audit
+
+      - name: 4. Auditoría de Seguridad SCA (npm audit)
         run: cd backend && npm audit --audit-level=high
-      - name: Suite de Pruebas Unitarias Automatizadas
+
+      - name: 5. Ejecutar Suite de Pruebas Unitarias e Integración HTTP
         run: node --test tests/api.test.js
     </pre>
+
+    <div class="callout callout-success">
+      <div class="callout-title">Ventajas de la Arquitectura Dual CI</div>
+      1. Doble barrera de protección: Ningún PR puede integrarse sin superar el workflow de GitHub Actions en la nube.<br>
+      2. Neutralidad de plataforma: El código es validado tanto en contenedores Linux (Ubuntu en GitHub Actions) como en Windows nativo (Self-Hosted Agent en Azure Pipelines).
+    </div>
 
     <div class="image-placeholder">
       <span class="ph-tag">EVIDENCIA TÉCNICA // CAPTURA 5.1</span>
       <div class="ph-title">📸 Captura 5.1: Workflow Complementario en GitHub Actions</div>
-      <div class="ph-desc">Muestra las ejecuciones exitosas del workflow `ci.yml` en la pestaña Actions del repositorio GitHub.</div>
+      <div class="ph-desc">Muestra la pestaña Actions del repositorio GitHub con las ejecuciones exitosas en verde del workflow ci.yml.</div>
+      <div class="ph-box"><span>🖼️</span>Espacio Reservado para Captura de Pantalla 5.1 (GitHub Actions Tab)</div>
       <span class="ph-rubric">Rúbrica: GitHub Actions — 1 workflow complementario en .github/workflows/</span>
     </div>
   </section>
 
+  <div class="page-break"></div>
+
   <!-- ============================================================== -->
-  <!-- 9. GESTIÓN DE SECRETOS Y SEGURIDAD SCA -->
+  <!-- PÁGINA 15: 11. DEVSECOPS: CERO SECRETOS Y AUDITORÍA SCA -->
   <!-- ============================================================== -->
   <section id="sec-seguridad">
-    <h1>9. Gestión de Secretos y Seguridad de Dependencias (SCA)</h1>
+    <h1>11. DevSecOps: Cero Secretos y Seguridad SCA</h1>
     <p>
-      En estricto cumplimiento de la <strong>Regla 9</strong> de la rúbrica institucional:
+      En cumplimiento inquebrantable de la <strong>Regla 9</strong> institucional (cero exposición de credenciales), el proyecto implementó controles estrictos de seguridad de código y análisis de composición de software:
     </p>
 
-    <ul>
-      <li><strong>Cero Secretos en Código:</strong> No existe ninguna contraseña, token personal (PAT) ni clave en texto plano dentro del repositorio, historial de commits o scripts de construcción.</li>
-      <li><strong>Protección de Remote azdo:</strong> La URL de conexión al repositorio de Azure DevOps se configuró limpiamente sin credenciales en la URL (`https://dev.azure.com/...`), delegando la autenticación en el Administrador de Credenciales de Git.</li>
-      <li><strong>Variable Group Protegido:</strong> Las credenciales de base de datos (`DB_PASSWORD`) y tokens de servicio se almacenan bajo candado cerrado en el Variable Group <strong><code>incident-hub-secrets</code></strong> de Azure DevOps.</li>
-      <li><strong>Auditoría SCA (Software Composition Analysis):</strong> Se evaluaron las dependencias del backend con <code>npm audit</code>, obteniendo un informe formal de <strong>0 vulnerabilidades</strong> críticas o altas.</li>
-    </ul>
+    <h2>11.1 Matriz de Protección de Credenciales y Secretos</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Punto de Control</th>
+          <th>Mecanismo de Protección Aplicado</th>
+          <th>Estado de Seguridad</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Código Fuente y Git History</strong></td>
+          <td>Archivos <code>.env</code> protegidos mediante <code>.gitignore</code>. Cero tokens o contraseñas en commits.</td>
+          <td><span class="badge badge-green">100% Saneado</span></td>
+        </tr>
+        <tr>
+          <td><strong>Remoto azdo en Git</strong></td>
+          <td>URL limpia: <code>https://dev.azure.com/DevOps-UMG-Mayro/incident-hub/_git/incident-hub</code> sin PAT en URL.</td>
+          <td><span class="badge badge-green">Cero Secretos</span></td>
+        </tr>
+        <tr>
+          <td><strong>Azure DevOps Variable Group</strong></td>
+          <td>Grupo <code>incident-hub-secrets</code> con <code>DB_PASSWORD</code> y tokens bajo candado cerrado (🔒 isSecret).</td>
+          <td><span class="badge badge-green">Bajo Candado</span></td>
+        </tr>
+        <tr>
+          <td><strong>Auditoría SCA (Software Composition)</strong></td>
+          <td>Ejecución automatizada de <code>npm audit --audit-level=high</code> en backend sin librerías externas vulnerables.</td>
+          <td><span class="badge badge-green">0 Vulnerabilidades</span></td>
+        </tr>
+        <tr>
+          <td><strong>Autenticación HMAC-SHA256 y RBAC</strong></td>
+          <td>Tokens firmados con <code>node:crypto</code> (<code>timingSafeEqual</code>), ocultamiento de <code>accessCode</code> con <code>toPublicUser()</code> y bloqueo <code>403 Forbidden</code> vía <code>requireAdminRole</code>.</td>
+          <td><span class="badge badge-green">OWASP A01/A07 OK</span></td>
+        </tr>
+        <tr>
+          <td><strong>Defensa en Profundidad XSS y Rate Limiting</strong></td>
+          <td>Escapado <code>escapeHtml()</code> en plantillas de correo, previsualización en <code>&lt;iframe sandbox=""&gt;</code>, cabeceras <code>CSP</code> y <code>createRateLimiter</code> por IP.</td>
+          <td><span class="badge badge-green">OWASP A03/A05 OK</span></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="image-placeholder">
+      <span class="ph-tag">EVIDENCIA TÉCNICA // CAPTURA 2.3</span>
+      <div class="ph-title">📸 Captura 2.3: Configuración Limpia de Remotos Git (Cero Secretos)</div>
+      <div class="ph-desc">Muestra la salida de `git remote -v` certificando que los remotos GitHub y Azure DevOps usan URLs limpias sin tokens PAT expuestos.</div>
+      <div class="ph-box"><span>🖼️</span>Espacio Reservado para Captura de Pantalla 2.3 (git remote -v)</div>
+      <span class="ph-rubric">Rúbrica: Gestión de Secretos (Regla 9) — Cero credenciales en configuración local</span>
+    </div>
 
     <div class="image-placeholder">
       <span class="ph-tag">EVIDENCIA TÉCNICA // CAPTURA 4.4</span>
-      <div class="ph-title">📸 Captura 4.4: Variable Group con Secretos Protegidos en Azure DevOps</div>
-      <div class="ph-desc">Muestra el grupo incident-hub-secrets con las variables protegidas bajo el candado cerrado (isSecret = true).</div>
+      <div class="ph-title">📸 Captura 4.4: Variable Group de Secretos Protegidos en Azure DevOps</div>
+      <div class="ph-desc">Muestra el grupo `incident-hub-secrets` en Pipelines ➔ Library con los secretos protegidos con candado cerrado.</div>
+      <div class="ph-box"><span>🖼️</span>Espacio Reservado para Captura de Pantalla 4.4 (Library Variable Groups)</div>
       <span class="ph-rubric">Rúbrica: Gestión de Secretos — Protección de credenciales y tokens (Regla 9)</span>
     </div>
 
     <div class="image-placeholder">
       <span class="ph-tag">EVIDENCIA TÉCNICA // CAPTURA 6.2</span>
       <div class="ph-title">📸 Captura 6.2: Auditoría de Seguridad de Dependencias (0 Vulnerabilidades)</div>
-      <div class="ph-desc">Muestra la salida de `npm run audit` reportando exactamente `found 0 vulnerabilities`.</div>
+      <div class="ph-desc">Muestra la consola ejecutando `npm run audit` reportando exactamente `found 0 vulnerabilities`.</div>
+      <div class="ph-box"><span>🖼️</span>Espacio Reservado para Captura de Pantalla 6.2 (npm run audit)</div>
       <span class="ph-rubric">Rúbrica: Análisis de Dependencias — Herramienta SCA y matriz de seguridad</span>
     </div>
   </section>
@@ -1001,79 +1500,42 @@ jobs:
   <div class="page-break"></div>
 
   <!-- ============================================================== -->
-  <!-- 10. SUITE DE PRUEBAS UNITARIAS -->
+  <!-- PÁGINA 16: 12. SUITE DE 8 PRUEBAS UNITARIAS AUTOMATIZADAS -->
   <!-- ============================================================== -->
   <section id="sec-tests">
-    <h1>10. Suite de Pruebas Unitarias Automatizadas</h1>
+    <h1>12. Suite de 8 Pruebas Unitarias Automatizadas</h1>
     <p>
-      La estabilidad del sistema se encuentra protegida por una suite completa de pruebas unitarias e integración en <code>tests/api.test.js</code>, ejecutadas mediante el Node.js Native Test Runner (sin dependencias externas inseguras):
+      La integridad funcional del sistema está salvaguardada por una batería completa de pruebas unitarias e integración en <code>tests/api.test.js</code>, implementadas sobre el <strong>Node.js Native Test Runner</strong> (incorporado en Node 20.x), lo que elimina la necesidad de frameworks pesados como Jest o Mocha:
     </p>
 
+    <h2>12.1 Matriz de Casos de Prueba Implementados</h2>
     <table>
       <thead>
         <tr>
           <th>#</th>
-          <th>Prueba Unitaria Implementada</th>
-          <th>Criterio Técnico Validado</th>
+          <th>Nombre del Caso de Prueba</th>
+          <th>Condición Evaluada</th>
+          <th>Resultado Esperado</th>
           <th>Trazabilidad</th>
         </tr>
       </thead>
       <tbody>
-        <tr>
-          <td>1</td>
-          <td>Estructura de los 5 estados obligatorios</td>
-          <td>Verifica existencia de `NUEVO`, `ASIGNADO`, `EN_PROCESO`, `RESUELTO` y `CERRADO`.</td>
-          <td>Rúbrica Operación</td>
-        </tr>
-        <tr>
-          <td>2</td>
-          <td>Creación de incidentes válida e inválida</td>
-          <td>Rechaza peticiones con campos obligatorios vacíos (400 Bad Request).</td>
-          <td>AB#8</td>
-        </tr>
-        <tr>
-          <td>3</td>
-          <td>Motor de filtros multicriterio</td>
-          <td>Valida filtrado combinado por estado, prioridad, categoría y técnico.</td>
-          <td>AB#11</td>
-        </tr>
-        <tr>
-          <td>4</td>
-          <td>Reglas de transición de estados</td>
-          <td>Verifica que la máquina de estados bloquee transiciones ilegales (ej. CERRADO a NUEVO).</td>
-          <td>AB#15</td>
-        </tr>
-        <tr>
-          <td>5</td>
-          <td>Cálculo corregido de métricas de Dashboard</td>
-          <td>Valida conteo matemático exacto de tickets críticos, abiertos y cerrados.</td>
-          <td>AB#22 (Fix Fallo)</td>
-        </tr>
-        <tr>
-          <td>6</td>
-          <td>Sanitización de seguridad contra XSS</td>
-          <td>Comprueba que caracteres HTML (&lt;, &gt;, script) sean neutralizados.</td>
-          <td>AB#27 (DT-1)</td>
-        </tr>
-        <tr>
-          <td>7</td>
-          <td>Servicio de notificaciones Gmail UMG</td>
-          <td>Valida el despacho asíncrono y la plantilla hacia `mbarriosg8@miumg.edu.gt`.</td>
-          <td>AB#23, AB#30</td>
-        </tr>
-        <tr>
-          <td>8</td>
-          <td>Respuesta de Suite Integral de Integración</td>
-          <td>Certifica que el 100% de los subtests finalicen con éxito en &lt; 900 ms.</td>
-          <td>AB#24</td>
-        </tr>
+        <tr><td>1</td><td>Estructura de 5 estados obligatorios</td><td>Validación de constantes de estados</td><td>Existencia de NUEVO, ASIGNADO, EN_PROCESO, RESUELTO, CERRADO</td><td>Rúbrica Operación</td></tr>
+        <tr><td>2</td><td>Creación válida e inválida</td><td>Envío de payloads completos y vacíos</td><td>Acepta payload correcto y rechaza con 400 Bad Request si faltan datos</td><td>AB#8</td></tr>
+        <tr><td>3</td><td>Motor de filtros multicriterio</td><td>Filtrado por estado, prioridad y área</td><td>Retorno exacto del subconjunto coincidente sin alterar datos</td><td>AB#11</td></tr>
+        <tr><td>4</td><td>Reglas de transición de estados</td><td>Transición ilegal (CERRADO a NUEVO)</td><td>Rechazo estricto con error 400 Bad Request y mensaje explícito</td><td>AB#15</td></tr>
+        <tr><td>5</td><td>Cálculo matemático O(N) de Dashboard</td><td>Conteo de abiertos, cerrados, críticos y MTTR</td><td>Sumatoria exacta en 1 pasada: <code>stats.criticos === 1</code> (Línea 80 - Fix fallo controlado)</td><td>AB#22</td></tr>
+        <tr><td>6</td><td>Sanitización XSS y escapado HTML</td><td>Inyección de <code>&lt;script&gt;</code> y <code>&lt;img onerror=...&gt;</code></td><td>Neutralización de payloads XSS en JSON y plantillas de correo (<code>escapeHtml</code>)</td><td>AB#27 (DT-1)</td></tr>
+        <tr><td>7</td><td>Servicio de correo Gmail UMG</td><td>Despacho asíncrono TLS a destinatario</td><td>Plantilla HTML escapada enviada a <code>mbarriosg8@miumg.edu.gt</code></td><td>AB#23, AB#30</td></tr>
+        <tr><td>8</td><td>Integración HTTP Express, RBAC y Máquina de Estados</td><td>Peticiones reales sobre Express (<code>/api/users</code>, <code>/api/auth/login</code>, <code>/api/incidents</code>)</td><td>Oculta <code>accessCode</code> (200), rechaza login sin clave (401), bloquea técnico en ruta admin (403) y bloquea saltos ilegales (400)</td><td>AB#15, AB#24, AB#27</td></tr>
       </tbody>
     </table>
 
     <div class="image-placeholder">
       <span class="ph-tag">EVIDENCIA TÉCNICA // CAPTURA 6.1</span>
       <div class="ph-title">📸 Captura 6.1: Suite Completa de 8 Pruebas Unitarias en Consola (8/8 PASS)</div>
-      <div class="ph-desc">Muestra la salida de `node --test tests/api.test.js` certificando 8 pruebas pasando en verde (pass 8, fail 0).</div>
+      <div class="ph-desc">Muestra la salida de `node --test tests/api.test.js` certificando 8 pruebas aprobadas en verde (# pass 8, # fail 0).</div>
+      <div class="ph-box"><span>🖼️</span>Espacio Reservado para Captura de Pantalla 6.1 (TAP Test Output)</div>
       <span class="ph-rubric">Rúbrica: Azure Pipelines — Pruebas unitarias automatizadas estables</span>
     </div>
   </section>
@@ -1081,135 +1543,319 @@ jobs:
   <div class="page-break"></div>
 
   <!-- ============================================================== -->
-  <!-- 11. INTERFAZ WEB Y 7 CAMPOS OBSERVABLES -->
+  <!-- PÁGINA 17: 13. INTERFAZ WEB: GOBERNANZA RBAC -->
   <!-- ============================================================== -->
-  <section id="sec-ui">
-    <h1>11. Interfaz Web, Experiencia de Usuario y 7 Campos Observables</h1>
+  <section id="sec-ui-rbac">
+    <h1>13. Interfaz Web: Gobernanza de Roles (RBAC)</h1>
     <p>
-      La aplicación cliente (React 18 con Vite) ofrece una interfaz interactiva de alta fidelidad, con estética de terminal de operaciones de confiabilidad de sitios (SRE / Enclave de Operaciones).
+      El cliente web incorpora una arquitectura de control de acceso basado en roles (<strong>RBAC</strong>), que segmenta la interfaz y las capacidades operativas según el perfil autenticado en el enclave de operaciones:
     </p>
 
-    <h2>11.1 Cumplimiento Estricto de los 7 Campos Observables</h2>
-    <p>
-      Para obtener la máxima calificación (*Cumple Totalmente*), la tabla principal de incidentes (<code>#incidents-table</code>) y el modal de inspección exhiben de forma claramente observable los <strong>7 campos exigidos en la rúbrica</strong>:
-    </p>
-
+    <h2>13.1 Matriz de Capacidades por Rol de Usuario</h2>
     <table>
       <thead>
         <tr>
-          <th>Campo Exigido por Rúbrica</th>
-          <th>Nombre en Modelo de Datos</th>
-          <th>Visibilidad en Tabla (#incidents-table)</th>
-          <th>Visibilidad en Modal de Inspección</th>
+          <th>Capacidad Operativa</th>
+          <th>Administrador Soberano (Mayro Gameros)</th>
+          <th>Técnico Especialista (Carlos Mendoza / Ana Torres)</th>
         </tr>
       </thead>
       <tbody>
-        <tr>
-          <td>1. <strong>Título</strong></td>
-          <td><code>title</code></td>
-          <td>Columna 2 (Texto en blanco resaltado)</td>
-          <td>Encabezado H2 del modal</td>
-        </tr>
-        <tr>
-          <td>2. <strong>Descripción</strong></td>
-          <td><code>description</code></td>
-          <td>Visible mediante botón <em>Inspect Node →</em></td>
-          <td>Párrafo principal de contexto técnico</td>
-        </tr>
-        <tr>
-          <td>3. <strong>Categoría</strong></td>
-          <td><code>category</code></td>
-          <td>Columna 3 (HARDWARE, NETWORK, etc.)</td>
-          <td>Badge cian en encabezado</td>
-        </tr>
-        <tr>
-          <td>4. <strong>Prioridad</strong></td>
-          <td><code>priority</code></td>
-          <td>Columna 4 (Badge con color según criticidad)</td>
-          <td>Badge de prioridad en cabecera</td>
-        </tr>
-        <tr>
-          <td>5. <strong>Usuario (Solicitante)</strong></td>
-          <td><code>reported_by</code></td>
-          <td><strong>Columna 6 (mbarriosg8@miumg.edu.gt)</strong></td>
-          <td><strong>Ficha metadata: 👤 Solicitante</strong></td>
-        </tr>
-        <tr>
-          <td>6. <strong>Fecha</strong></td>
-          <td><code>created_at</code></td>
-          <td><strong>Columna 7 (Fecha DD/MM/AAAA)</strong></td>
-          <td><strong>Ficha metadata: 📅 Registrado</strong></td>
-        </tr>
-        <tr>
-          <td>7. <strong>Estado</strong></td>
-          <td><code>status</code></td>
-          <td>Columna 5 (Badge de los 5 estados)</td>
-          <td>Selector activo en State Override Matrix</td>
-        </tr>
+        <tr><td><strong>Visibilidad de Incidentes</strong></td><td>Acceso global a todos los incidentes de la organización.</td><td>Segmentación por área técnica asignada (Redes, Hardware, Servidores).</td></tr>
+        <tr><td><strong>Creación de Incidentes</strong></td><td>Habilitado con notificación automática a Gmail.</td><td>Habilitado para reportar dentro de su competencia.</td></tr>
+        <tr><td><strong>Asignación de Operadores</strong></td><td>Habilitado para reasignar a cualquier técnico.</td><td>Restringido: solo puede tomar tickets asignados a su área.</td></tr>
+        <tr><td><strong>Transición a CERRADO</strong></td><td>Habilitado para el cierre definitivo de incidentes.</td><td>Restringido: solo puede mover hasta RESUELTO.</td></tr>
+        <tr><td><strong>Disparo de Pruebas de CI</strong></td><td>Habilitado (Botones de simulación de falla y solución).</td><td>Bloqueado con advertencia de permisos insuficientes.</td></tr>
       </tbody>
     </table>
 
     <div class="image-placeholder">
       <span class="ph-tag">EVIDENCIA TÉCNICA // CAPTURA 8.1</span>
       <div class="ph-title">📸 Captura 8.1: Panel de Inicio de Sesión RBAC con Autocompletado</div>
-      <div class="ph-desc">Muestra la pantalla de login con las tarjetas interactivas de Mayro Gameros (Admin) y los técnicos especialistas.</div>
+      <div class="ph-desc">Muestra la pantalla de bienvenida con las tarjetas de acceso de Mayro Gameros (Admin) y los técnicos con sus códigos operativos.</div>
+      <div class="ph-box"><span>🖼️</span>Espacio Reservado para Captura de Pantalla 8.1 (Login RBAC)</div>
       <span class="ph-rubric">Rúbrica: Gobernanza Multiusuario — Acceso por roles (Regla 9)</span>
     </div>
 
     <div class="image-placeholder">
-      <span class="ph-tag">EVIDENCIA TÉCNICA // CAPTURA 8.5</span>
-      <div class="ph-title">📸 Captura 8.5: Matriz de Incidentes con los 7 Campos Observables</div>
-      <div class="ph-desc">Muestra la tabla `#incidents-table` con las columnas Solicitante y Fecha visibles junto a Título, Categoría, Prioridad y Estado.</div>
-      <span class="ph-rubric">Rúbrica: Gestión de Incidentes — Todos los 7 campos observables en pantalla</span>
+      <span class="ph-tag">EVIDENCIA TÉCNICA // CAPTURA 8.2</span>
+      <div class="ph-title">📸 Captura 8.2: Enclave Administrador con Acceso Global y Credenciales</div>
+      <div class="ph-desc">Muestra la cabecera superior con Mayro activo: `LNKS // mbarriosg8@miumg.edu.gt [ADMIN ENCLAVE // SOVEREIGN OPERATOR]`.</div>
+      <div class="ph-box"><span>🖼️</span>Espacio Reservado para Captura de Pantalla 8.2 (Admin Enclave Header)</div>
+      <span class="ph-rubric">Rúbrica: Gobernanza — Vista y permisos globales de administrador</span>
     </div>
 
     <div class="image-placeholder">
-      <span class="ph-tag">EVIDENCIA TÉCNICA // CAPTURA 8.6</span>
-      <div class="ph-title">📸 Captura 8.6: Modal de Inspección y Transición de Estados (AB#15)</div>
-      <div class="ph-desc">Muestra las fichas de Solicitante y Fecha en el modal, el selector de los 5 estados y la bitácora inmutable de auditoría.</div>
-      <span class="ph-rubric">Rúbrica: Operación y Seguimiento — Flujo completo de 5 estados y comentarios</span>
-    </div>
-
-    <div class="image-placeholder">
-      <span class="ph-tag">EVIDENCIA TÉCNICA // CAPTURA 8.7</span>
-      <div class="ph-title">📸 Captura 8.7: Bloqueo de Transición Ilegal (400 Bad Request)</div>
-      <div class="ph-desc">Muestra el mensaje de rechazo al intentar transicionar un incidente de CERRADO a NUEVO.</div>
-      <span class="ph-rubric">Rúbrica: Operación — Validación estricta de la máquina de estados</span>
-    </div>
-
-    <div class="image-placeholder">
-      <span class="ph-tag">EVIDENCIA TÉCNICA // CAPTURA 8.9</span>
-      <div class="ph-title">📸 Captura 8.9: Dashboard y Telemetría con 3 Gráficos SVG</div>
-      <div class="ph-desc">Muestra las tarjetas KPI (abiertos, cerrados, críticos) y los 3 gráficos SVG (dona, barras y carga por técnico).</div>
-      <span class="ph-rubric">Rúbrica: Indicadores — Dashboard básico con distribuciones por categoría y técnico</span>
-    </div>
-
-    <div class="image-placeholder">
-      <span class="ph-tag">EVIDENCIA TÉCNICA // CAPTURA 9.1</span>
-      <div class="ph-title">📸 Captura 9.1: Correo de Alerta de Incidente Crítico en Gmail UMG</div>
-      <div class="ph-desc">Muestra la bandeja de `mbarriosg8@miumg.edu.gt` con el correo HTML recibido con asunto 🚨 [ALERTA DE INCIDENTE CRÍTICO].</div>
-      <span class="ph-rubric">Rúbrica: Observabilidad — Notificaciones automáticas por correo electrónico</span>
+      <span class="ph-tag">EVIDENCIA TÉCNICA // CAPTURA 8.3</span>
+      <div class="ph-title">📸 Captura 8.3: Enclave Técnico con Segmentación Operativa por Área</div>
+      <div class="ph-desc">Muestra la interfaz tras cambiar a Carlos Mendoza (Redes): `[LOCALIZED OPERATOR CAPSULE]` con botones rápidos `🎯 Mis Asignados`.</div>
+      <div class="ph-box"><span>🖼️</span>Espacio Reservado para Captura de Pantalla 8.3 (Technician Segmented View)</div>
+      <span class="ph-rubric">Rúbrica: Gobernanza — Segmentación operativa por rol de usuario</span>
     </div>
   </section>
 
   <div class="page-break"></div>
 
   <!-- ============================================================== -->
-  <!-- 12. SEMVER Y ESTRATEGIA DE RELEASE -->
+  <!-- PÁGINA 18: 13. INTERFAZ: LOS 7 CAMPOS OBSERVABLES -->
   <!-- ============================================================== -->
-  <section id="sec-release">
-    <h1>12. Versionado Semántico y Estrategia de Release</h1>
+  <section id="sec-ui-campos">
+    <h1>13. Interfaz Web: Los 7 Campos Observables en Pantalla</h1>
     <p>
-      El proyecto implementó <strong>Versionado Semántico (SemVer 2.0.0)</strong> para reflejar la evolución incremental del producto a lo largo de las 3 semanas de desarrollo:
+      Para obtener el grado de <em>Cumple Totalmente</em>, la tabla principal de incidentes (<code>#incidents-table</code>) y el formulario de registro exhiben de manera explícita y visible los <strong>7 campos observables exigidos en la rúbrica</strong>:
     </p>
 
+    <h2>13.1 Mapeo de los 7 Campos en la Matriz de Incidentes</h2>
     <table>
       <thead>
         <tr>
-          <th>Semana</th>
-          <th>Etiqueta SemVer</th>
+          <th>Campo Exigido</th>
+          <th>Identificador en BD</th>
+          <th>Representación Visual en Tabla</th>
+          <th>Validación y Comportamiento</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>1. <strong>Título</strong></td>
+          <td><code>title</code></td>
+          <td>Columna 2: Texto blanco en negrita.</td>
+          <td>Obligatorio, longitud de 5 a 150 caracteres.</td>
+        </tr>
+        <tr>
+          <td>2. <strong>Descripción</strong></td>
+          <td><code>description</code></td>
+          <td>Botón <em>Inspect Node →</em> y modal completo.</td>
+          <td>Obligatorio, sanitizado contra inyecciones XSS (DT-1).</td>
+        </tr>
+        <tr>
+          <td>3. <strong>Categoría</strong></td>
+          <td><code>category</code></td>
+          <td>Columna 3: Badge temático cian.</td>
+          <td>HARDWARE, SOFTWARE, NETWORK, SEGURIDAD, BASE_DE_DATOS.</td>
+        </tr>
+        <tr>
+          <td>4. <strong>Prioridad</strong></td>
+          <td><code>priority</code></td>
+          <td>Columna 4: Badge con código cromático.</td>
+          <td>BAJA (Azul), MEDIA (Cian), ALTA (Amarillo), CRITICA (Rojo pulsante).</td>
+        </tr>
+        <tr>
+          <td>5. <strong>Usuario (Solicitante)</strong></td>
+          <td><code>reported_by</code></td>
+          <td><strong>Columna 6: <code>mbarriosg8@miumg.edu.gt</code></strong></td>
+          <td><strong>Visible en cada fila identificando al solicitante formal.</strong></td>
+        </tr>
+        <tr>
+          <td>6. <strong>Fecha de Registro</strong></td>
+          <td><code>created_at</code></td>
+          <td><strong>Columna 7: Fecha formateada DD/MM/AAAA.</strong></td>
+          <td><strong>Marca temporal inmutable generada al crear el ticket.</strong></td>
+        </tr>
+        <tr>
+          <td>7. <strong>Estado Actual</strong></td>
+          <td><code>status</code></td>
+          <td>Columna 5: Badge de los 5 estados.</td>
+          <td>NUEVO, ASIGNADO, EN_PROCESO, RESUELTO, CERRADO.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="image-placeholder">
+      <span class="ph-tag">EVIDENCIA TÉCNICA // CAPTURA 8.4</span>
+      <div class="ph-title">📸 Captura 8.4: Formulario de Registro de Nuevo Incidente</div>
+      <div class="ph-desc">Muestra el modal interactivo `➕ New Incident` con los campos de entrada, selección de categoría y botón de notificación a Gmail.</div>
+      <div class="ph-box"><span>🖼️</span>Espacio Reservado para Captura de Pantalla 8.4 (New Incident Modal)</div>
+      <span class="ph-rubric">Rúbrica: Gestión de Incidentes — Formulario con validación de entradas</span>
+    </div>
+
+    <div class="image-placeholder">
+      <span class="ph-tag">EVIDENCIA TÉCNICA // CAPTURA 8.5</span>
+      <div class="ph-title">📸 Captura 8.5: Matriz de Incidentes con los 7 Campos Observables</div>
+      <div class="ph-desc">Muestra la tabla `#incidents-table` con las columnas Solicitante y Fecha explícitamente visibles junto al Título, Categoría, Prioridad y Estado.</div>
+      <div class="ph-box"><span>🖼️</span>Espacio Reservado para Captura de Pantalla 8.5 (Incidents Table 7 Fields)</div>
+      <span class="ph-rubric">Rúbrica: Gestión de Incidentes — Todos los 7 campos observables en pantalla</span>
+    </div>
+  </section>
+
+  <div class="page-break"></div>
+
+  <!-- ============================================================== -->
+  <!-- PÁGINA 19: 13. INTERFAZ: MÁQUINA DE 5 ESTADOS Y AUDITORÍA -->
+  <!-- ============================================================== -->
+  <section id="sec-ui-estados">
+    <h1>13. Interfaz Web: Máquina de 5 Estados y Auditoría Inmutable</h1>
+    <p>
+      El ciclo de vida del incidente está gobernado por una <strong>Máquina de Estados Finita Estricta</strong> (implementada en <code>backend/src/services/workflowService.js</code>), que impide transiciones ilegales y registra una huella de auditoría inmutable ante cada cambio:
+    </p>
+
+    <h2>13.1 Matriz de Transiciones de Estado Permitidas</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Estado Origen</th>
+          <th>Transición Permitida Hacia</th>
+          <th>Acción Operativa Requerida</th>
+          <th>Notificación Emitida</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td><code>NUEVO</code></td><td><code>ASIGNADO</code>, <code>EN_PROCESO</code></td><td>Asignación de técnico responsable o atención inmediata. Prohibido saltar directo a <code>CERRADO</code>.</td><td>Correo a mbarriosg8@miumg.edu.gt con operador asignado.</td></tr>
+        <tr><td><code>ASIGNADO</code></td><td><code>EN_PROCESO</code>, <code>RESUELTO</code>, <code>NUEVO</code></td><td>Inicio formal del diagnóstico, resolución rápida o devolución a bandeja.</td><td>Actualización de estado en auditoría.</td></tr>
+        <tr><td><code>EN_PROCESO</code></td><td><code>RESUELTO</code>, <code>ASIGNADO</code></td><td>Aplicación de la solución técnica (registra <code>resolved_at</code>) o reasignación.</td><td>Correo de ticket resuelto con notas técnicas.</td></tr>
+        <tr><td><code>RESUELTO</code></td><td><code>CERRADO</code>, <code>EN_PROCESO</code></td><td>Validación de satisfacción (registra <code>closed_at</code>) o reapertura técnica controlada. Prohibido volver a <code>NUEVO</code>.</td><td>Cierre definitivo de auditoría inmutable.</td></tr>
+        <tr><td><code>CERRADO</code></td><td><em>Ninguno (<code>[]</code> Terminal Inmutable)</em></td><td><strong>Bloqueo total ante cualquier intento de reapertura (<code>NUEVO</code>, <code>EN_PROCESO</code>, etc.).</strong></td><td><strong>Error 400 Bad Request: "Transición de estado no permitida".</strong></td></tr>
+      </tbody>
+    </table>
+
+    <div class="image-placeholder">
+      <span class="ph-tag">EVIDENCIA TÉCNICA // CAPTURA 8.6</span>
+      <div class="ph-title">📸 Captura 8.6: Modal de Inspección, Transición de Estados y Auditoría</div>
+      <div class="ph-desc">Muestra el modal `Inspect Node →` con las fichas de Solicitante y Fecha, el selector de estados y el timeline de auditoría inmutable.</div>
+      <div class="ph-box"><span>🖼️</span>Espacio Reservado para Captura de Pantalla 8.6 (Inspect Modal State Override)</div>
+      <span class="ph-rubric">Rúbrica: Operación y Seguimiento — Flujo completo de 5 estados y comentarios</span>
+    </div>
+
+    <div class="image-placeholder">
+      <span class="ph-tag">EVIDENCIA TÉCNICA // CAPTURA 8.7</span>
+      <div class="ph-title">📸 Captura 8.7: Bloqueo de Transición Ilegal (400 Bad Request)</div>
+      <div class="ph-desc">Muestra la respuesta de rechazo con código 400 al forzar el paso de CERRADO a NUEVO demostrando la máquina de estados estricta.</div>
+      <div class="ph-box"><span>🖼️</span>Espacio Reservado para Captura de Pantalla 8.7 (Illegal Transition Block 400)</div>
+      <span class="ph-rubric">Rúbrica: Operación — Validación estricta de la máquina de estados</span>
+    </div>
+  </section>
+
+  <div class="page-break"></div>
+
+  <!-- ============================================================== -->
+  <!-- PÁGINA 20: 13. INTERFAZ: FILTROS MULTICRITERIO Y GRÁFICOS SVG -->
+  <!-- ============================================================== -->
+  <section id="sec-ui-kpi">
+    <h1>13. Interfaz Web: Filtros Multicriterio y Dashboard SVG</h1>
+    <p>
+      Para satisfacer la dimensión de <em>Consulta e Indicadores</em> sin introducir vulnerabilidades de librerías externas obsoletas, los indicadores visuales fueron desarrollados en <strong>SVG nativo puro y CSS Grid</strong>, manteniendo el reporte de <code>npm audit</code> en 0 vulnerabilidades:
+    </p>
+
+    <h2>13.1 Componentes de Analítica y Filtros Implementados</h2>
+    <ul>
+      <li><strong>Filtros Multicriterio Dinámicos:</strong> Filtrado instantáneo por Estado (5 opciones), Prioridad (4 opciones), Categoría (5 opciones) y Técnico Asignado, más buscador libre en tiempo real.</li>
+      <li><strong>Tarjetas KPI de Telemetría:</strong> Contadores reactivos de incidentes Activos, Abiertos, Cerrados y Críticos.</li>
+      <li><strong>Gráfico 1 (Dona SVG):</strong> Distribución porcentual en tiempo real de los incidentes según los 5 estados del ciclo de vida.</li>
+      <li><strong>Gráfico 2 (Barras SVG):</strong> Conteo de incidentes segmentados por categoría tecnológica (Network, Hardware, Software).</li>
+      <li><strong>Gráfico 3 (Carga por Técnico):</strong> Visualización de balance de carga de trabajo por especialista de soporte.</li>
+    </ul>
+
+    <div class="image-placeholder">
+      <span class="ph-tag">EVIDENCIA TÉCNICA // CAPTURA 8.8</span>
+      <div class="ph-title">📸 Captura 8.8: Filtros Multicriterio Reactivos en Tiempo Real</div>
+      <div class="ph-desc">Muestra la barra de filtros combinando Estado, Prioridad, Categoría y Operador reduciendo la tabla en milisegundos.</div>
+      <div class="ph-box"><span>🖼️</span>Espacio Reservado para Captura de Pantalla 8.8 (Multi-Criteria Filters)</div>
+      <span class="ph-rubric">Rúbrica: Consulta — Filtros por estado, prioridad, categoría y técnico</span>
+    </div>
+
+    <div class="image-placeholder">
+      <span class="ph-tag">EVIDENCIA TÉCNICA // CAPTURA 8.9</span>
+      <div class="ph-title">📸 Captura 8.9: Dashboard y Telemetría con 3 Gráficos SVG Nativos</div>
+      <div class="ph-desc">Muestra los 3 gráficos SVG (dona de estados, barras de categorías y carga por técnico) junto a los contadores KPI superiores.</div>
+      <div class="ph-box"><span>🖼️</span>Espacio Reservado para Captura de Pantalla 8.9 (SVG Dashboard Charts)</div>
+      <span class="ph-rubric">Rúbrica: Indicadores — Dashboard con métricas y distribuciones visuales</span>
+    </div>
+
+    <div class="image-placeholder">
+      <span class="ph-tag">EVIDENCIA TÉCNICA // CAPTURA 8.10</span>
+      <div class="ph-title">📸 Captura 8.10: Monitor de Azure DevOps y CI/CD en Vivo con Traza TTY</div>
+      <div class="ph-desc">Muestra el panel de observabilidad DevOps dentro de la interfaz web con la traza de ejecución de pruebas en consola TTY.</div>
+      <div class="ph-box"><span>🖼️</span>Espacio Reservado para Captura de Pantalla 8.10 (Live DevOps Monitor UI)</div>
+      <span class="ph-rubric">Rúbrica: Observabilidad — Integración de telemetría de CI/CD en la aplicación</span>
+    </div>
+  </section>
+
+  <div class="page-break"></div>
+
+  <!-- ============================================================== -->
+  <!-- PÁGINA 21: 14. NOTIFICACIONES GMAIL UMG EN VIVO -->
+  <!-- ============================================================== -->
+  <section id="sec-observabilidad">
+    <h1>14. Observabilidad y Notificaciones Gmail UMG en Vivo</h1>
+    <p>
+      El sistema cuenta con un motor de mensajería asíncrona basado en Nodemailer sobre transporte TLS seguro, integrado con la cuenta institucional <strong><code>mbarriosg8@miumg.edu.gt</code></strong>. Cada evento crítico en la aplicación o en la tubería de CI genera una notificación formal con plantilla HTML:
+    </p>
+
+    <h2>14.1 Catálogo de Notificaciones Despachadas</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Evento Disparador</th>
+          <th>Asunto del Correo Recibido</th>
+          <th>Destinatario Verificado</th>
+          <th>Contenido de la Notificación</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Creación de Incidente Crítico</td>
+          <td>🚨 [ALERTA DE INCIDENTE CRÍTICO] - #...</td>
+          <td><code>mbarriosg8@miumg.edu.gt</code></td>
+          <td>Ficha con ID, título, prioridad CRÍTICA en rojo y solicitante.</td>
+        </tr>
+        <tr>
+          <td>Transición de Estado Auditada</td>
+          <td>📋 [CAMBIO DE ESTADO: ...] Incidente #...</td>
+          <td><code>mbarriosg8@miumg.edu.gt</code></td>
+          <td>Trazabilidad de cambio de estado y operador asignado.</td>
+        </tr>
+        <tr>
+          <td>Fallo de Tubería de CI (Rojo ❌)</td>
+          <td>🚨 [FALLO EN PIPELINE ❌] Build #... FAILED</td>
+          <td><code>mbarriosg8@miumg.edu.gt</code></td>
+          <td>Detalle del error de aserción en pruebas y bloqueo de release.</td>
+        </tr>
+        <tr>
+          <td>Pipeline Restaurado (Verde ✅)</td>
+          <td>BUILD #20261020.1 SUCCEEDED</td>
+          <td><code>mbarriosg8@miumg.edu.gt</code></td>
+          <td>Confirmación de superación de Quality Gates y artefacto publicado.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="image-placeholder">
+      <span class="ph-tag">EVIDENCIA TÉCNICA // CAPTURA 9.1</span>
+      <div class="ph-title">📸 Captura 9.1: Correo de Alerta de Incidente Crítico en Gmail UMG</div>
+      <div class="ph-desc">Muestra la bandeja de entrada de mbarriosg8@miumg.edu.gt con el correo recibido tras crear un incidente de prioridad CRÍTICA.</div>
+      <div class="ph-box"><span>🖼️</span>Espacio Reservado para Captura de Pantalla 9.1 (Critical Incident Alert Email)</div>
+      <span class="ph-rubric">Rúbrica: Observabilidad — Notificaciones automáticas por correo electrónico</span>
+    </div>
+
+    <div class="image-placeholder">
+      <span class="ph-tag">EVIDENCIA TÉCNICA // CAPTURA 9.4</span>
+      <div class="ph-title">📸 Captura 9.4: Correo Oficial de Azure DevOps: BUILD #20261020.1 SUCCEEDED</div>
+      <div class="ph-desc">Muestra el correo oficial de Azure Pipelines recibido en Gmail UMG confirmando el éxito del build ejecutado por el agente local.</div>
+      <div class="ph-box"><span>🖼️</span>Espacio Reservado para Captura de Pantalla 9.4 (Build Succeeded Official Email)</div>
+      <span class="ph-rubric">Rúbrica: Azure Pipelines — Notificaciones de estado de integración continua</span>
+    </div>
+  </section>
+
+  <div class="page-break"></div>
+
+  <!-- ============================================================== -->
+  <!-- PÁGINA 22: 15. SEMVER (v1.0.0) Y ARTEFACTOS DROP -->
+  <!-- ============================================================== -->
+  <section id="sec-semver">
+    <h1>15. Versionado Semántico (SemVer) y Estrategia de Release</h1>
+    <p>
+      El proyecto adoptó formalmente la especificación <strong>Semantic Versioning (SemVer 2.0.0)</strong>, reflejando el progreso incremental a través de los tres repositorios oficiales del curso:
+    </p>
+
+    <h2>15.1 Progresión Semántica de Releases (Semana 1 a Semana 3)</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Hito Semanal</th>
+          <th>Versión SemVer</th>
           <th>Repositorio Oficial</th>
-          <th>Alcance y Estado</th>
+          <th>Tipo de Cambio (SemVer)</th>
+          <th>Entregable Consolidado</th>
         </tr>
       </thead>
       <tbody>
@@ -1217,19 +1863,22 @@ jobs:
           <td><strong>Semana 1</strong></td>
           <td><code>v0.1.0</code></td>
           <td><code>Incident-hub-w1</code></td>
-          <td>Lanzamiento Alpha: Planificación, modelo PostgreSQL, API CRUD y 7 PRs.</td>
+          <td>MINOR inicial (0.y.z)</td>
+          <td>Planificación en Boards, modelo DDL PostgreSQL, API CRUD y 7 PRs fusionados.</td>
         </tr>
         <tr>
           <td><strong>Semana 2</strong></td>
           <td><code>v0.2.0</code></td>
           <td><code>Incident-hub-w2</code></td>
-          <td>Lanzamiento Beta: CI/CD dual, Self-Hosted Agent, 2 deudas técnicas y fallo controlado.</td>
+          <td>MINOR acumulativo</td>
+          <td>CI/CD dual, Self-Hosted Agent, resolución de DT-1/DT-2 y fallo controlado.</td>
         </tr>
         <tr>
           <td><strong>Semana 3</strong></td>
           <td><code>v1.0.0</code></td>
           <td><code>Incident-hub-w3</code></td>
-          <td><strong>Release de Producción:</strong> Estabilización, SemVer v1.0.0, artefacto `incident-hub-drop`.</td>
+          <td><strong>MAJOR de Producción</strong></td>
+          <td><strong>Release Final de Producción:</strong> Estabilización, artefacto <code>incident-hub-drop</code> y cierre 100%.</td>
         </tr>
       </tbody>
     </table>
@@ -1237,147 +1886,67 @@ jobs:
     <div class="image-placeholder">
       <span class="ph-tag">EVIDENCIA TÉCNICA // CAPTURA 10.1</span>
       <div class="ph-title">📸 Captura 10.1: Etiquetas de Versionado Semántico (SemVer) en Git</div>
-      <div class="ph-desc">Muestra la lista de tags en GitHub con la progresión incremental v0.1.0 ➔ v0.2.0 ➔ v1.0.0.</div>
-      <span class="ph-rubric">Rúbrica: Versionado Semántico (SemVer) — Versionado coherente hasta v1.0.0</span>
+      <div class="ph-desc">Muestra la lista de Git Tags en GitHub evidenciando la progresión histórica v0.1.0 ➔ v0.2.0 ➔ v1.0.0.</div>
+      <div class="ph-box"><span>🖼️</span>Espacio Reservado para Captura de Pantalla 10.1 (Git SemVer Tags)</div>
+      <span class="ph-rubric">Rúbrica: Versionado Semántico (SemVer) — Progresión coherente hasta v1.0.0</span>
     </div>
 
     <div class="image-placeholder">
       <span class="ph-tag">EVIDENCIA TÉCNICA // CAPTURA 10.2</span>
-      <div class="ph-title">📸 Captura 10.2: Release Oficial de Producción en GitHub</div>
-      <div class="ph-desc">Muestra la publicación oficial v1.0.0 en GitHub Releases con notas de versión y artefacto zip.</div>
+      <div class="ph-title">📸 Captura 10.2: Publicación Oficial de Release v1.0.0 en GitHub</div>
+      <div class="ph-desc">Muestra la página de GitHub Releases con la versión oficial v1.0.0, notas de versión y artefacto zip descargable.</div>
+      <div class="ph-box"><span>🖼️</span>Espacio Reservado para Captura de Pantalla 10.2 (GitHub Release v1.0.0)</div>
       <span class="ph-rubric">Rúbrica: Estrategia de Release — Empaquetado y versión lista para liberar</span>
+    </div>
+
+    <div class="image-placeholder">
+      <span class="ph-tag">EVIDENCIA TÉCNICA // CAPTURA 10.3</span>
+      <div class="ph-title">📸 Captura 10.3: Repositorio Azure Repos Sincronizado en Rama main</div>
+      <div class="ph-desc">Muestra Azure Repos con la rama main sincronizada con el último commit AB#34 certificando la paridad con GitHub.</div>
+      <div class="ph-box"><span>🖼️</span>Espacio Reservado para Captura de Pantalla 10.3 (Azure Repos Synced)</div>
+      <span class="ph-rubric">Rúbrica: Repositorios — Sincronización entre Azure DevOps y GitHub</span>
     </div>
   </section>
 
   <div class="page-break"></div>
 
   <!-- ============================================================== -->
-  <!-- 13. MATRIZ DE CUMPLIMIENTO DE RÚBRICA -->
+  <!-- PÁGINA 23: 16. MATRIZ DE CUMPLIMIENTO DE RÚBRICA 100% -->
   <!-- ============================================================== -->
   <section id="sec-rubrica">
-    <h1>13. Matriz de Cumplimiento de la Rúbrica Oficial de Evaluación</h1>
+    <h1>16. Matriz Exhaustiva de Cumplimiento de la Rúbrica</h1>
     <p>
-      A continuación se presenta el balance consolidado frente a cada criterio observable de la rúbrica de evaluación:
+      Evaluación formal frente a cada criterio observable definido en la rúbrica institucional de evaluación del curso:
     </p>
 
     <table>
       <thead>
         <tr>
-          <th>Dimensión / Criterio</th>
-          <th>Métrica y Criterio Observable</th>
-          <th>Implementación Verificada en el Proyecto</th>
-          <th>Calificación Obtenida</th>
+          <th>Criterio Evaluado</th>
+          <th>Condición de Máxima Calificación (Cumple Totalmente)</th>
+          <th>Evidencia Verificable en el Proyecto</th>
+          <th>Veredicto</th>
         </tr>
       </thead>
       <tbody>
-        <tr>
-          <td><strong>Gestión de Incidentes</strong></td>
-          <td>7 campos observables: título, descripción, categoría, prioridad, usuario, fecha y estado.</td>
-          <td>Columnas Solicitante y Fecha incorporadas en tabla y modal de detalle.</td>
-          <td><span class="badge-status badge-excellent">Cumple Totalmente</span></td>
-        </tr>
-        <tr>
-          <td><strong>Operación (5 estados)</strong></td>
-          <td>Asignar técnico y flujo: NUEVO, ASIGNADO, EN_PROCESO, RESUELTO, CERRADO.</td>
-          <td>Los 5 estados implementados y máquina de estados finita validada en PATCH.</td>
-          <td><span class="badge-status badge-excellent">Cumple Totalmente</span></td>
-        </tr>
-        <tr>
-          <td><strong>Seguimiento</strong></td>
-          <td>Comentarios o bitácora visible por incidente.</td>
-          <td>Bitácora inmutable `incidentLogs` y notas técnicas visibles por ticket.</td>
-          <td><span class="badge-status badge-excellent">Cumple Totalmente</span></td>
-        </tr>
-        <tr>
-          <td><strong>Consulta</strong></td>
-          <td>Filtros por estado, prioridad, categoría y técnico.</td>
-          <td>Filtros multicriterio reactivos en tiempo real + búsqueda libre por texto.</td>
-          <td><span class="badge-status badge-excellent">Cumple Totalmente</span></td>
-        </tr>
-        <tr>
-          <td><strong>Indicadores</strong></td>
-          <td>Dashboard con abiertos, cerrados, críticos y distribución por categoría/técnico.</td>
-          <td>Tarjetas de telemetría superior + 3 gráficos SVG nativos interactivos.</td>
-          <td><span class="badge-status badge-excellent">Cumple Totalmente</span></td>
-        </tr>
-        <tr>
-          <td><strong>Integración y Arquitectura</strong></td>
-          <td>Frontend React/Vue + API REST + BD PostgreSQL documentada.</td>
-          <td>React 18 + Express API + PostgreSQL 16 con DDL y resiliencia dual ADR-004.</td>
-          <td><span class="badge-status badge-excellent">Cumple Totalmente</span></td>
-        </tr>
-        <tr>
-          <td><strong>Azure Boards</strong></td>
-          <td>Mínimo 2 Epics, 4 Features, 8 US y 16 Tasks.</td>
-          <td>30 Work Items (2 Epics, 4 Features, 8 US, 16 Tasks) 100% cerrados con Mayro.</td>
-          <td><span class="badge-status badge-excellent">Cumple Totalmente</span></td>
-        </tr>
-        <tr>
-          <td><strong>Gestión de Ramas (Git)</strong></td>
-          <td>Estabilidad en main y ramas feature/*, fix/*, refactor/*.</td>
-          <td>14 ramas técnicas ordenadas bajo GitFlow adaptado.</td>
-          <td><span class="badge-status badge-excellent">Cumple Totalmente</span></td>
-        </tr>
-        <tr>
-          <td><strong>Trazabilidad</strong></td>
-          <td>Vinculación Task ➔ feature/* ➔ Commit AB#ID.</td>
-          <td>Commits vinculados a Work Items mediante sintaxis oficial `AB#ID`.</td>
-          <td><span class="badge-status badge-excellent">Cumple Totalmente</span></td>
-        </tr>
-        <tr>
-          <td><strong>Pull Requests (PR)</strong></td>
-          <td>Mínimo 6 PR reales con descripción y code review.</td>
-          <td>13 Pull Requests reales acumulados con revisiones de código cruzadas.</td>
-          <td><span class="badge-status badge-excellent">Cumple Totalmente</span></td>
-        </tr>
-        <tr>
-          <td><strong>Deuda Técnica</strong></td>
-          <td>Mínimo 5 deudas identificadas y mínimo 2 resueltas.</td>
-          <td>5 identificadas en catálogo; DT-1 (XSS) y DT-2 (Errors) resueltas en PRs.</td>
-          <td><span class="badge-status badge-excellent">Cumple Totalmente</span></td>
-        </tr>
-        <tr>
-          <td><strong>Azure Pipelines (CI)</strong></td>
-          <td>Etapas completas en azure-pipelines.yml.</td>
-          <td>8 fases: checkout, env, SCA, tests, Vite build real, packaging y release drop.</td>
-          <td><span class="badge-status badge-excellent">Cumple Totalmente</span></td>
-        </tr>
-        <tr>
-          <td><strong>Fallo Controlado</strong></td>
-          <td>Mínimo 1 pipeline fallido con resolución documentada.</td>
-          <td>PR #4 (Fallo por aserción) ➔ Alerta Gmail ➔ PR #5 (Fix verificado en verde).</td>
-          <td><span class="badge-status badge-excellent">Cumple Totalmente</span></td>
-        </tr>
-        <tr>
-          <td><strong>Agente Autohospedado</strong></td>
-          <td>Mínimo 1 self-hosted agent verificado.</td>
-          <td>Agente `mayro-local-agent` (v4.274.1) activo en el pool Default.</td>
-          <td><span class="badge-status badge-excellent">Cumple Totalmente</span></td>
-        </tr>
-        <tr>
-          <td><strong>Gestión de Secretos</strong></td>
-          <td>Protección de credenciales; 0 secretos en repo ni capturas.</td>
-          <td>Remote `azdo` saneado sin PAT, Variable Group protegido y .env ignorado.</td>
-          <td><span class="badge-status badge-excellent">Cumple Totalmente</span></td>
-        </tr>
-        <tr>
-          <td><strong>GitHub Actions</strong></td>
-          <td>1 workflow complementario en .github/workflows/.</td>
-          <td>Workflow `ci.yml` ejecutando validación, auditoría y pruebas en PRs.</td>
-          <td><span class="badge-status badge-excellent">Cumple Totalmente</span></td>
-        </tr>
-        <tr>
-          <td><strong>Análisis Dependencias</strong></td>
-          <td>Herramienta SCA y matriz de seguridad documentada.</td>
-          <td>`npm audit` reportando 0 vulnerabilidades + catálogo en seguridad.md.</td>
-          <td><span class="badge-status badge-excellent">Cumple Totalmente</span></td>
-        </tr>
-        <tr>
-          <td><strong>SemVer hasta v1.0.0</strong></td>
-          <td>Versionado semántico coherente (v0.1.0 ➔ v0.2.0 ➔ v1.0.0).</td>
-          <td>Etiquetas anotadas SemVer en GitHub reflejando la evolución de 3 semanas.</td>
-          <td><span class="badge-status badge-excellent">Cumple Totalmente</span></td>
-        </tr>
+        <tr><td><strong>Gestión de Incidentes</strong></td><td>7 campos observables en pantalla: título, descripción, categoría, prioridad, usuario, fecha y estado.</td><td>Campos explícitos en `#incidents-table` y modal de inspección.</td><td><span class="badge badge-green">Cumple Totalmente</span></td></tr>
+        <tr><td><strong>Operación y Estados</strong></td><td>Asignar técnico y ciclo de 5 estados: NUEVO, ASIGNADO, EN_PROCESO, RESUELTO, CERRADO.</td><td>Máquina de estados finita validada en suite de pruebas unitarias.</td><td><span class="badge badge-green">Cumple Totalmente</span></td></tr>
+        <tr><td><strong>Seguimiento</strong></td><td>Comentarios o bitácora de auditoría visible por ticket.</td><td>Bitácora inmutable en tabla `incident_logs` visible en modal.</td><td><span class="badge badge-green">Cumple Totalmente</span></td></tr>
+        <tr><td><strong>Consulta</strong></td><td>Filtros reactivos por estado, prioridad, categoría y técnico.</td><td>Barra de filtros combinados multicriterio + búsqueda libre.</td><td><span class="badge badge-green">Cumple Totalmente</span></td></tr>
+        <tr><td><strong>Indicadores</strong></td><td>Dashboard con abiertos, cerrados, críticos y distribuciones.</td><td>Tarjetas KPI superiores + 3 gráficos SVG nativos (0 vulnerabilidades).</td><td><span class="badge badge-green">Cumple Totalmente</span></td></tr>
+        <tr><td><strong>Integración Arquitectura</strong></td><td>Frontend React/Vue + API REST + BD PostgreSQL documentada.</td><td>React 18 + Express API + PostgreSQL 16 con fallback dual ADR-004.</td><td><span class="badge badge-green">Cumple Totalmente</span></td></tr>
+        <tr><td><strong>Azure Boards</strong></td><td>Mínimo 2 Epics, 4 Features, 8 US y 16 Tasks completas.</td><td>30 Work Items (2 Epics, 4 Features, 8 US, 16 Tasks) 100% cerrados.</td><td><span class="badge badge-green">Cumple Totalmente</span></td></tr>
+        <tr><td><strong>Gestión de Ramas (Git)</strong></td><td>Estabilidad en main y ramas feature/*, fix/*, refactor/*.</td><td>14 ramas técnicas implementadas bajo GitFlow adaptado.</td><td><span class="badge badge-green">Cumple Totalmente</span></td></tr>
+        <tr><td><strong>Trazabilidad</strong></td><td>Vinculación Task ➔ feature/* ➔ Commit AB#ID.</td><td>100% de commits referenciados con sintaxis oficial AB#ID.</td><td><span class="badge badge-green">Cumple Totalmente</span></td></tr>
+        <tr><td><strong>Pull Requests (PR)</strong></td><td>Mínimo 6 PRs reales con descripción y code review.</td><td>13 PRs reales acumulados (W1 y W2) con revisiones de código.</td><td><span class="badge badge-green">Cumple Totalmente</span></td></tr>
+        <tr><td><strong>Deuda Técnica</strong></td><td>Mínimo 5 identificadas y mínimo 2 resueltas en PRs.</td><td>5 identificadas en catálogo; DT-1 y DT-2 resueltas en PRs W2.</td><td><span class="badge badge-green">Cumple Totalmente</span></td></tr>
+        <tr><td><strong>Azure Pipelines (CI)</strong></td><td>Etapas completas en azure-pipelines.yml con build real.</td><td>8 etapas declarativas con compilación real de Vite y tests.</td><td><span class="badge badge-green">Cumple Totalmente</span></td></tr>
+        <tr><td><strong>Fallo Controlado</strong></td><td>Mínimo 1 pipeline fallido con diagnóstico y corrección.</td><td>Fallo de aserción en tests ➔ Alerta Gmail ➔ Fix AB#24 en verde.</td><td><span class="badge badge-green">Cumple Totalmente</span></td></tr>
+        <tr><td><strong>Agente Autohospedado</strong></td><td>Mínimo 1 self-hosted agent configurado y usado.</td><td>`mayro-local-agent` activo en `D:\Agentes1\Agentes` (Pool Default).</td><td><span class="badge badge-green">Cumple Totalmente</span></td></tr>
+        <tr><td><strong>Gestión de Secretos</strong></td><td>Protección de credenciales (Regla 9); cero secretos expuestos.</td><td>Variable Group protegido, remotos limpios y .env ignorado.</td><td><span class="badge badge-green">Cumple Totalmente</span></td></tr>
+        <tr><td><strong>GitHub Actions</strong></td><td>1 workflow complementario en .github/workflows/.</td><td>Workflow `ci.yml` ejecutando validación y SCA en PRs.</td><td><span class="badge badge-green">Cumple Totalmente</span></td></tr>
+        <tr><td><strong>Análisis Dependencias</strong></td><td>Herramienta SCA y matriz de seguridad documentada.</td><td>`npm audit` reportando 0 vulnerabilidades + catálogo en seguridad.</td><td><span class="badge badge-green">Cumple Totalmente</span></td></tr>
+        <tr><td><strong>SemVer hasta v1.0.0</strong></td><td>Versionado coherente en 3 semanas (v0.1.0 ➔ v1.0.0).</td><td>Etiquetas Git SemVer y release oficial v1.0.0 publicado.</td><td><span class="badge badge-green">Cumple Totalmente</span></td></tr>
       </tbody>
     </table>
   </section>
@@ -1385,24 +1954,82 @@ jobs:
   <div class="page-break"></div>
 
   <!-- ============================================================== -->
-  <!-- 14. CONCLUSIONES Y RECOMENDACIONES -->
+  <!-- PÁGINA 24: 17. GUÍA MAESTRA DE SUSTENTACIÓN ORAL -->
+  <!-- ============================================================== -->
+  <section id="sec-sustentacion">
+    <h1>17. Guía Maestra de Sustentación Oral y Defensa</h1>
+    <p>
+      Estrategia recomendada para la presentación oral ante la terna evaluadora, estructurada en 5 actos clave de demostración técnica:
+    </p>
+
+    <h2>17.1 Guion Paso a Paso para la Demostración en Vivo</h2>
+    <div class="callout callout-success">
+      <div class="callout-title">Acto 1: Gobierno Ágil en Azure Boards (2 minutos)</div>
+      "Buenas tardes, ingenieros. Iniciamos en Azure Boards mostrando la estructura jerárquica de 4 niveles: 2 Epics (AB#4 y AB#20) con sus 4 Features completadas (🏆 2/2). En la vista de Work items observamos los 30 elementos cerrados al 100% bajo mi responsabilidad, con Story Points y horas estimadas, con cero elementos huérfanos."
+    </div>
+
+    <div class="callout callout-success">
+      <div class="callout-title">Acto 2: GitFlow, Trazabilidad AB# y Cero Secretos (2 minutos)</div>
+      "En Git contamos con 14 ramas técnicas ordenadas bajo GitFlow adaptado. Ejecutamos `git log --oneline --graph` para demostrar cómo cada commit referencia su Work Item `AB#ID`. Mostramos `git remote -v` para certificar el cumplimiento de la Regla 9: credenciales y tokens PAT protegidos fuera de la URL."
+    </div>
+
+    <div class="callout callout-success">
+      <div class="callout-title">Acto 3: Demostración en Vivo de la Aplicación y los 7 Campos (3 minutos)</div>
+      "En la interfaz React/Vite validamos el inicio RBAC. En `#incidents-table` verificamos los 7 campos observables requeridos: Título, Descripción, Categoría, Prioridad, Solicitante (mbarriosg8@miumg.edu.gt), Fecha y Estado. Creamos un incidente crítico y mostramos el correo de alerta que llega al instante a Gmail UMG. Forzamos una transición ilegal (CERRADO a NUEVO) y vemos cómo la API la rechaza con 400 Bad Request."
+    </div>
+
+    <div class="callout callout-success">
+      <div class="callout-title">Acto 4: El Ciclo de Fallo Controlado y Recuperación en CI (3 minutos)</div>
+      "En Azure Pipelines, nuestro pipeline declarativo de 8 etapas corre sobre el Self-Hosted Agent `mayro-local-agent` activo en mi máquina. Introducimos una aserción errónea en `tests/api.test.js:80`, hacemos push y vemos cómo el agente detiene el build en etapa 5 con Exit Code 1, bloquea el release y envía alerta a Gmail. Luego subimos la solución en commit AB#24, el pipeline corre completo en verde, compila Vite con 0 vulnerabilidades y publica el artefacto `incident-hub-drop`."
+    </div>
+
+    <div class="callout callout-success">
+      <div class="callout-title">Acto 5: Conclusión y Versionado SemVer v1.0.0 (1 minuto)</div>
+      "Finalmente en GitHub exhibimos la progresión SemVer en 3 releases: v0.1.0 en W1, v0.2.0 en W2 y v1.0.0 en W3, con 13 Pull Requests reales con code reviews cruzadas y el artefacto ZIP listo para producción."
+    </div>
+  </section>
+
+  <div class="page-break"></div>
+
+  <!-- ============================================================== -->
+  <!-- PÁGINA 25: 18. CONCLUSIONES Y RECOMENDACIONES -->
   <!-- ============================================================== -->
   <section id="sec-conclusiones">
-    <h1>14. Conclusiones y Recomendaciones de Ingeniería DevOps</h1>
+    <h1>18. Conclusiones y Recomendaciones de Ingeniería</h1>
+
+    <h2>18.1 Conclusiones de Ingeniería</h2>
     <ol>
       <li>
-        <strong>Trazabilidad Integral como Pilar de Confiabilidad:</strong> La articulación estricta entre Azure Boards, ramas especializadas de Git y commits referenciados con <code>AB#ID</code> erradica por completo la ambigüedad en el origen de los cambios, garantizando que cada línea de código responda a un requerimiento de negocio medible.
+        <strong>Madurez DevOps e Integración Continua Real:</strong> El proyecto evidenció que la adopción rigurosa de una cultura de integración continua trasciende el desarrollo tradicional. Al implementar un agente autohospedado local que ejecuta compilaciones reales de Vite, validación de dependencias SCA (0 vulnerabilidades) y ejecución de pruebas nativas, se garantiza que ningún código defectuoso alcance entornos productivos.
       </li>
       <li>
-        <strong>Cultura de Doble Validación (Dual CI):</strong> La orquestación paralela entre Azure Pipelines (ejecutando en un agente autohospedado local con build de producción real) y GitHub Actions (validando de forma inmediata en la nube cada Pull Request) minimiza el riesgo de introducir regresiones a la rama <code>main</code>, logrando un ciclo de integración ágil y robusto.
+        <strong>Trazabilidad Holística Bidireccional:</strong> La articulación estricta entre Azure Boards (Work Items AB#4 a AB#34), ramas temáticas de Git y commits referenciados elimina cualquier incertidumbre sobre el origen y propósito de cada modificación, estableciendo una cadena de custodia inmutable desde el requerimiento del negocio hasta el artefacto compilado.
       </li>
       <li>
-        <strong>Seguridad por Diseño (DevSecOps) y Cero Secretos:</strong> La eliminación de tokens PAT en configuraciones locales, el uso de Variable Groups protegidos bajo candado cerrado y la verificación automatizada de dependencias con <code>npm audit</code> demuestran que la seguridad no es un paso tardío, sino un control inmutable embebido en el pipeline de ingeniería.
+        <strong>DevSecOps y Seguridad por Diseño (Regla 9):</strong> La erradicación de secretos en código fuente, la protección de remotos Git, el uso de Variable Groups bajo candado cerrado y la sanitización de entradas contra XSS demuestran que la seguridad es un pilar arquitectónico no negociable en sistemas modernos.
       </li>
       <li>
-        <strong>Resiliencia de Persistencia y Continuidad Operativa:</strong> La implementación del adaptador dual documentado en ADR-004 garantiza que la plataforma cumpla con los estándares de bases de datos relacionales empresariales (PostgreSQL 16) y al mismo tiempo mantenga su alta disponibilidad en entornos efímeros de pruebas automatizadas.
+        <strong>Resiliencia de Persistencia y Continuidad Operativa:</strong> El patrón de persistencia dual documentado en ADR-004 garantiza compatibilidad con bases de datos relacionales empresariales (PostgreSQL 16) y asegura a la vez la continuidad operativa en entornos efímeros de pruebas automatizadas.
       </li>
     </ol>
+
+    <h2>18.2 Recomendaciones Futuras</h2>
+    <ol>
+      <li>
+        <strong>Implementación de Pruebas de Carga y E2E:</strong> Incorporar herramientas de automatización de pruebas de extremo a extremo en navegador real (Playwright o Cypress) dentro del workflow de GitHub Actions para evaluar la experiencia de usuario sintética en cada Pull Request.
+      </li>
+      <li>
+        <strong>Orquestación de Contenedores y Kubernetes:</strong> Para hitos posteriores (v2.0.0), empaquetar el backend y la base de datos en imágenes OCI mediante Dockerfiles multi-stage y orquestar su despliegue mediante Helm Charts en Azure Kubernetes Service (AKS).
+      </li>
+      <li>
+        <strong>Monitoreo de Telemetría Distribuida (APM):</strong> Integrar OpenTelemetry o Azure Application Insights para capturar trazas distribuidas, perfiles de consumo de memoria y métricas de latencia de endpoints en tiempo real.
+      </li>
+    </ol>
+
+    <div style="margin-top: 40px; border-top: 1px solid #cbd5e1; padding-top: 20px; display: flex; justify-content: space-between; font-size: 8.5pt; color: #64748b;">
+      <div>IT Incident Hub &bull; Memoria Técnica de Ingeniería DevOps &bull; Release v1.0.0</div>
+      <div>Página 25 de 25 &bull; Facultad de Ingeniería en Sistemas &bull; UMG 2026</div>
+    </div>
   </section>
 
 </div>

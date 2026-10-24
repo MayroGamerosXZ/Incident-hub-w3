@@ -1,14 +1,20 @@
 /**
  * Servicio de Notificaciones y Alertas por Correo (Gmail / Google Workspace SMTP)
  * Configurado para: mbarriosg8@miumg.edu.gt (Mayro Geovanni Barrios Gameros - DevOps Lead)
- * Cumple Regla 9: Cero credenciales expuestas en código fuente (uso de variables de entorno)
+ * Cumple Regla 9: Cero credenciales expuestas en código fuente y escapado anti-XSS (OWASP A03)
  */
 const tls = require('node:tls');
 const path = require('node:path');
 require('dotenv').config({ path: path.resolve(__dirname, '..', '..', '.env') });
+const { escapeHtml } = require('../middleware/securityMiddleware');
 
 const DEFAULT_RECIPIENT = process.env.ALERT_RECIPIENT || 'mbarriosg8@miumg.edu.gt';
 const DEFAULT_SENDER = process.env.GMAIL_USER || 'mbarriosg8@miumg.edu.gt';
+const EMAIL_HEADER_SAFE_RE = /^[^\s@<>,\r\n]+@[^\s@<>,\r\n]+\.[^\s@<>,\r\n]+$/;
+
+function sanitizeHeaderValue(val) {
+  return String(val ?? '').replace(/[\r\n]+/g, ' ').trim();
+}
 
 // Configuración dinámica en tiempo de ejecución (leída desde backend/.env)
 let smtpConfig = {
@@ -18,6 +24,8 @@ let smtpConfig = {
   pass: process.env.GMAIL_APP_PASSWORD || '',
   recipient: DEFAULT_RECIPIENT
 };
+
+let nextNotificationId = 3;
 
 // Bitácora en memoria de correos procesados para trazabilidad en la UI y auditoría
 let notificationHistory = [
@@ -65,47 +73,57 @@ let notificationHistory = [
   }
 ];
 
-function buildEmailHtml(incident, actionTitle = 'NOTIFICACIÓN DE INCIDENTE') {
+function buildEmailHtml(incident = {}, actionTitle = 'NOTIFICACIÓN DE INCIDENTE') {
   const priorityColor =
     incident.priority === 'CRITICA' ? '#DC2626' :
     incident.priority === 'ALTA' ? '#F97316' :
     incident.priority === 'MEDIA' ? '#EAB308' : '#22C55E';
 
+  const safeTitle = escapeHtml(incident.title);
+  const safeDesc = escapeHtml(incident.description);
+  const safeCategory = escapeHtml(incident.category);
+  const safePriority = escapeHtml(incident.priority);
+  const safeStatus = escapeHtml(incident.status);
+  const safeReportedBy = escapeHtml(incident.reported_by);
+  const safeId = escapeHtml(incident.id);
+  const safeActionTitle = escapeHtml(actionTitle);
+  const safeRecipient = escapeHtml(smtpConfig ? smtpConfig.recipient : DEFAULT_RECIPIENT);
+
   return `
     <div style="background-color:#0A0A0A;color:#F5F5F5;font-family:'Inter',Arial,sans-serif;padding:24px;border:1px solid #2E2E2E;border-radius:4px;max-width:620px;margin:0 auto;">
       <div style="border-bottom:2px solid #DC2626;padding-bottom:12px;margin-bottom:16px;">
         <span style="background:#DC2626;color:#FFF;padding:3px 8px;font-weight:bold;font-size:11px;border-radius:2px;">IT INCIDENT HUB v1.0.0</span>
-        <h2 style="margin:8px 0 0 0;color:#FFFFFF;font-size:18px;text-transform:uppercase;">${actionTitle}</h2>
+        <h2 style="margin:8px 0 0 0;color:#FFFFFF;font-size:18px;text-transform:uppercase;">${safeActionTitle}</h2>
       </div>
       <p style="color:#A3A3A3;font-size:13px;margin-bottom:16px;">
-        Notificación oficial despachada a <strong>${smtpConfig ? smtpConfig.recipient : DEFAULT_RECIPIENT}</strong> (DevOps &amp; Cloud Lead - UMG).
+        Notificación oficial despachada a <strong>${safeRecipient}</strong> (DevOps &amp; Cloud Lead - UMG).
       </p>
       <table style="width:100%;border-collapse:collapse;background:#141414;border:1px solid #2E2E2E;font-size:13px;margin-bottom:16px;">
         <tr>
           <td style="padding:8px 12px;border-bottom:1px solid #2E2E2E;color:#A3A3A3;width:35%;">ID de Ticket:</td>
-          <td style="padding:8px 12px;border-bottom:1px solid #2E2E2E;color:#60A5FA;font-weight:bold;">#${incident.id}</td>
+          <td style="padding:8px 12px;border-bottom:1px solid #2E2E2E;color:#60A5FA;font-weight:bold;">#${safeId}</td>
         </tr>
         <tr>
           <td style="padding:8px 12px;border-bottom:1px solid #2E2E2E;color:#A3A3A3;">Título:</td>
-          <td style="padding:8px 12px;border-bottom:1px solid #2E2E2E;color:#FFFFFF;font-weight:bold;">${incident.title}</td>
+          <td style="padding:8px 12px;border-bottom:1px solid #2E2E2E;color:#FFFFFF;font-weight:bold;">${safeTitle}</td>
         </tr>
         <tr>
           <td style="padding:8px 12px;border-bottom:1px solid #2E2E2E;color:#A3A3A3;">Prioridad / Categoría:</td>
           <td style="padding:8px 12px;border-bottom:1px solid #2E2E2E;">
-            <span style="color:${priorityColor};font-weight:bold;">${incident.priority}</span> &bull; <span style="color:#D4D4D4;">${incident.category}</span>
+            <span style="color:${priorityColor};font-weight:bold;">${safePriority}</span> &bull; <span style="color:#D4D4D4;">${safeCategory}</span>
           </td>
         </tr>
         <tr>
           <td style="padding:8px 12px;border-bottom:1px solid #2E2E2E;color:#A3A3A3;">Estado Actual:</td>
-          <td style="padding:8px 12px;border-bottom:1px solid #2E2E2E;color:#4ADE80;font-weight:bold;">${incident.status}</td>
+          <td style="padding:8px 12px;border-bottom:1px solid #2E2E2E;color:#4ADE80;font-weight:bold;">${safeStatus}</td>
         </tr>
         <tr>
           <td style="padding:8px 12px;border-bottom:1px solid #2E2E2E;color:#A3A3A3;">Reportado Por:</td>
-          <td style="padding:8px 12px;border-bottom:1px solid #2E2E2E;color:#D4D4D4;">${incident.reported_by}</td>
+          <td style="padding:8px 12px;border-bottom:1px solid #2E2E2E;color:#D4D4D4;">${safeReportedBy}</td>
         </tr>
         <tr>
           <td style="padding:8px 12px;color:#A3A3A3;">Descripción:</td>
-          <td style="padding:8px 12px;color:#D4D4D4;">${incident.description}</td>
+          <td style="padding:8px 12px;color:#D4D4D4;">${safeDesc}</td>
         </tr>
       </table>
       <div style="font-size:11px;color:#737373;border-top:1px solid #2E2E2E;padding-top:10px;">
@@ -115,14 +133,23 @@ function buildEmailHtml(incident, actionTitle = 'NOTIFICACIÓN DE INCIDENTE') {
   `.trim();
 }
 
-function buildPipelineEmailHtml(buildInfo) {
+function buildPipelineEmailHtml(buildInfo = {}) {
   const isFailed = (buildInfo.result || buildInfo.status || '').toLowerCase() === 'failed';
   const accentColor = isFailed ? '#DC2626' : '#2563EB';
   const statusText = isFailed ? '❌ FAILED (BLOQUEADO POR QUALITY GATE)' : '✅ SUCCEEDED (RESTAURADO Y VERIFICADO)';
   const statusColor = isFailed ? '#F87171' : '#4ADE80';
+  const safeBuildNumber = escapeHtml(buildInfo.buildNumber);
+  const safeBranch = escapeHtml(buildInfo.branch);
+  const safeCommit = escapeHtml(buildInfo.commit);
+  const safeAgent = escapeHtml(buildInfo.agent);
+  const safeErrorDetail = escapeHtml(buildInfo.errorDetail);
+  const safeArtifact = escapeHtml(buildInfo.artifact);
+  const safeRecipient = escapeHtml(smtpConfig ? smtpConfig.recipient : DEFAULT_RECIPIENT);
+  const safeWorkItems = escapeHtml((buildInfo.workItems || ['AB#22', 'AB#24']).join(', '));
+
   const headerTitle = isFailed
-    ? `🚨 ALERTA DE FALLO EN PIPELINE (${buildInfo.buildNumber})`
-    : `✅ SOLUCIÓN Y PIPELINE EXITOSO (${buildInfo.buildNumber})`;
+    ? `🚨 ALERTA DE FALLO EN PIPELINE (${safeBuildNumber})`
+    : `✅ SOLUCIÓN Y PIPELINE EXITOSO (${safeBuildNumber})`;
 
   return `
     <div style="background-color:#0A0A0A;color:#F5F5F5;font-family:'Inter',Arial,sans-serif;padding:24px;border:1px solid #2E2E2E;border-radius:4px;max-width:620px;margin:0 auto;">
@@ -137,52 +164,63 @@ function buildPipelineEmailHtml(buildInfo) {
         </tr>
         <tr>
           <td style="padding:8px 12px;border-bottom:1px solid #2E2E2E;color:#A3A3A3;">Rama / Commit:</td>
-          <td style="padding:8px 12px;border-bottom:1px solid #2E2E2E;color:#60A5FA;font-family:monospace;">${buildInfo.branch} (${buildInfo.commit})</td>
+          <td style="padding:8px 12px;border-bottom:1px solid #2E2E2E;color:#60A5FA;font-family:monospace;">${safeBranch} (${safeCommit})</td>
         </tr>
         <tr>
           <td style="padding:8px 12px;border-bottom:1px solid #2E2E2E;color:#A3A3A3;">Agente Ejecutor:</td>
-          <td style="padding:8px 12px;border-bottom:1px solid #2E2E2E;color:#FFFFFF;">${buildInfo.agent}</td>
+          <td style="padding:8px 12px;border-bottom:1px solid #2E2E2E;color:#FFFFFF;">${safeAgent}</td>
         </tr>
-        ${buildInfo.errorDetail ? `
+        ${safeErrorDetail ? `
         <tr>
           <td style="padding:8px 12px;border-bottom:1px solid #2E2E2E;color:#F87171;font-weight:bold;">Causa del Fallo:</td>
-          <td style="padding:8px 12px;border-bottom:1px solid #2E2E2E;color:#FCA5A5;font-family:monospace;font-size:12px;">${buildInfo.errorDetail}</td>
+          <td style="padding:8px 12px;border-bottom:1px solid #2E2E2E;color:#FCA5A5;font-family:monospace;font-size:12px;">${safeErrorDetail}</td>
         </tr>` : ''}
         <tr>
           <td style="padding:8px 12px;color:#A3A3A3;">Artefacto de Release:</td>
-          <td style="padding:8px 12px;color:#FBBF24;font-weight:bold;">📦 ${buildInfo.artifact}</td>
+          <td style="padding:8px 12px;color:#FBBF24;font-weight:bold;">📦 ${safeArtifact}</td>
         </tr>
       </table>
       <div style="font-size:11px;color:#737373;">
-        Notificación enviada a: <strong>${smtpConfig ? smtpConfig.recipient : DEFAULT_RECIPIENT}</strong> &bull; Azure Boards: <strong>${(buildInfo.workItems || ['AB#22', 'AB#24']).join(', ')}</strong>
+        Notificación enviada a: <strong>${safeRecipient}</strong> &bull; Azure Boards: <strong>${safeWorkItems}</strong>
       </div>
     </div>
   `.trim();
 }
 
 /**
- * Envío nativo por TLS a smtp.gmail.com:465 con soporte completo de respuestas multilínea SMTP
+ * Envío nativo por TLS a smtp.gmail.com:465 con prevención de CRLF injection y dot-stuffing RFC 5321
  */
 function sendRawSmtpTls({ host, port, user, pass, to, subject, html }) {
   return new Promise((resolve, reject) => {
+    const cleanUser = sanitizeHeaderValue(user);
+    const cleanTo = sanitizeHeaderValue(to);
+    const cleanSubject = sanitizeHeaderValue(subject);
+
+    if (!EMAIL_HEADER_SAFE_RE.test(cleanUser) || !EMAIL_HEADER_SAFE_RE.test(cleanTo)) {
+      return reject(new Error('Dirección de correo inválida o intento de inyección de cabeceras SMTP'));
+    }
+
     const cleanPass = String(pass).replace(/\s+/g, '');
+    // RFC 5321 Sección 4.5.2: Dot-stuffing para evitar cierre prematuro de bloque DATA
+    const dotStuffedHtml = String(html).replace(/\r?\n/g, '\r\n').replace(/^\./gm, '..');
+
     const commands = [
       `EHLO incident-hub.local\r\n`,
       `AUTH LOGIN\r\n`,
-      `${Buffer.from(user).toString('base64')}\r\n`,
+      `${Buffer.from(cleanUser).toString('base64')}\r\n`,
       `${Buffer.from(cleanPass).toString('base64')}\r\n`,
-      `MAIL FROM:<${user}>\r\n`,
-      `RCPT TO:<${to}>\r\n`,
+      `MAIL FROM:<${cleanUser}>\r\n`,
+      `RCPT TO:<${cleanTo}>\r\n`,
       `DATA\r\n`,
       [
-        `From: "IT Incident Hub DevOps" <${user}>`,
-        `To: <${to}>`,
+        `From: "IT Incident Hub DevOps" <${cleanUser}>`,
+        `To: <${cleanTo}>`,
         `Date: ${new Date().toUTCString()}`,
-        `Subject: =?UTF-8?B?${Buffer.from(subject).toString('base64')}?=`,
+        `Subject: =?UTF-8?B?${Buffer.from(cleanSubject).toString('base64')}?=`,
         `MIME-Version: 1.0`,
         `Content-Type: text/html; charset=UTF-8`,
         ``,
-        html,
+        dotStuffedHtml,
         `.`,
         ``
       ].join('\r\n')
@@ -253,10 +291,11 @@ async function sendIncidentNotification(incident, eventType = 'INCIDENT_CREATED'
   const subject = `[${incident.priority}] Incidente #${incident.id}: ${incident.title} (${incident.status})`;
   const html = buildEmailHtml(incident, actionTitle);
 
-  let transportUsed = 'OUTBOX_VERIFIED_RELAY';
-  let deliveryStatus = 'DELIVERED';
+  const hasSmtpCredentials = Boolean(smtpConfig.pass && smtpConfig.pass.trim().length > 0);
+  let transportUsed = 'LOCAL_OUTBOX_SIMULATION';
+  let deliveryStatus = 'SIMULATED_OUTBOX_NO_SMTP';
 
-  if (smtpConfig.pass && smtpConfig.pass.trim().length > 0 && process.env.NODE_ENV !== 'test') {
+  if (hasSmtpCredentials && process.env.NODE_ENV !== 'test') {
     try {
       await sendRawSmtpTls({
         host: smtpConfig.host,
@@ -272,12 +311,12 @@ async function sendIncidentNotification(incident, eventType = 'INCIDENT_CREATED'
     } catch (err) {
       console.error('[SMTP Warning]:', err.message);
       transportUsed = 'OUTBOX_FALLBACK_RESILIENT';
-      deliveryStatus = 'DELIVERED_LOCAL_OUTBOX';
+      deliveryStatus = 'SMTP_DELIVERY_FAILED';
     }
   }
 
   const record = {
-    id: notificationHistory.length + 1,
+    id: nextNotificationId++,
     to: smtpConfig.recipient,
     from: `IT Incident Hub Alerts <${smtpConfig.user}>`,
     subject,
@@ -301,10 +340,11 @@ async function sendPipelineNotification(buildInfo) {
     : `✅ [SOLUCIÓN APLICADA] ${buildInfo.buildNumber} SUCCEEDED - ${buildInfo.branch} (AB#30)`;
   const html = buildPipelineEmailHtml(buildInfo);
 
-  let transportUsed = 'AZURE_DEVOPS_HOOK';
-  let deliveryStatus = 'DELIVERED';
+  const hasSmtpCredentials = Boolean(smtpConfig.pass && smtpConfig.pass.trim().length > 0);
+  let transportUsed = 'LOCAL_OUTBOX_SIMULATION';
+  let deliveryStatus = 'SIMULATED_OUTBOX_NO_SMTP';
 
-  if (smtpConfig.pass && smtpConfig.pass.trim().length > 0 && process.env.NODE_ENV !== 'test') {
+  if (hasSmtpCredentials && process.env.NODE_ENV !== 'test') {
     try {
       await sendRawSmtpTls({
         host: smtpConfig.host,
@@ -320,11 +360,12 @@ async function sendPipelineNotification(buildInfo) {
     } catch (err) {
       console.error('[SMTP Warning]:', err.message);
       transportUsed = 'AZURE_OUTBOX_RESILIENT';
+      deliveryStatus = 'SMTP_DELIVERY_FAILED';
     }
   }
 
   const record = {
-    id: notificationHistory.length + 1,
+    id: nextNotificationId++,
     to: smtpConfig.recipient,
     from: `Azure Pipelines CI/CD <${smtpConfig.user}>`,
     subject,
@@ -352,9 +393,27 @@ function getNotifications() {
 }
 
 function updateSmtpConfig({ recipient, user, appPassword }) {
-  if (recipient) smtpConfig.recipient = String(recipient).trim();
-  if (user) smtpConfig.user = String(user).trim();
-  if (appPassword !== undefined) smtpConfig.pass = String(appPassword).trim();
+  if (recipient) {
+    const cleanRecipient = sanitizeHeaderValue(recipient);
+    if (!EMAIL_HEADER_SAFE_RE.test(cleanRecipient)) {
+      const err = new Error('Formato de correo recipient inválido');
+      err.statusCode = 400;
+      throw err;
+    }
+    smtpConfig.recipient = cleanRecipient;
+  }
+  if (user) {
+    const cleanUser = sanitizeHeaderValue(user);
+    if (!EMAIL_HEADER_SAFE_RE.test(cleanUser)) {
+      const err = new Error('Formato de correo sender user inválido');
+      err.statusCode = 400;
+      throw err;
+    }
+    smtpConfig.user = cleanUser;
+  }
+  if (appPassword !== undefined) {
+    smtpConfig.pass = sanitizeHeaderValue(appPassword);
+  }
   return {
     recipient: smtpConfig.recipient,
     sender: smtpConfig.user,
@@ -368,5 +427,6 @@ module.exports = {
   sendPipelineNotification,
   getNotifications,
   updateSmtpConfig,
-  buildEmailHtml
+  buildEmailHtml,
+  buildPipelineEmailHtml
 };

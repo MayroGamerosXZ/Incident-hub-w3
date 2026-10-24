@@ -393,9 +393,16 @@ export default function DevOpsMonitor({
               <div><strong style={{ color: '#64748b' }}>TIMESTAMP:</strong> <span style={{ color: '#ffb03a' }}>{new Date(selectedEmail.timestamp).toLocaleString()}</span></div>
             </div>
 
-            <div
-              style={{ border: '1px solid #222c37', overflow: 'hidden' }}
-              dangerouslySetInnerHTML={{ __html: selectedEmail.html_preview }}
+            <iframe
+              title="Vista Previa Segura de Correo (Sandboxed)"
+              sandbox=""
+              srcDoc={selectedEmail.html_preview}
+              style={{
+                width: '100%',
+                minHeight: '360px',
+                border: '1px solid #222c37',
+                backgroundColor: '#0A0A0A'
+              }}
             />
 
             <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '16px' }}>
