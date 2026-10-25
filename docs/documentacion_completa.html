@@ -1472,6 +1472,14 @@ jobs:
       </tbody>
     </table>
 
+    <h2>11.2 Caso Real de Detección y Remediación SCA en Tubería CI (AB#26)</h2>
+    <div class="callout callout-warning">
+      <div class="callout-title">🛡️ Demostración de Bloqueo por Vulnerabilidad en Dependencias (Supply Chain Gate)</div>
+      Además del bloqueo por fallo en pruebas unitarias (Etapa 5), se validó la efectividad del <strong>Quality Gate de Seguridad SCA (Etapa 4: <code>npm audit --audit-level=high</code>)</strong> en GitHub Actions y Azure Pipelines:<br>
+      &bull; <strong>Detección (Rojo ❌):</strong> Al presentarse una versión vulnerable de la dependencia transitiva <code>body-parser &lt; 1.20.9</code> (Advisory <code>GHSA-27r3-jxmh-p828</code>, severidad <em>High</em> por Denegación de Servicio tras payloads comprimidos), el runner detuvo automáticamente la tubería con <code>Exit Code 1</code> impidiendo el empaquetado.<br>
+      &bull; <strong>Remediación (Verde ✅):</strong> Se ejecutó <code>cd backend &amp;&amp; npm audit fix</code> actualizando el árbol en <code>package-lock.json</code>, se verificó <code>found 0 vulnerabilities</code> y se integró el commit <code>fix(security-audit): AB#26</code> restaurando ambos pipelines a verde.
+    </div>
+
     <div class="image-placeholder">
       <span class="ph-tag">EVIDENCIA TÉCNICA // CAPTURA 2.3</span>
       <div class="ph-title">📸 Captura 2.3: Configuración Limpia de Remotos Git (Cero Secretos)</div>

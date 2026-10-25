@@ -32,6 +32,23 @@ El ciclo de Entrega Continua (CD) implementa una progresión controlada a travé
             └───────────────────────────┘
 ```
 
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Dev as Developer (Mayro)
+    participant CI as Azure Pipelines
+    participant Staging as Ambiente Staging
+    actor QA as QA Lead (Laura Torres)
+    participant Prod as Producción (v1.0.0)
+    
+    Dev->>CI: Push / Merge a main
+    CI->>CI: Build Vite + Tests (api.test.js) + SCA
+    CI->>Staging: Despliegue automático a Staging
+    QA->>Staging: Validación E2E y firma Gate 1
+    QA->>Dev: Aprobación de Release
+    Dev->>Prod: Aprobación final Gate 2 (Tag v1.0.0)
+```
+
 ### Especificación de Ambientes
 
 | Ambiente | Propósito | Trigger de Despliegue | Responsable de Aprobación |

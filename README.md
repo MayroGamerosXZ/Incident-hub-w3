@@ -39,6 +39,16 @@ Para garantizar el cumplimiento de las normas DevOps de trazabilidad y gobernanz
 
 ## 🏗️ Arquitectura de la Solución
 
+```mermaid
+graph TD
+    Client["💻 Frontend SPA (React 18 + Vite)"] -->|HTTP REST / JSON| Server["⚙️ Backend API (Express Node.js 20)"]
+    Server --> Middlewares["🛡️ Security & Validation (HMAC, XSS, RateLimit)"]
+    Middlewares --> Workflow["🔄 Workflow & State Machine (5 Estados)"]
+    Workflow --> DB[("🗄️ PostgreSQL 16 + Resilient Store (ADR-004)")]
+    Workflow --> SMTP["📧 Google Workspace SMTP TLS (:465)"]
+    SMTP --> Inbox["📬 mbarriosg8@miumg.edu.gt"]
+```
+
 * **Frontend:** React 18 SPA con Vite (compilación estática optimizada en `frontend/dist/`).
 * **Backend:** Node.js con Express, arquitectura desacoplada por capas (rutas, controladores, middleware, servicios).
 * **Persistencia:** PostgreSQL 16 con esquemas relacionales, triggers de auditoría temporal, vistas analíticas y motor dual resiliente documentado en ADR-004 (conmuta a almacenamiento en memoria cuando el servicio de base de datos no está disponible en agentes efímeros).
@@ -87,6 +97,7 @@ incident-hub/
 ├── docs/                        # Documentación técnica obligatoria
 │   ├── arquitectura.md          # Arquitectura de componentes, datos y ADR-001 a ADR-004
 │   ├── branching.md             # Estrategia de ramas (GitFlow adaptado)
+│   ├── dependencias.md          # Análisis de paquetes, SCA (npm audit) y decisiones
 │   ├── deuda_tecnica.md         # Catálogo de 5 deudas técnicas y resolución de 2
 │   ├── fallo_controlado.md      # Evidencia y análisis de causa raíz del fallo de CI
 │   ├── guia_capturas.md         # Lista oficial de capturas para la documentación final
